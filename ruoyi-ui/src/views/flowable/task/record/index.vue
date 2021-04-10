@@ -1,36 +1,57 @@
 <template>
   <div class="app-container">
-            <!--        <el-row :gutter="20">-->
         <el-card class="box-card" >
               <div slot="header" class="clearfix">
                 <span class="el-icon-document">基础信息</span>
                 <el-button style="float: right;" type="primary" @click="goBack">返回</el-button>
               </div>
-            <el-col :span="16" :offset="8" v-if="variableOpen">
-                  <div style="margin-bottom: 20px;font-size: 14px" v-for="item in variables">
-                    <label style="font-weight: normal">{{item.label}}： </label>
-                    <label v-if="item.val instanceof Array" style="color:#8a909c;font-weight: normal">{{item.val[0]}}  至  {{item.val[1]}}</label>
-                    <label v-else style="color:#8a909c;font-weight: normal">{{item.val}}</label>
-                  </div>
 
-                  <!--审批意见填写-->
-                  <div style="margin-bottom: 20px;font-size: 14px;" v-if="finished">
-                      <label style="font-weight: normal;font-size: 14px;">审批意见：</label>
-                      <el-input style="margin-top:10px;width:50%" type="textarea" v-model="comment" placeholder="请输入意见"/>
-                    <div style="margin-top: 20px">
+            <!--流程表单填写数据-->
+            <el-col :span="16" :offset="8" v-if="variableOpen">
+                <el-form style="margin-bottom: 20px;font-size: 14px"  ref="variablesForm"  label-width="80px" size="mini">
+                  <div v-for="item in variables">
+                      <el-form-item :label="item.label">
+                        <label v-if="item.val instanceof Array" style="color:#8a909c;font-weight: normal">{{item.val[0]}}  至  {{item.val[1]}}</label>
+                        <label v-else style="color:#8a909c;font-weight: normal">{{item.val}}</label>
+                      </el-form-item>
+                  </div>
+                </el-form>
+
+              <!--审批意见填写-->
+              <div style="margin-bottom: 20px;font-size: 14px;" v-if="finished">
+                <el-form ref="taskForm" :model="taskForm" label-width="80px" size="mini">
+                  <el-form-item label="退回节点" prop="targetKey" v-show="taskForm.returnTaskShow">
+                    <el-radio-group v-model="taskForm.targetKey">
+                      <<el-radio-button
+                        v-for="item in returnTaskList"
+                        :key="item.id"
+                        :label="item.id"
+                      >{{item.name}}</el-radio-button>
+                    </el-radio-group>
+                  </el-form-item>
+                  <el-form-item label="审批意见" prop="comment" :rules="[{ required: true, message: '请输入意见', trigger: 'blur' }]">
+                    <el-input style="width: 30%;" type="textarea" v-model="taskForm.comment" placeholder="请输入意见"/>
+                  </el-form-item>
+                  <el-form-item>
+                    <div  v-show="taskForm.defaultTaskShow">
                       <el-button  icon="el-icon-edit-outline" type="primary" size="mini" @click="handleComplete">审批</el-button>
-                      <el-button  icon="el-icon-refresh-left" type="warning" size="mini" >退回</el-button>
+                      <el-button  icon="el-icon-refresh-left" type="warning" size="mini" @click="handleReturn">退回</el-button>
                       <el-button  icon="el-icon-circle-close" type="danger" size="mini" @click="handleReject">驳回</el-button>
                     </div>
-                  </div>
+                    <div v-show="taskForm.returnTaskShow">
+                      <el-button type="primary" @click="submitReturnTask">确 定</el-button>
+                      <el-button @click="cancelTask">取 消</el-button>
+                    </div>
+                  </el-form-item>
+                </el-form>
+              </div>
             </el-col>
 
             <!--初始化流程加载表单信息-->
             <el-col :span="16" :offset="4" v-if="formConfOpen">
               <div class="test-form">
-                <parser :key="new Date().getTime()"  :form-conf="formConf" @submit="sumbitForm1" ref="parser" @getData="getData" />
+                <parser :key="new Date().getTime()"  :form-conf="formConf" @submit="submitForm" ref="parser" @getData="getData" />
               </div>
-              <!--            <el-button type="success" size="mini" @click="startProcess">启动</el-button>-->
             </el-col>
         </el-card>
 
@@ -77,20 +98,17 @@
           <el-image :src="src"></el-image>
         </el-col>
       </el-card>
-<!--        </el-row>-->
   </div>
 </template>
 
 <script>
 import { flowRecord } from "@/api/flowable/finished";
-// import BpmnViewer from '@/components/BpmnViewer/src/BpmnViewer'
 import Parser from '@/components/parser/Parser'
 import {definitionStart, getProcessVariables } from "@/api/flowable/definition";
-import {complete, rejectTask} from "@/api/flowable/todo";
+import {complete, rejectTask, returnList, returnTask} from "@/api/flowable/todo";
 export default {
   name: "Record",
   components: {
-    // BpmnViewer
     Parser
   },
   props: {},
@@ -101,36 +119,40 @@ export default {
       flowRecordList: [], // 流程流转数据
       formConfCopy: {},
       src: null,
-      form:{},
-      // 表单校验
-      rules: {},
-      comment:"", // 意见内容
+      rules: {}, // 表单校验
+      variablesForm: {}, // 流程变量数据
+      taskForm:{
+        returnTaskShow: false,
+        defaultTaskShow: true,
+        comment:"", // 意见内容
+        procInsId: "", // 流程实例编号
+        deployId: "",  // 流程定义编号
+        taskId: "" ,// 流程任务编号
+        procDefId: "",  // 流程编号
+      },
       formConf: {}, // 默认表单数据
       formConfOpen: false, // 是否加载默认表单数据
-      procDefId: "",  // 流程编号
       variables: [], // 流程变量数据
       variableOpen: false, // 是否加载流程变量数据
-      procInsId: "", // 流程实例编号
-      deployId: "",  // 流程定义编号
-      taskId: "" ,// 流程任务编号
+      returnTaskList: [],  // 回退列表数据
       finished: false,
       isFinished: 0
     };
   },
   created() {
-    this.procInsId = this.$route.query && this.$route.query.procInsId;
+    this.taskForm.procInsId = this.$route.query && this.$route.query.procInsId;
     // 初始化表单
-    this.deployId = this.$route.query && this.$route.query.deployId;
-    this.procDefId  = this.$route.query && this.$route.query.procDefId;
+    this.taskForm.deployId = this.$route.query && this.$route.query.deployId;
+    this.taskForm.procDefId  = this.$route.query && this.$route.query.procDefId;
     this.isFinished =  this.$route.query && this.$route.query.isFinished
 
     // 流程任务重获取变量表单
-    this.taskId  = this.$route.query && this.$route.query.taskId;
-    if (this.taskId){
-      this.processVariables(this.taskId)
-      this.deployId = null
+    this.taskForm.taskId  = this.$route.query && this.$route.query.taskId;
+    if (this.taskForm.taskId){
+      this.processVariables( this.taskForm.taskId)
+      this.taskForm.deployId = null
     }
-    this.getFlowRecordList(this.procInsId,this.deployId);
+    this.getFlowRecordList( this.taskForm.procInsId, this.taskForm.deployId);
   },
   mounted() {
     // // 表单数据回填，模拟异步请求场景
@@ -170,8 +192,7 @@ export default {
           this.formConf = res.data.formData;
           this.formConfOpen = true
         }
-
-        // 处理已办任务页面跳转后会显示审批等操作按钮
+        // 处理已办任务页面跳转后会显示审批等操作按钮 todo: 待优化
         if (this.isFinished == 0) {
           this.finished = res.data.finished;
         }
@@ -188,19 +209,6 @@ export default {
         }
       })
     },
-    /** 启动流程 */
-    startProcess(){
-      this.$refs.parser.getData()
-      if (this.procDefId) {
-        let variables = {
-          "variables": this.variables
-        }
-        definitionStart(this.procDefId,JSON.stringify(variables)).then(res => {
-          this.msgSuccess(res.msg);
-        })
-      }
-
-    },
     /** 获取流程变量内容 */
     processVariables(taskId){
       if (taskId) {
@@ -212,28 +220,12 @@ export default {
     },
     /** 审批任务*/
     handleComplete() {
-      const  params = {
-        instanceId: this.procInsId,
-        taskId: this.taskId,
-        comment:this.comment
-      }
-      complete(params).then(response => {
+      complete(this.taskForm).then(response => {
         this.msgSuccess(response.msg);
         this.goBack();
       })
     },
-    /** 驳回任务 */
-    handleReject() {
-      const params = {
-        taskId: this.taskId,
-        comment: this.comment
-      }
-      rejectTask(params).then(res => {
-        this.msgSuccess(res.msg);
-        this.goBack();
-      })
-    },
-    /** 回退页面 */
+    /** 返回页面 */
     goBack(){
       // 关闭当前标签页并返回上个页面
       this.$store.dispatch("tagsView/delView", this.$route);
@@ -261,8 +253,8 @@ export default {
         this.variables = variables;
       }
     },
-    sumbitForm1(data) {
-      console.log('sumbitForm1提交数据：', data)
+    /** 申请流程表单数据提交 */
+    submitForm(data) {
       if (data){
         const variableList = [];
         data.fields.forEach(item =>{
@@ -280,17 +272,45 @@ export default {
           }
           variableList.push(variableData)
         })
-        // this.variables = variables;
-        if (this.procDefId) {
+        if (this.taskForm.procDefId) {
           let variables = {
             "variables": variableList
           }
-          definitionStart(this.procDefId,JSON.stringify(variables)).then(res => {
+          // 启动流程并将表单数据加入流程变量
+          definitionStart(this.taskForm.procDefId,JSON.stringify(variables)).then(res => {
             this.msgSuccess(res.msg);
             this.goBack();
           })
         }
       }
+    },
+    /** 驳回任务 */
+    handleReject() {
+      rejectTask(this.taskForm).then(res => {
+        this.msgSuccess(res.msg);
+        this.goBack();
+      })
+    },
+    /** 可退回任务列表 */
+    handleReturn() {
+      returnList(this.taskForm).then(res => {
+        this.returnTaskList = res.data;
+        this.taskForm.returnTaskShow = true;
+        this.taskForm.defaultTaskShow = false;
+      })
+    },
+    /** 取消回退任务按钮 */
+    cancelTask() {
+      this.taskForm.returnTaskShow = false;
+      this.taskForm.defaultTaskShow = true;
+      this.returnTaskList = [];
+    },
+    /** 提交退回任务 */
+    submitReturnTask(){
+      returnTask(this.taskForm).then(res => {
+        this.msgSuccess(res.msg);
+        this.goBack()
+      })
     }
   }
 };

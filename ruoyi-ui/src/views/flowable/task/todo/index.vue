@@ -99,27 +99,6 @@
             @click="handleProcess(scope.row)"
           >处理
           </el-button>
-<!--          <el-button-->
-<!--            size="mini"-->
-<!--            type="text"-->
-<!--            icon="el-icon-edit-outline"-->
-<!--            @click="handleComplete(scope.row)"-->
-<!--          >审批-->
-<!--          </el-button>-->
-<!--          <el-button-->
-<!--            size="mini"-->
-<!--            type="text"-->
-<!--            icon="el-icon-refresh-left"-->
-<!--            @click="handleReturn(scope.row)"-->
-<!--          >退回-->
-<!--          </el-button>-->
-<!--          <el-button-->
-<!--            size="mini"-->
-<!--            type="text"-->
-<!--            icon="el-icon-circle-close"-->
-<!--            @click="handleReject(scope.row)"-->
-<!--          >驳回-->
-<!--          </el-button>-->
           <el-button
             size="mini"
             type="text"
@@ -139,63 +118,6 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
-
-    <!-- 审批任务 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="任务编号" prop="taskId">
-          <el-input disabled v-model="form.taskId"/>
-        </el-form-item>
-        <el-form-item label="意见内容" prop="comment">
-          <el-input type="textarea" v-model="form.comment" placeholder="请输入意见"/>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
-      </div>
-    </el-dialog>
-
-    <!-- 驳回任务 -->
-    <el-dialog :title="rejectTask.title" :visible.sync="rejectTask.open" width="500px" append-to-body>
-      <el-form ref="rejectTask" :model="rejectTask" label-width="80px">
-        <el-form-item label="任务编号" prop="taskId">
-          <el-input disabled v-model="rejectTask.taskId"/>
-        </el-form-item>
-        <el-form-item label="意见内容" prop="comment">
-          <el-input type="textarea" v-model="rejectTask.comment" placeholder="请输入意见"/>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitRejectForm">确 定</el-button>
-        <el-button @click="cancelReject">取 消</el-button>
-      </div>
-    </el-dialog>
-
-    <!-- 退回任务 -->
-    <el-dialog :title="returnTaskData.title" :visible.sync="returnTaskData.open" width="500px" append-to-body>
-      <el-table
-        v-loading="loading"
-        :data="returnList"
-        @current-change="handleCurrentChange"
-        highlight-current-row
-        border
-      >
-        <el-table-column width="55" align="center" label="选择">
-          <template scope="scope">
-            <el-radio :label="scope.$index" v-model="radio" @change.native="handleRadioChoice(scope.row)">{{""}}</el-radio>
-          </template>
-        </el-table-column>
-        <el-table-column label="退回key" align="center" prop="id"/>
-        <el-table-column label="退回节点" align="center" prop="name"/>
-      </el-table>
-      <el-divider></el-divider>
-      <label>意见</label><el-input type="textarea" v-model="taskComment" placeholder="请输入意见"/>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitReturnTask">确 定</el-button>
-        <el-button @click="cancelTask">取 消</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -234,13 +156,6 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
-      radio: "",
-      // 回退列表数据
-      returnList: [],
-      // 回退请求参数
-      returnTaskData: {},
-      // 退回意见
-      taskComment: "",
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -250,14 +165,12 @@ export default {
       },
       // 表单参数
       form: {},
-      rejectTask:{},
       // 表单校验
       rules: {}
     };
   },
   created() {
     this.getList();
-
   },
   methods: {
     /** 查询流程定义列表 */
@@ -283,17 +196,6 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
-    },
-    // 取消驳回任务按钮
-    cancelReject() {
-      this.rejectTask.open = false;
-      this.rejectTask = {};
-    },
-    // 取消任务按钮
-    cancelTask() {
-      this.returnTaskData.open = false;
-      this.radio = "";
-      this.getList();
     },
     // 表单重置
     reset() {
@@ -327,57 +229,11 @@ export default {
       this.single = selection.length !== 1
       this.multiple = !selection.length
     },
-    // 单选框选中
-    handleRadioChoice(row){
-      this.returnTaskData.targetKey =  row.id
-    },
-    handleCurrentChange(val) {
-      if (val) {
-        let index = this.returnList.findIndex(
-          item => item.id === val.id
-        )
-        if (index > -1) {
-          this.radio = index;
-        }
-        this.$emit('data', val.pkg)
-      }
-      this.returnTaskData.targetKey =  val.id
-    },
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
       this.open = true;
       this.title = "添加流程定义";
-    },
-    /** 审批任务*/
-    handleComplete(row) {
-      this.form = {
-        instanceId: row.procInsId,
-        taskId: row.taskId
-      }
-      this.open = true;
-      this.title = "审批任务";
-    },
-    /** 可退回任务列表 */
-    handleReturn(row) {
-      const params = {
-        taskId: row.taskId
-      }
-      returnList(params).then(res => {
-        this.returnList = res.data;
-        this.returnTaskData.taskId = params.taskId
-        this.returnTaskData.open = true;
-        this.returnTaskData.title = "可退回任务列表";
-      })
-    },
-    /** 驳回任务 */
-    handleReject(row) {
-      this.rejectTask = {
-        instanceId: row.procInsId,
-        taskId: row.taskId
-      }
-      this.rejectTask.open = true;
-      this.rejectTask.title = "驳回任务";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -388,43 +244,6 @@ export default {
         this.open = true;
         this.title = "修改流程定义";
       });
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          complete(this.form).then(response => {
-            this.msgSuccess(response.msg);
-            this.open = false;
-            this.getList();
-          })
-        }
-      });
-    },
-    /** 提交退回任务*/
-    submitReturnTask(){
-      const params = {
-        taskId: this.returnTaskData.taskId,
-        targetKey: this.returnTaskData.targetKey
-      }
-      returnTask(params).then(res => {
-        this.returnTaskData.open = false;
-        this.msgSuccess(res.msg);
-        this.radio = "";
-        this.getList();
-      })
-    },
-    /** 提交驳回任务*/
-    submitRejectForm(){
-      const params = {
-        taskId: this.rejectTask.taskId,
-        comment: this.rejectTask.comment
-      }
-      rejectTask(params).then(res => {
-        this.msgSuccess(res.msg);
-        this.rejectTask.open = false;
-        this.getList();
-      })
     },
     /** 删除按钮操作 */
     handleDelete(row) {
