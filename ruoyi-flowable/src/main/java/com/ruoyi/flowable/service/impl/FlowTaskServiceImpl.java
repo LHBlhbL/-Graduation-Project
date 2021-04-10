@@ -890,15 +890,11 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
      * @return
      */
     private String getDate(long ms) {
-        int ss = 1000;
-        int mi = ss * 60;
-        int hh = mi * 60;
-        int dd = hh * 24;
 
-        long day = ms / dd;
-        long hour = (ms - day * dd) / hh;
-        long minute = (ms - day - hour * hh) / mi;
-        long second = (ms - day - hour * mi) / ss;
+        long day = ms / (24 * 60 * 60 * 1000);
+        long hour = (ms / (60 * 60 * 1000) - day * 24);
+        long minute = ((ms / (60 * 1000)) - day * 24 * 60 - hour * 60);
+        long second = (ms / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - minute * 60);
 
         if (day > 0) {
             return day + "天" + hour + "小时" + minute + "分钟";
