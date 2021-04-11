@@ -35,6 +35,15 @@ export function updateState(params) {
   })
 }
 
+// 指定流程办理人员列表
+export function userList(query) {
+  return request({
+    url: '/flowable/definition/userList',
+    method: 'get',
+    params: query
+  })
+}
+
 // 读取xml文件
 export function readXml(deployId) {
   return request({

@@ -1,14 +1,15 @@
 package com.ruoyi.flowable.controller;
 
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.flowable.domain.dto.FlowProcDefDto;
 import com.ruoyi.flowable.domain.dto.FlowSaveXmlVo;
 import com.ruoyi.flowable.service.IFlowDefinitionService;
+import com.ruoyi.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,6 +41,9 @@ public class FlowDefinitionController {
 
     @Autowired
     private IFlowDefinitionService flowDefinitionService;
+
+    @Autowired
+    private ISysUserService userService;
 
 
     @GetMapping(value = "/list")
@@ -80,7 +85,7 @@ public class FlowDefinitionController {
     public AjaxResult readXml(@ApiParam(value = "流程定义id") @PathVariable(value = "deployId") String deployId) {
         try {
             return flowDefinitionService.readXml(deployId);
-        }catch (Exception e) {
+        } catch (Exception e) {
             return AjaxResult.error("加载xml文件异常");
         }
 
@@ -98,9 +103,9 @@ public class FlowDefinitionController {
             if (image != null) {
                 ImageIO.write(image, "png", os);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 if (os != null) {
                     os.flush();
@@ -159,6 +164,13 @@ public class FlowDefinitionController {
     public AjaxResult delete(@ApiParam(value = "流程部署ID", required = true) @RequestParam String deployId) {
         flowDefinitionService.delete(deployId);
         return AjaxResult.success();
+    }
+
+    @ApiOperation(value = "指定流程办理人员列表")
+    @GetMapping("/userList")
+    public AjaxResult userList(SysUser user) {
+        List<SysUser> list = userService.selectUserList(user);
+        return AjaxResult.success(list);
     }
 
 }

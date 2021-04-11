@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { readXml, saveXml } from "@/api/flowable/definition";
+import { readXml, saveXml, userList } from "@/api/flowable/definition";
 // import bpmnModeler from "workflow-bpmn-modeler";
 import bpmnModeler from '@/components/Process/index'
 
@@ -26,9 +26,9 @@ export default {
     return {
       xml: "", // 后端查询到的xml
       users: [
-        { name: "张三", id: "1" },
-        { name: "李四", id: "2" },
-        { name: "轩轩", id: "100" },
+        // { name: "张三", id: "1" },
+        // { name: "李四", id: "2" },
+        // { name: "轩轩", id: "100" },
       ],
       groups: [
         { name: "超级管理员", id: "1" },
@@ -43,28 +43,42 @@ export default {
   },
   created () {
     const deployId = this.$route.query && this.$route.query.deployId;
+    //  查询流程xml
     if (deployId) {
       this.getModelDetail(deployId);
     }
+    this.getUserList()
   },
   methods: {
+    /** xml 文件 */
     getModelDetail(deployId) {
       // 发送请求，获取xml
       readXml(deployId).then(res =>{
         this.xml = res.data
       })
     },
+    /** 保存xml */
     save(data) {
       const params = {
         name: data.process.name,
         category: data.process.category,
         xml: data.xml
       }
-      saveXml(params).then(res =>{
+      saveXml(params).then(res => {
         this.$message(res.msg)
         // 关闭当前标签页并返回上个页面
         this.$store.dispatch("tagsView/delView", this.$route);
         this.$router.go(-1)
+      })
+    },
+    /** 指定流程办理人员列表 */
+    getUserList() {
+      // todo 待根据部门选择人员
+      // const params = {
+      //
+      // }
+      userList().then(res =>{
+        this.users = res.data
       })
     },
   },

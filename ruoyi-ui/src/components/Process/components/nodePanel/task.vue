@@ -122,7 +122,7 @@ export default {
             label: '指定人员',
             allowCreate: true,
             filterable: true,
-            dic: { data: _this.users, label: 'name', value: 'id' },
+            dic: { data: _this.users, label: 'nickName', value: 'userId' },
             show: !!_this.showConfig.assignee && _this.formData.userType === 'assignee'
           },
           {
@@ -132,7 +132,7 @@ export default {
             multiple: true,
             allowCreate: true,
             filterable: true,
-            dic: { data: _this.users, label: 'name', value: 'id' },
+            dic: { data: _this.users, label: 'nickName', value: 'userId' },
             show: !!_this.showConfig.candidateUsers && _this.formData.userType === 'candidateUsers'
           },
           {
