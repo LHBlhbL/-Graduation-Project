@@ -122,10 +122,11 @@ export default {
       rules: {}, // 表单校验
       variablesForm: {}, // 流程变量数据
       taskForm:{
-        returnTaskShow: false,
-        defaultTaskShow: true,
+        returnTaskShow: false, // 是否展示回退表单
+        defaultTaskShow: true, // 默认处理按钮
         comment:"", // 意见内容
         procInsId: "", // 流程实例编号
+        instanceId: "", // 流程实例编号
         deployId: "",  // 流程定义编号
         taskId: "" ,// 流程任务编号
         procDefId: "",  // 流程编号
@@ -141,6 +142,7 @@ export default {
   },
   created() {
     this.taskForm.procInsId = this.$route.query && this.$route.query.procInsId;
+    this.taskForm.instanceId = this.$route.query && this.$route.query.procInsId;
     // 初始化表单
     this.taskForm.deployId = this.$route.query && this.$route.query.deployId;
     this.taskForm.procDefId  = this.$route.query && this.$route.query.procDefId;
@@ -168,24 +170,24 @@ export default {
     // }, 1000)
   },
   methods: {
-    setIcon(val){
-      if (val){
+    setIcon(val) {
+      if (val) {
         return "el-icon-check";
-      }else {
+      } else {
         return "el-icon-time";
       }
     },
-    setColor(val){
-      if (val){
+    setColor(val) {
+      if (val) {
         return "#2bc418";
-      }else {
+      } else {
         return "#b3bdbb";
       }
     },
     /** 流程流转记录 */
-    getFlowRecordList(procInsId,deployId){
-      const params = {procInsId: procInsId,deployId:deployId}
-      flowRecord(params).then(res =>{
+    getFlowRecordList(procInsId, deployId) {
+      const params = {procInsId: procInsId, deployId: deployId}
+      flowRecord(params).then(res => {
         this.flowRecordList = res.data.flowList;
         // 流程过程中不存在初始化表单 直接读取的流程变量众存储的表单值
         if (res.data.formData) {
@@ -210,42 +212,46 @@ export default {
       })
     },
     /** 获取流程变量内容 */
-    processVariables(taskId){
+    processVariables(taskId) {
       if (taskId) {
         getProcessVariables(taskId).then(res => {
           this.variables = res.data.variables;
           this.variableOpen = true
-        })
+        });
       }
     },
-    /** 审批任务*/
+    /** 审批任务 */
     handleComplete() {
-      complete(this.taskForm).then(response => {
-        this.msgSuccess(response.msg);
-        this.goBack();
-      })
+      this.$refs["taskForm"].validate(valid => {
+        if (valid) {
+          complete(this.taskForm).then(response => {
+            this.msgSuccess(response.msg);
+            this.goBack();
+          });
+        }
+      });
     },
     /** 返回页面 */
-    goBack(){
+    goBack() {
       // 关闭当前标签页并返回上个页面
       this.$store.dispatch("tagsView/delView", this.$route);
       this.$router.go(-1)
     },
     /** 接收子组件传的值 */
-    getData(data){
-      if (data){
+    getData(data) {
+      if (data) {
         const variables = [];
-        data.fields.forEach(item =>{
+        data.fields.forEach(item => {
           let variableData = {};
           variableData.label = item.__config__.label
           // 表单值为多个选项时
-          if (item.__config__.defaultValue instanceof Array){
+          if (item.__config__.defaultValue instanceof Array) {
             const array = [];
-            item.__config__.defaultValue.forEach(val =>{
+            item.__config__.defaultValue.forEach(val => {
               array.push(val)
             })
             variableData.val = array;
-          }else {
+          } else {
             variableData.val = item.__config__.defaultValue
           }
           variables.push(variableData)
@@ -255,19 +261,19 @@ export default {
     },
     /** 申请流程表单数据提交 */
     submitForm(data) {
-      if (data){
+      if (data) {
         const variableList = [];
-        data.fields.forEach(item =>{
+        data.fields.forEach(item => {
           let variableData = {};
           variableData.label = item.__config__.label
           // 表单值为多个选项时
-          if (item.__config__.defaultValue instanceof Array){
+          if (item.__config__.defaultValue instanceof Array) {
             const array = [];
-            item.__config__.defaultValue.forEach(val =>{
+            item.__config__.defaultValue.forEach(val => {
               array.push(val)
             })
             variableData.val = array;
-          }else {
+          } else {
             variableData.val = item.__config__.defaultValue
           }
           variableList.push(variableData)
@@ -277,7 +283,7 @@ export default {
             "variables": variableList
           }
           // 启动流程并将表单数据加入流程变量
-          definitionStart(this.taskForm.procDefId,JSON.stringify(variables)).then(res => {
+          definitionStart(this.taskForm.procDefId, JSON.stringify(variables)).then(res => {
             this.msgSuccess(res.msg);
             this.goBack();
           })
@@ -286,10 +292,14 @@ export default {
     },
     /** 驳回任务 */
     handleReject() {
-      rejectTask(this.taskForm).then(res => {
-        this.msgSuccess(res.msg);
-        this.goBack();
-      })
+      this.$refs["taskForm"].validate(valid => {
+        if (valid) {
+          rejectTask(this.taskForm).then(res => {
+            this.msgSuccess(res.msg);
+            this.goBack();
+          });
+        }
+      });
     },
     /** 可退回任务列表 */
     handleReturn() {
@@ -306,11 +316,15 @@ export default {
       this.returnTaskList = [];
     },
     /** 提交退回任务 */
-    submitReturnTask(){
-      returnTask(this.taskForm).then(res => {
-        this.msgSuccess(res.msg);
-        this.goBack()
-      })
+    submitReturnTask() {
+      this.$refs["taskForm"].validate(valid => {
+        if (valid) {
+          returnTask(this.taskForm).then(res => {
+            this.msgSuccess(res.msg);
+            this.goBack()
+          });
+        }
+      });
     }
   }
 };
