@@ -499,8 +499,12 @@ export default {
       delete data.fields
       this.formConf = data
     },
+    /** 表单基本信息 */
     handleForm(){
-     this.form.formContent = JSON.stringify(this.formConf)
+      this.formData = {
+        fields: deepClone(this.drawingList),
+      }
+     this.form.formContent = JSON.stringify(this.formData);
      this.formOpen = true;
      this.formTitle = "添加表单";
     },
@@ -519,22 +523,20 @@ export default {
       this.formOpen = false;
       this.reset();
     },
+    /** 保存表单信息 */
     submitForm(){
       this.$refs["form"].validate(valid => {
         if (valid) {
           if (this.form.formId != null) {
             updateForm(this.form).then(response => {
               this.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
             });
           } else {
             addForm(this.form).then(response => {
               this.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
             });
           }
+          this.open = false;
           // 关闭当前标签页并返回上个页面
           this.$store.dispatch("tagsView/delView", this.$route);
           this.$router.go(-1)
