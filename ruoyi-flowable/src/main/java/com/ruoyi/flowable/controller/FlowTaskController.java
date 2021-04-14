@@ -135,6 +135,12 @@ public class FlowTaskController {
         return AjaxResult.success();
     }
 
+    @ApiOperation(value = "获取下一节点")
+    @PostMapping(value = "/nextFlowNode")
+    public AjaxResult getNextFlowNode(@RequestBody FlowTaskVo flowTaskVo) {
+        return flowTaskService.getNextFlowNode(flowTaskVo);
+    }
+
     /**
      * 生成流程图
      *

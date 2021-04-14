@@ -5,6 +5,7 @@ import com.ruoyi.flowable.domain.vo.FlowTaskVo;
 import org.flowable.task.api.Task;
 
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * @author XuanXuan
@@ -142,4 +143,11 @@ public interface IFlowTaskService {
      * @return
      */
     AjaxResult processVariables(String taskId);
+
+    /**
+     * 获取下一节点
+     * @param flowTaskVo 任务
+     * @return
+     */
+    AjaxResult getNextFlowNode(FlowTaskVo flowTaskVo);
 }

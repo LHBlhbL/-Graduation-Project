@@ -46,6 +46,15 @@ export function returnList(data) {
   })
 }
 
+// 下一节点
+export function getNextFlowNode(data) {
+  return request({
+    url: '/flowable/task/nextFlowNode',
+    method: 'post',
+    data: data
+  })
+}
+
 // 部署流程实例
 export function deployStart(deployId) {
   return request({

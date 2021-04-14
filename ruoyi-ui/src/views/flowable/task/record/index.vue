@@ -29,6 +29,15 @@
                       >{{item.name}}</el-radio-button>
                     </el-radio-group>
                   </el-form-item>
+                  <el-form-item label="任务接收" prop="targetKey" v-show="taskForm.noUserShow">
+                    <el-radio-group v-model="taskForm.assignee">
+                      <<el-radio-button
+                      v-for="item in userList"
+                      :key="item.userId"
+                      :label="item.userId"
+                    >{{item.nickName}}</el-radio-button>
+                    </el-radio-group>
+                  </el-form-item>
                   <el-form-item label="审批意见" prop="comment" :rules="[{ required: true, message: '请输入意见', trigger: 'blur' }]">
                     <el-input style="width: 30%;" type="textarea" v-model="taskForm.comment" placeholder="请输入意见"/>
                   </el-form-item>
@@ -104,8 +113,8 @@
 <script>
 import { flowRecord } from "@/api/flowable/finished";
 import Parser from '@/components/parser/Parser'
-import {definitionStart, getProcessVariables } from "@/api/flowable/definition";
-import {complete, rejectTask, returnList, returnTask} from "@/api/flowable/todo";
+import {definitionStart, getProcessVariables, userList } from "@/api/flowable/definition";
+import {complete, rejectTask, returnList, returnTask, getNextFlowNode} from "@/api/flowable/todo";
 export default {
   name: "Record",
   components: {
@@ -123,14 +132,17 @@ export default {
       variablesForm: {}, // 流程变量数据
       taskForm:{
         returnTaskShow: false, // 是否展示回退表单
-        defaultTaskShow: true, // 默认处理按钮
+        defaultTaskShow: true, // 默认处理
+        noUserShow: false, // 审批用户
         comment:"", // 意见内容
         procInsId: "", // 流程实例编号
         instanceId: "", // 流程实例编号
         deployId: "",  // 流程定义编号
         taskId: "" ,// 流程任务编号
         procDefId: "",  // 流程编号
+        assignee: null
       },
+      userList:[], // 流程候选人
       formConf: {}, // 默认表单数据
       formConfOpen: false, // 是否加载默认表单数据
       variables: [], // 流程变量数据
@@ -218,6 +230,17 @@ export default {
           this.variables = res.data.variables;
           this.variableOpen = true
         });
+        const params = {
+          taskId: taskId
+        }
+        getNextFlowNode(params).then(res => {
+          if (res.data){
+            userList().then(res =>{
+              this.userList = res.data;
+              this.taskForm.noUserShow = true;
+            })
+          }
+        })
       }
     },
     /** 审批任务 */
@@ -307,12 +330,14 @@ export default {
         this.returnTaskList = res.data;
         this.taskForm.returnTaskShow = true;
         this.taskForm.defaultTaskShow = false;
+        this.taskForm.noUserShow = false;
       })
     },
     /** 取消回退任务按钮 */
     cancelTask() {
       this.taskForm.returnTaskShow = false;
       this.taskForm.defaultTaskShow = true;
+      this.taskForm.noUserShow = true;
       this.returnTaskList = [];
     },
     /** 提交退回任务 */

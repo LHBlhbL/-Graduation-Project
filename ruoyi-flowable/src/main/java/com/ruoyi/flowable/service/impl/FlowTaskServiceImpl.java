@@ -15,14 +15,15 @@ import com.ruoyi.flowable.domain.dto.FlowTaskDto;
 import com.ruoyi.flowable.domain.vo.FlowTaskVo;
 import com.ruoyi.flowable.factory.FlowServiceFactory;
 import com.ruoyi.flowable.flow.CustomProcessDiagramGenerator;
+import com.ruoyi.flowable.flow.FindNextNodeUtil;
 import com.ruoyi.flowable.flow.FlowableUtils;
 import com.ruoyi.flowable.service.IFlowTaskService;
 import com.ruoyi.flowable.service.ISysDeployFormService;
 import com.ruoyi.system.domain.SysForm;
 import com.ruoyi.system.service.ISysRoleService;
 import com.ruoyi.system.service.ISysUserService;
-import liquibase.pro.packaged.S;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
@@ -32,6 +33,7 @@ import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.ProcessEngineConfiguration;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
@@ -106,8 +108,12 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
 //            }
             taskService.setVariables(task.getTaskId(), map);
         }
-        // 设置任务处理人员
+        // 设置任务审批人员
         taskService.setAssignee(task.getTaskId(), userId.toString());
+        // todo : 这种方式无法动态设置任务接收人
+//        if (StringUtils.isNotBlank(task.getAssignee())) {
+//            taskService.addCandidateUser(task.getTaskId(), task.getAssignee());
+//        }
         // 提交任务
         taskService.complete(task.getTaskId());
 
@@ -495,7 +501,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
     }
 
     /**
-     * 撤回流程
+     * 撤回流程  目前存在错误
      *
      * @param flowTaskVo
      * @return
@@ -544,7 +550,6 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
 
         Execution execution = runtimeService.createExecutionQuery().executionId(task.getExecutionId()).singleResult();
         String activityId = execution.getActivityId();
-        log.warn("------->> activityId:{}", activityId);
         FlowNode flowNode = (FlowNode) bpmnModel.getMainProcess().getFlowElement(activityId);
 
         //记录原活动方向
@@ -598,13 +603,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             // 当前流程信息
             flowTask.setTaskId(task.getId());
             flowTask.setTaskDefKey(task.getTaskDefinitionKey());
-//            // 审批人员信息
-//            SysUser sysUser = sysUserService.selectUserById(Long.parseLong(task.getAssignee()));
-//            flowTask.setAssigneeId(sysUser.getUserId());
-//            flowTask.setAssigneeName(sysUser.getNickName());
-//            flowTask.setDeptName(sysUser.getDept().getDeptName());
             flowTask.setCreateTime(task.getCreateTime());
-//            flowTask.setProcVars(task.getProcessVariables());
             flowTask.setProcDefId(task.getProcessDefinitionId());
             flowTask.setTaskName(task.getName());
             // 流程定义信息
@@ -655,10 +654,6 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             // 当前流程信息
             flowTask.setTaskId(histTask.getId());
             // 审批人员信息
-//            SysUser sysUser = sysUserService.selectUserById(Long.parseLong(histTask.getAssignee()));
-//            flowTask.setAssigneeId(sysUser.getUserId());
-//            flowTask.setAssigneeName(sysUser.getNickName());
-//            flowTask.setDeptName(sysUser.getDept().getDeptName());
             flowTask.setCreateTime(histTask.getCreateTime());
             flowTask.setFinishTime(histTask.getEndTime());
             flowTask.setDuration(getDate(histTask.getDurationInMillis()));
@@ -725,6 +720,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
                         flowTask.setAssigneeName(sysUser.getNickName());
                         flowTask.setDeptName(sysUser.getDept().getDeptName());
                     }
+                    // 展示审批人员
                     List<HistoricIdentityLink> linksForTask = historyService.getHistoricIdentityLinksForTask(histIns.getTaskId());
                     StringBuilder stringBuilder = new StringBuilder();
                     for (HistoricIdentityLink identityLink : linksForTask) {
@@ -790,39 +786,11 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
      */
     @Override
     public InputStream diagram(String processId) {
-//        HistoricProcessInstance instance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processId).singleResult();
-//        //获得已经办理的历史节点
-//        List<HistoricActivityInstance> activityInstances = historyService.createHistoricActivityInstanceQuery().processInstanceId(processId).orderByHistoricActivityInstanceStartTime().asc().list();
-//        List<String> activties = new ArrayList<>();
-//        List<String> flows = new ArrayList<>();
-//        for (HistoricActivityInstance activityInstance : activityInstances) {
-//            if ("sequenceFlow".equals(activityInstance.getActivityType())) {
-//                //需要高亮显示的连接线
-//                flows.add(activityInstance.getActivityId());
-//            } else {
-//                //需要高亮显示的节点
-//                activties.add(activityInstance.getActivityId());
-//            }
-//        }
-//        BpmnModel bpmnModel = repositoryService.getBpmnModel(instance.getProcessDefinitionId());
-//        //获得图片流
-//        DefaultProcessDiagramGenerator diagramGenerator = new DefaultProcessDiagramGenerator();
-//        return diagramGenerator.generateDiagram(
-//                bpmnModel,
-//                "png",
-//                activties,
-//                flows,
-//                "宋体",
-//                "宋体",
-//                "宋体",
-//                null,
-//                1.0,
-//                false);
-
         String processDefinitionId;
-        //1.获取当前的流程实例
+        // 获取当前的流程实例
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processId).singleResult();
-        if (Objects.isNull(processInstance)) {// 如果流程已经结束，则得到结束节点
+        // 如果流程已经结束，则得到结束节点
+        if (Objects.isNull(processInstance)) {
             HistoricProcessInstance pi = historyService.createHistoricProcessInstanceQuery().processInstanceId(processId).singleResult();
 
             processDefinitionId = pi.getProcessDefinitionId();
@@ -832,10 +800,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             processDefinitionId = pi.getProcessDefinitionId();
         }
 
-
-        /**
-         * 获得活动的节点
-         */
+        // 获得活动的节点
         List<HistoricActivityInstance> highLightedFlowList = historyService.createHistoricActivityInstanceQuery().processInstanceId(processId).orderByHistoricActivityInstanceStartTime().asc().list();
 
         List<String> highLightedFlows = new ArrayList<>();
@@ -853,10 +818,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
 
         //获取流程图
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
-
         ProcessEngineConfiguration configuration = processEngine.getProcessEngineConfiguration();
-
-        // ProcessDiagramGenerator diagramGenerator = engconf.getProcessDiagramGenerator();
         //获取自定义图片生成器
         ProcessDiagramGenerator diagramGenerator = new CustomProcessDiagramGenerator();
         InputStream in = diagramGenerator.generateDiagram(bpmnModel, "png", highLightedNodes, highLightedFlows, configuration.getActivityFontName(),
@@ -881,6 +843,47 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             Map<String, Object> variables = taskService.getVariables(taskId);
             return AjaxResult.success(variables);
         }
+    }
+
+    /**
+     * 获取下一节点
+     *
+     * @param flowTaskVo 任务
+     * @return
+     */
+    @Override
+    public AjaxResult getNextFlowNode(FlowTaskVo flowTaskVo) {
+        Task task = taskService.createTaskQuery().taskId(flowTaskVo.getTaskId()).singleResult();
+        List<FlowTaskDto> nextNodeList = new ArrayList<>();
+        if (Objects.nonNull(task)) {
+            ExecutionEntity ee = (ExecutionEntity) runtimeService.createExecutionQuery()
+                    .executionId(task.getExecutionId()).singleResult();
+            // 当前审批节点
+            String crruentActivityId = ee.getActivityId();
+            BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
+            FlowNode flowNode = (FlowNode) bpmnModel.getFlowElement(crruentActivityId);
+            // 输出连线
+            List<SequenceFlow> outFlows = flowNode.getOutgoingFlows();
+
+            for (SequenceFlow sequenceFlow : outFlows) {
+                // 下一个审userTask
+                FlowElement targetFlow = sequenceFlow.getTargetFlowElement();
+                if (targetFlow instanceof UserTask) {
+                    FlowTaskDto flowTaskDto = new FlowTaskDto();
+                    // 当流程设计时未指定任务接受人员/组时 判定为用户动态选择下一任务审批人
+                    // todo 1. 读取自定义节点属性来验证是否动态选择审批人
+                    //      2. 验证表达式
+                    if (StringUtils.isBlank(((UserTask) targetFlow).getAssignee()) &&
+                            CollectionUtils.isEmpty(((UserTask) targetFlow).getCandidateGroups()) &&
+                            CollectionUtils.isEmpty(((UserTask) targetFlow).getCandidateUsers())) {
+                        flowTaskDto.setTaskDefKey(targetFlow.getId());
+                        flowTaskDto.setTaskName(targetFlow.getName());
+                        nextNodeList.add(flowTaskDto);
+                    }
+                }
+            }
+        }
+        return AjaxResult.success(nextNodeList);
     }
 
     /**

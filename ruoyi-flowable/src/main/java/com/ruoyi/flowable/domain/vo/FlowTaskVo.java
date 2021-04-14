@@ -28,9 +28,12 @@ public class FlowTaskVo {
     @ApiModelProperty("流程实例Id")
     private String instanceId;
 
-    @ApiModelProperty("退回节点")
+    @ApiModelProperty("节点")
     private String targetKey;
 
     @ApiModelProperty("流程变量信息")
     private Map<String, Object> values;
+
+    @ApiModelProperty("审批人")
+    private String assignee;
 }
