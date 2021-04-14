@@ -6,6 +6,10 @@
 ,零基础学习很值得一看。最后感谢 [若依框架](https://gitee.com/y_project/RuoYi-Vue) ,快速集成开发爽到飞起 ~~~
 
 
+## 演示地址
+
+访问链接：http://129.211.46.183/
+
 * 前端采用Vue、Element UI。
 * 后端采用Spring Boot、Spring Security、Redis & Jwt。
 * 权限认证使用Jwt，支持多终端认证系统。
