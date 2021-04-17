@@ -239,9 +239,6 @@ export default {
         this.total = response.data.total;
         this.loading = false;
       });
-      // readXml("fc8504de-9063-11eb-b009-00e04c1b045a").then(res =>{
-      //   this.xmlData = res.data
-      // });
     },
     // 取消按钮
     cancel() {

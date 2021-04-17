@@ -151,8 +151,11 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
     @Override
     public AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables) {
         try {
+            // 设置流程发起人Id到流程中
             Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
             identityService.setAuthenticatedUserId(userId.toString());
+            variables.put("initiator",userId);
+            variables.put("_FLOWABLE_SKIP_EXPRESSION_ENABLED", true);
             runtimeService.startProcessInstanceById(procDefId, variables);
             return AjaxResult.success("流程启动成功");
         } catch (Exception e) {

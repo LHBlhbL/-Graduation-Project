@@ -6,9 +6,13 @@ export default {
   },
   'bpmn:UserTask': {
     userType: true,
+    dataType: true,
     assignee: true,
     candidateUsers: true,
     candidateGroups: true,
+    // assigneeFixed: true,
+    // candidateUsersFixed: true,
+    // candidateGroupsFixed: true,
     async: true,
     priority: true,
     formKey: true,

@@ -5,12 +5,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
+import com.ruoyi.common.constant.ProcessConstants;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.CustomException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.flowable.domain.dto.FlowCommentDto;
+import com.ruoyi.flowable.domain.dto.FlowNextDto;
 import com.ruoyi.flowable.domain.dto.FlowTaskDto;
 import com.ruoyi.flowable.domain.vo.FlowTaskVo;
 import com.ruoyi.flowable.factory.FlowServiceFactory;
@@ -23,6 +25,7 @@ import com.ruoyi.system.service.ISysRoleService;
 import com.ruoyi.system.service.ISysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
@@ -86,34 +89,23 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             taskService.addComment(task.getTaskId(), task.getInstanceId(), "1", task.getComment());
         }
         Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
-        // 变量信息
-        if (task.getValues() != null && task.getValues().size() > 0) {
-            Map<String, Object> map = (Map<String, Object>) task.getValues().get("mainTable");
-            map.put("FormOrigData" + task.getTaskId(), JSON.toJSONString(task.getValues()));
-//            List<TaskDto> list = getTaskFormList(task.getTaskId());
-//            // 节点上挂载的表单ID
-//            if (!CollectionUtils.isEmpty(list)) {
-//                List<Object> formList = new ArrayList<>();
-//                for (TaskDto taskDto : list) {
-//                    formList.addAll(taskDto.getFormList());
-//                }
-//
-//                List<String> strs = new ArrayList<>();
-//                for (int k = 0; k < formList.size(); k++) {
-//                    Map<String, Object> map1 = (Map<String, Object>) formList.get(k);
-//                    strs.add(map1.get("id").toString());
-//                }
+        // 读取变量 动态设置下一环节审批人
+//        Map<String, Object> taskValues = task.getValues();
+//        if (taskValues != null && taskValues.size() > 0) {
+//            if(StringUtils.isNotBlank((taskValues.get("assignee").toString()))){
+//                taskService.ad
 //            }
-            taskService.setVariables(task.getTaskId(), map);
-        }
+//            if(CollectionUtils.isNotEmpty((List<String>) taskValues.get("candidateUsers"))){
+//
+//            }
+//            if(CollectionUtils.isNotEmpty((List<String>) taskValues.get("candidateGroups"))){
+//
+//            }
+//        }
         // 设置任务审批人员
         taskService.setAssignee(task.getTaskId(), userId.toString());
-        // todo : 这种方式无法动态设置任务接收人
-//        if (StringUtils.isNotBlank(task.getAssignee())) {
-//            taskService.addCandidateUser(task.getTaskId(), task.getAssignee());
-//        }
         // 提交任务
-        taskService.complete(task.getTaskId());
+        taskService.complete(task.getTaskId(),task.getValues());
 
     }
 
@@ -617,6 +609,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
                     .processInstanceId(task.getProcessInstanceId())
                     .singleResult();
             SysUser startUser = sysUserService.selectUserById(Long.parseLong(historicProcessInstance.getStartUserId()));
+//            SysUser startUser = sysUserService.selectUserById(Long.parseLong(task.getAssignee()));
             flowTask.setStartUserId(startUser.getNickName());
             flowTask.setStartUserName(startUser.getNickName());
             flowTask.setStartDeptName(startUser.getDept().getDeptName());
@@ -757,6 +750,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
                 map.put("finished", false);
             }
         }
+        // 第一次申请获取初始化表单
         if (StringUtils.isNotBlank(deployId)) {
             SysForm sysForm = sysInstanceFormService.selectSysDeployFormByDeployId(deployId);
             map.put("formData", JSONObject.parseObject(sysForm.getFormContent()));
@@ -852,7 +846,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
     @Override
     public AjaxResult getNextFlowNode(FlowTaskVo flowTaskVo) {
         Task task = taskService.createTaskQuery().taskId(flowTaskVo.getTaskId()).singleResult();
-        List<FlowTaskDto> nextNodeList = new ArrayList<>();
+        FlowNextDto flowNextDto = new FlowNextDto();
         if (Objects.nonNull(task)) {
             ExecutionEntity ee = (ExecutionEntity) runtimeService.createExecutionQuery()
                     .executionId(task.getExecutionId()).singleResult();
@@ -862,26 +856,34 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             FlowNode flowNode = (FlowNode) bpmnModel.getFlowElement(crruentActivityId);
             // 输出连线
             List<SequenceFlow> outFlows = flowNode.getOutgoingFlows();
-
             for (SequenceFlow sequenceFlow : outFlows) {
                 // 下一个审userTask
                 FlowElement targetFlow = sequenceFlow.getTargetFlowElement();
                 if (targetFlow instanceof UserTask) {
-                    FlowTaskDto flowTaskDto = new FlowTaskDto();
+
                     // 当流程设计时未指定任务接受人员/组时 判定为用户动态选择下一任务审批人
                     // todo 1. 读取自定义节点属性来验证是否动态选择审批人
                     //      2. 验证表达式
-                    if (StringUtils.isBlank(((UserTask) targetFlow).getAssignee()) &&
-                            CollectionUtils.isEmpty(((UserTask) targetFlow).getCandidateGroups()) &&
-                            CollectionUtils.isEmpty(((UserTask) targetFlow).getCandidateUsers())) {
-                        flowTaskDto.setTaskDefKey(targetFlow.getId());
-                        flowTaskDto.setTaskName(targetFlow.getName());
-                        nextNodeList.add(flowTaskDto);
+                    String dataType = targetFlow.getAttributeValue("http://flowable.org/bpmn", "dataType");
+                    String userType = targetFlow.getAttributeValue("http://flowable.org/bpmn", "userType");
+//                    Map<String, List<ExtensionAttribute>> attributes = targetFlow.getAttributes();
+//                    List<ExtensionAttribute> extensionAttributes = attributes.get("dataType");
+//                    for (ExtensionAttribute attribute : extensionAttributes) {
+//                        String value = attribute.getValue();
+//                    }
+                    if (ProcessConstants.DATA_TYPE.equals(dataType)){
+                        if (ProcessConstants.USER_TYPE_ASSIGNEE.equals(userType)){
+                            List<SysUser> list = sysUserService.selectUserList(new SysUser());
+
+                            flowNextDto.setVars(ProcessConstants.PROCESS_APPROVAL);
+                            flowNextDto.setType(ProcessConstants.USER_TYPE_ASSIGNEE);
+                            flowNextDto.setUserList(list);
+                        }
                     }
                 }
             }
         }
-        return AjaxResult.success(nextNodeList);
+        return AjaxResult.success(flowNextDto);
     }
 
     /**

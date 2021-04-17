@@ -404,8 +404,6 @@ export default {
     },
     /** 挂载表单 */
     submitFormDeploy(){
-      debugger
-      console.log(this.formDeployParam)
       addDeployForm(this.formDeployParam).then(res =>{
         this.msgSuccess(res.msg);
         this.formDeployOpen = false;

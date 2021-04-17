@@ -14,7 +14,6 @@
 
 <script>
 import { readXml, saveXml, userList } from "@/api/flowable/definition";
-// import bpmnModeler from "workflow-bpmn-modeler";
 import bpmnModeler from '@/components/Process/index'
 
 export default {
@@ -26,7 +25,8 @@ export default {
     return {
       xml: "", // 后端查询到的xml
       users: [
-        // { name: "张三", id: "1" },
+        { nickName: "#{initiator}", userId: "#{initiator}" },
+        {nickName: "#{approval}", userId: "#{approval}"}
         // { name: "李四", id: "2" },
         // { name: "轩轩", id: "100" },
       ],
@@ -78,7 +78,13 @@ export default {
       //
       // }
       userList().then(res =>{
-        this.users = res.data
+        res.data.forEach(val =>{
+          let obj = {};
+          obj.userId = val.userId;
+          obj.nickName = val.nickName;
+          this.users.push(obj)
+        })
+        debugger
       })
     },
   },

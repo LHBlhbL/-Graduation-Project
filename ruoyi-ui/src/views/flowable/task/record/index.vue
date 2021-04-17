@@ -140,7 +140,8 @@ export default {
         deployId: "",  // 流程定义编号
         taskId: "" ,// 流程任务编号
         procDefId: "",  // 流程编号
-        assignee: null
+        assignee: null,
+        vars: "",
       },
       userList:[], // 流程候选人
       formConf: {}, // 默认表单数据
@@ -234,11 +235,9 @@ export default {
           taskId: taskId
         }
         getNextFlowNode(params).then(res => {
-          if (res.data){
-            userList().then(res =>{
-              this.userList = res.data;
+          if (res.data.userList){
+              this.userList = res.data.userList;
               this.taskForm.noUserShow = true;
-            })
           }
         })
       }
@@ -247,6 +246,10 @@ export default {
     handleComplete() {
       this.$refs["taskForm"].validate(valid => {
         if (valid) {
+          let values = {
+           "approval": this.taskForm.assignee
+          }
+          this.taskForm.values =values
           complete(this.taskForm).then(response => {
             this.msgSuccess(response.msg);
             this.goBack();
