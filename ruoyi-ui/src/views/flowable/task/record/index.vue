@@ -8,17 +8,12 @@
 
             <!--流程表单填写数据-->
             <el-col :span="16" :offset="8" v-if="variableOpen">
-                <el-form style="margin-bottom: 20px;font-size: 14px"  ref="variablesForm"  label-width="80px" size="mini">
-                  <div v-for="item in variables">
-                      <el-form-item :label="item.label">
-                        <label v-if="item.val instanceof Array" style="color:#8a909c;font-weight: normal">{{item.val[0]}}  至  {{item.val[1]}}</label>
-                        <label v-else style="color:#8a909c;font-weight: normal">{{item.val}}</label>
-                      </el-form-item>
-                  </div>
-                </el-form>
+              <div>
+                <parser :key="new Date().getTime()" :form-conf="variablesData" />
+              </div>
 
               <!--审批意见填写-->
-              <div style="margin-bottom: 20px;font-size: 14px;" v-if="finished">
+              <div style="margin-left:20px;margin-bottom: 20px;font-size: 14px;" v-if="finished">
                 <el-form ref="taskForm" :model="taskForm" label-width="80px" size="mini">
                   <el-form-item label="退回节点" prop="targetKey" v-show="taskForm.returnTaskShow">
                     <el-radio-group v-model="taskForm.targetKey">
@@ -39,7 +34,7 @@
                     </el-radio-group>
                   </el-form-item>
                   <el-form-item label="审批意见" prop="comment" :rules="[{ required: true, message: '请输入意见', trigger: 'blur' }]">
-                    <el-input style="width: 30%;" type="textarea" v-model="taskForm.comment" placeholder="请输入意见"/>
+                    <el-input style="width: 50%" type="textarea" v-model="taskForm.comment" placeholder="请输入意见"/>
                   </el-form-item>
                   <el-form-item>
                     <div  v-show="taskForm.defaultTaskShow">
@@ -147,6 +142,7 @@ export default {
       formConf: {}, // 默认表单数据
       formConfOpen: false, // 是否加载默认表单数据
       variables: [], // 流程变量数据
+      variablesData: {}, // 流程变量数据
       variableOpen: false, // 是否加载流程变量数据
       returnTaskList: [],  // 回退列表数据
       finished: false,
@@ -228,7 +224,8 @@ export default {
     processVariables(taskId) {
       if (taskId) {
         getProcessVariables(taskId).then(res => {
-          this.variables = res.data.variables;
+          // this.variables = res.data.variables;
+          this.variablesData = res.data.variables;
           this.variableOpen = true
         });
         const params = {
@@ -288,25 +285,12 @@ export default {
     /** 申请流程表单数据提交 */
     submitForm(data) {
       if (data) {
-        const variableList = [];
-        data.fields.forEach(item => {
-          let variableData = {};
-          variableData.label = item.__config__.label
-          // 表单值为多个选项时
-          if (item.__config__.defaultValue instanceof Array) {
-            const array = [];
-            item.__config__.defaultValue.forEach(val => {
-              array.push(val)
-            })
-            variableData.val = array;
-          } else {
-            variableData.val = item.__config__.defaultValue
-          }
-          variableList.push(variableData)
-        })
+        const formData = data;
+        formData.disabled = true;
+        formData.formBtns = false;
         if (this.taskForm.procDefId) {
           let variables = {
-            "variables": variableList
+            "variables": formData
           }
           // 启动流程并将表单数据加入流程变量
           definitionStart(this.taskForm.procDefId, JSON.stringify(variables)).then(res => {
