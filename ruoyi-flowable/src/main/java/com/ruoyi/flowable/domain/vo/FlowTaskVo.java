@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,4 +37,10 @@ public class FlowTaskVo {
 
     @ApiModelProperty("审批人")
     private String assignee;
+
+    @ApiModelProperty("候选人")
+    private List<String> candidateUsers;
+
+    @ApiModelProperty("审批组")
+    private List<String> candidateGroups;
 }

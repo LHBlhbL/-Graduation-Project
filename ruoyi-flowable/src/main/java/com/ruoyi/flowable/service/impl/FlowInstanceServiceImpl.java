@@ -13,6 +13,7 @@ import org.flowable.task.api.Task;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -115,8 +116,9 @@ public class FlowInstanceServiceImpl extends FlowServiceFactory implements IFlow
         try {
             // 设置流程发起人Id到流程中
             Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
-            identityService.setAuthenticatedUserId(userId.toString());
-            // variables.put("测试默认流程变量",1231546);
+//            identityService.setAuthenticatedUserId(userId.toString());
+            variables.put("initiator",userId);
+            variables.put("_FLOWABLE_SKIP_EXPRESSION_ENABLED", true);
             runtimeService.startProcessInstanceById(procDefId, variables);
             return AjaxResult.success("流程启动成功");
         } catch (Exception e) {
