@@ -8,22 +8,47 @@
       :categorys="categorys"
       :is-view="false"
       @save="save"
+      @showXML="showXML"
     />
+    <!--在线查看xml-->
+    <el-dialog :title="xmlTitle" :visible.sync="xmlOpen" width="60%" append-to-body>
+      <div>
+        <pre v-highlight>
+           <code class="xml">
+                {{xmlContent}}
+           </code>
+        </pre>
+      </div>
+    </el-dialog>
   </div>
 </template>
-
 <script>
 import { readXml, saveXml, userList } from "@/api/flowable/definition";
 import bpmnModeler from '@/components/Process/index'
-
+import vkbeautify from 'vkbeautify'
+import Hljs from 'highlight.js'
+import 'highlight.js/styles/atom-one-dark.css'
 export default {
   name: "Model",
   components: {
-    bpmnModeler
+    bpmnModeler,
+    vkbeautify
+  },
+  // 自定义指令
+  directives: {
+    highlight:(el) => {
+      let blocks = el.querySelectorAll('pre code');
+      blocks.forEach((block) => {
+        Hljs.highlightBlock(block)
+      })
+    }
   },
   data() {
     return {
       xml: "", // 后端查询到的xml
+      xmlOpen: false,
+      xmlTitle: '',
+      xmlContent: '',
       users: [
         { nickName: "#{initiator}", userId: "#{initiator}" },
         {nickName: "#{approval}", userId: "#{approval}"}
@@ -64,12 +89,13 @@ export default {
         category: data.process.category,
         xml: data.xml
       }
-      saveXml(params).then(res => {
-        this.$message(res.msg)
-        // 关闭当前标签页并返回上个页面
-        this.$store.dispatch("tagsView/delView", this.$route);
-        this.$router.go(-1)
-      })
+      debugger
+      // saveXml(params).then(res => {
+      //   this.$message(res.msg)
+      //   // 关闭当前标签页并返回上个页面
+      //   this.$store.dispatch("tagsView/delView", this.$route);
+      //   this.$router.go(-1)
+      // })
     },
     /** 指定流程办理人员列表 */
     getUserList() {
@@ -84,9 +110,13 @@ export default {
           obj.nickName = val.nickName;
           this.users.push(obj)
         })
-        debugger
       })
     },
+    showXML(data){
+      this.xmlTitle = 'xml查看';
+      this.xmlOpen = true;
+      this.xmlContent = vkbeautify.xml(data);
+    }
   },
 };
 </script>

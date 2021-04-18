@@ -29,7 +29,7 @@
             </el-tooltip>
           </div>
           <div>
-            <el-button size="mini" icon="el-icon-download" @click="showXML()">查看xml</el-button>
+            <el-button size="mini" icon="el-icon-view" @click="showXML">查看xml</el-button>
             <el-button size="mini" icon="el-icon-download" @click="saveXML(true)">下载xml</el-button>
             <el-button size="mini" icon="el-icon-picture" @click="saveImg('svg', true)">下载svg</el-button>
             <el-button size="mini" type="primary" @click="save">保存模型</el-button>
@@ -45,9 +45,6 @@
         </el-aside>
       </el-container>
     </el-container>
-    <el-dialog :title="xmlTitle" :visible.sync="xmlOpen" width="50%" append-to-body>
-      <div v-html="xmlContent" />
-    </el-dialog>
   </div>
 </template>
 
@@ -70,9 +67,6 @@ export default {
       type: String,
       default: ''
     },
-    xmlTitle: "",
-    xmlOpen: false,
-    xmlContent: "",
     users: {
       type: Array,
       default: () => []
@@ -296,10 +290,7 @@ export default {
     async showXML() {
       try {
         const { xml } = await this.modeler.saveXML({ format: true })
-        this.xmlOpen = true;
-        this.xmlTitle = 'xml查看';
-        debugger
-        // this.xmlContent = this.parseXml(xml);
+        this.$emit('showXML',xml)
       } catch (err) {
         console.log(err)
       }
@@ -338,50 +329,6 @@ export default {
       a.download = filename
       a.click()
       window.URL.revokeObjectURL(url)
-    },
-    parseXml(content) {
-      let xml_doc = null
-      try {
-        xml_doc = (new DOMParser()).parseFromString(content.replace(/[\n\r\s]/g, ''), 'text/xml')
-      } catch (e) {
-        return false
-      }
-      let flag = 0
-
-      function build_xml(index, list, element) {
-        let t = []
-        for (let i = 0; i < flag; i++) {
-          t.push('&nbsp;&nbsp;&nbsp;&nbsp;')
-        }
-        t = t.join('')
-        list.push(t + '&lt;<span class="code-key">' + element.nodeName + '</span>&gt;<br/>')
-        for (let i = 0; i < element.childNodes.length; i++) {
-          const nodeName = element.childNodes[i].nodeName
-          if (element.childNodes[i].childNodes.length === 0) {
-            const value_txt = ''
-            const item = t + '&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="code-key">' + nodeName +
-              '</span>&gt;' + value_txt + '&lt;/<span class="code-key">' + nodeName + '</span>&gt;<br/>'
-            list.push(item)
-          } else if ((element.childNodes[i].childNodes.length === 1 && element.childNodes[i].childNodes[0].nodeValue != null)) {
-            const value = element.childNodes[i].childNodes[0].nodeValue
-            const value_color = !isNaN(Number(value)) ? 'code-number' : 'code-string'
-            const value_txt = '<span class="' + value_color + '">' + value + '</span>'
-            const item = t + '&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="code-key">' + nodeName +
-              '</span>&gt;' + value_txt + '&lt;/<span class="code-key">' + nodeName + '</span>&gt;<br/>'
-            list.push(item)
-          } else {
-            flag++
-            build_xml(++index, list, element.childNodes[i])
-            flag--
-          }
-        }
-        list.push(t + '&lt;/<span class="code-key">' + element.nodeName + '</span>&gt;<BR/>')
-      }
-
-      const list = []
-      build_xml(0, list, xml_doc.documentElement)
-
-      return list.join('')
     }
   }
 }
@@ -434,12 +381,6 @@ export default {
   .djs-container svg {
     min-height: 650px;
   }
-
-  .code-string{color:#993300;}
-  .code-number{color:#cc00cc;}
-  .code-boolean{color:#000033;}
-  .code-null{color:magenta;}
-  .code-key{color:#003377;font-weight:bold;}
 
   // .highlight.djs-shape .djs-visual > :nth-child(1) {
   //   fill: green !important;

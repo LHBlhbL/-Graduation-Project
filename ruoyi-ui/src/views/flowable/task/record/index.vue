@@ -7,7 +7,7 @@
               </div>
 
             <!--流程表单填写数据-->
-            <el-col :span="16" :offset="8" v-if="variableOpen">
+            <el-col :span="16" :offset="6" v-if="variableOpen">
               <div>
                 <parser :key="new Date().getTime()" :form-conf="variablesData" />
               </div>
