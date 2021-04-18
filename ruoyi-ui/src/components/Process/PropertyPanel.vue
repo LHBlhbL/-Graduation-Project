@@ -9,6 +9,7 @@
       :users="users"
       :groups="groups"
       :categorys="categorys"
+      @dataType="dataType"
     />
   </div>
 </template>
@@ -134,6 +135,10 @@ export default {
           })
         }
       })
+    },
+    /** 获取数据类型 */
+    dataType(data){
+      this.$emit('dataType', data)
     }
   }
 }

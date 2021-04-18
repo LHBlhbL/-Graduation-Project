@@ -265,22 +265,25 @@ export default {
       immediate: true
     }
   },
+
   mounted() {
-    const formId =  this.$route.query && this.$route.query.formId;
     if (Array.isArray(drawingListInDB) && drawingListInDB.length > 0) {
       this.drawingList = drawingListInDB
     } else {
       this.drawingList = drawingDefalut
     }
     this.activeFormItem(this.drawingList[0])
-    // if (formConfInDB) {
-    //   this.formConf = formConfInDB
-    // }
+    // // if (formConfInDB) {
+    // //   this.formConf = formConfInDB
+    // // }
+    this.drawingList = [];
+    const formId =  this.$route.query && this.$route.query.formId;
     if (formId) {
       getForm(formId).then(res =>{
-        this.formConf = JSON.parse(res.data.formContent)
+        this.formConf = JSON.parse(res.data.formContent);
+        // this.drawingList = this.formConf.fields;
+        this.form = res.data;
       })
-
     }else {
       if (formConfInDB) {
         this.formConf = formConfInDB
@@ -536,6 +539,8 @@ export default {
               this.msgSuccess("新增成功");
             });
           }
+          this.drawingList = []
+          this.idGlobal = 100
           this.open = false;
           // 关闭当前标签页并返回上个页面
           this.$store.dispatch("tagsView/delView", this.$route);

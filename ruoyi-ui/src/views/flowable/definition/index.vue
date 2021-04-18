@@ -122,10 +122,17 @@
           <el-button
             size="mini"
             type="text"
-            icon="el-icon-video-pause"
+            icon="el-icon-connection"
             v-if="scope.row.formId == null"
             @click="handleAddForm(scope.row)"
           >配置表单</el-button>
+<!--          <el-button-->
+<!--            size="mini"-->
+<!--            type="text"-->
+<!--            icon="el-icon-connection"-->
+<!--            v-else-->
+<!--            @click="handleAddForm(scope.row)"-->
+<!--          >更换表单</el-button>-->
           <el-button
             size="mini"
             type="text"
@@ -402,6 +409,19 @@ export default {
         this.formDeployTitle = "挂载表单";
       })
     },
+    // /** 更改挂载表单弹框 */
+    // handleEditForm(row){
+    //   this.formDeployParam.deployId = row.deploymentId
+    //   const queryParams = {
+    //     pageNum: 1,
+    //     pageSize: 10
+    //   }
+    //   listForm(queryParams).then(res =>{
+    //     this.formList = res.rows;
+    //     this.formDeployOpen = true;
+    //     this.formDeployTitle = "挂载表单";
+    //   })
+    // },
     /** 挂载表单 */
     submitFormDeploy(){
       addDeployForm(this.formDeployParam).then(res =>{

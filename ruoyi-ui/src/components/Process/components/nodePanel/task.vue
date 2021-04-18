@@ -125,7 +125,8 @@ export default {
             name: 'dataType',
             label: '指定方式',
             dic: _this.dataTypeOption,
-            show: !!_this.showConfig.dataType
+            show: !!_this.showConfig.dataType,
+            rules: [{ required: true, message: '请指定方式' }]
           },
           // {
           //   xType: 'input',
@@ -171,7 +172,7 @@ export default {
             multiple: true,
             allowCreate: true,
             filterable: true,
-            dic: { data: _this.groups, label: 'name', value: 'id' },
+            dic: { data: _this.groups, label: 'roleName', value: 'roleId' },
             show: !!_this.showConfig.candidateGroups && _this.formData.userType === 'candidateGroups'
           },
           {
@@ -287,9 +288,20 @@ export default {
       const that = this
       this.updateProperties({'flowable:dataType': val})
       if (val === 'dynamic') {
-        debugger
         this.updateProperties({'flowable:userType': that.formData.userType})
       }
+      // 切换时 删除之前选中的值
+      const types = ['assignee', 'candidateUsers', 'candidateGroups']
+      types.forEach(type => {
+        delete this.element.businessObject.$attrs[`flowable:${type}`]
+        delete this.formData[type]
+      })
+      // 传值到父组件
+      const params = {
+        dataType: val,
+        userType: this.formData.userType
+      }
+      this.$emit('dataType', params)
     },
     'formData.assignee': function(val) {
         if (this.formData.userType !== 'assignee') {

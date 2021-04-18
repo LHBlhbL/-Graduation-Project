@@ -105,7 +105,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         // 设置任务审批人员
         taskService.setAssignee(task.getTaskId(), userId.toString());
         // 提交任务
-        taskService.complete(task.getTaskId(),task.getValues());
+        taskService.complete(task.getTaskId(), task.getValues());
 
     }
 
@@ -753,6 +753,9 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         // 第一次申请获取初始化表单
         if (StringUtils.isNotBlank(deployId)) {
             SysForm sysForm = sysInstanceFormService.selectSysDeployFormByDeployId(deployId);
+            if (Objects.isNull(sysForm)){
+                return AjaxResult.error("请先配置流程表单");
+            }
             map.put("formData", JSONObject.parseObject(sysForm.getFormContent()));
         }
         return AjaxResult.success(map);
@@ -861,25 +864,40 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
                 FlowElement targetFlow = sequenceFlow.getTargetFlowElement();
                 if (targetFlow instanceof UserTask) {
 
-                    // 当流程设计时未指定任务接受人员/组时 判定为用户动态选择下一任务审批人
+                    // 读取自定义属性 动态选择下一任务审批人
                     // todo 1. 读取自定义节点属性来验证是否动态选择审批人
                     //      2. 验证表达式
-                    String dataType = targetFlow.getAttributeValue("http://flowable.org/bpmn", "dataType");
-                    String userType = targetFlow.getAttributeValue("http://flowable.org/bpmn", "userType");
-//                    Map<String, List<ExtensionAttribute>> attributes = targetFlow.getAttributes();
-//                    List<ExtensionAttribute> extensionAttributes = attributes.get("dataType");
-//                    for (ExtensionAttribute attribute : extensionAttributes) {
-//                        String value = attribute.getValue();
-//                    }
-                    if (ProcessConstants.DATA_TYPE.equals(dataType)){
-                        if (ProcessConstants.USER_TYPE_ASSIGNEE.equals(userType)){
+                    String dataType = targetFlow.getAttributeValue(ProcessConstants.NAMASPASE, ProcessConstants.PROCESS_CUSTOM_DATA_TYPE);
+                    String userType = targetFlow.getAttributeValue(ProcessConstants.NAMASPASE, ProcessConstants.PROCESS_CUSTOM_USER_TYPE);
+
+
+                    if (ProcessConstants.DATA_TYPE.equals(dataType)) {
+                        // 指定单个人员
+                        if (ProcessConstants.USER_TYPE_ASSIGNEE.equals(userType)) {
                             List<SysUser> list = sysUserService.selectUserList(new SysUser());
 
                             flowNextDto.setVars(ProcessConstants.PROCESS_APPROVAL);
                             flowNextDto.setType(ProcessConstants.USER_TYPE_ASSIGNEE);
                             flowNextDto.setUserList(list);
                         }
+                        // 候选人员(多个)
+                        if (ProcessConstants.USER_TYPE_USERS.equals(userType)) {
+                            List<SysUser> list = sysUserService.selectUserList(new SysUser());
+
+                            flowNextDto.setVars(ProcessConstants.PROCESS_APPROVAL);
+                            flowNextDto.setType(ProcessConstants.USER_TYPE_USERS);
+                            flowNextDto.setUserList(list);
+                        }
+                        // 候选组
+                        if (ProcessConstants.USER_TYPE_ROUPS.equals(userType)) {
+                            List<SysRole> sysRoles = sysRoleService.selectRoleAll();
+                            flowNextDto.setVars(ProcessConstants.PROCESS_APPROVAL);
+                            flowNextDto.setType(ProcessConstants.USER_TYPE_ROUPS);
+                            flowNextDto.setRoleList(sysRoles);
+                        }
                     }
+                } else if (targetFlow instanceof EndEvent) {
+                    return AjaxResult.success("流程已完结", null);
                 }
             }
         }

@@ -9,6 +9,7 @@
       :is-view="false"
       @save="save"
       @showXML="showXML"
+      @dataType="dataType"
     />
     <!--在线查看xml-->
     <el-dialog :title="xmlTitle" :visible.sync="xmlOpen" width="60%" append-to-body>
@@ -23,11 +24,12 @@
   </div>
 </template>
 <script>
-import { readXml, saveXml, userList } from "@/api/flowable/definition";
+import {readXml, roleList, saveXml, userList} from "@/api/flowable/definition";
 import bpmnModeler from '@/components/Process/index'
 import vkbeautify from 'vkbeautify'
 import Hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
+
 export default {
   name: "Model",
   components: {
@@ -49,21 +51,9 @@ export default {
       xmlOpen: false,
       xmlTitle: '',
       xmlContent: '',
-      users: [
-        { nickName: "#{initiator}", userId: "#{initiator}" },
-        {nickName: "#{approval}", userId: "#{approval}"}
-        // { name: "李四", id: "2" },
-        // { name: "轩轩", id: "100" },
-      ],
-      groups: [
-        { name: "超级管理员", id: "1" },
-        { name: "普通角色", id: "2" },
-        { name: "管理员", id: "100" },
-      ],
-      categorys: [
-        { name: "请假", id: "leave" },
-        { name: "财务", id: "finance" },
-      ],
+      users: [],
+      groups: [],
+      categorys: [],
     };
   },
   created () {
@@ -72,7 +62,10 @@ export default {
     if (deployId) {
       this.getModelDetail(deployId);
     }
-    this.getUserList()
+    this.getDicts("sys_process_category").then(res => {
+      this.categorys = res.data;
+    });
+    this.getDataList()
   },
   methods: {
     /** xml 文件 */
@@ -89,33 +82,60 @@ export default {
         category: data.process.category,
         xml: data.xml
       }
-      debugger
-      // saveXml(params).then(res => {
-      //   this.$message(res.msg)
-      //   // 关闭当前标签页并返回上个页面
-      //   this.$store.dispatch("tagsView/delView", this.$route);
-      //   this.$router.go(-1)
-      // })
+      saveXml(params).then(res => {
+        this.$message(res.msg)
+        // 关闭当前标签页并返回上个页面
+        this.$store.dispatch("tagsView/delView", this.$route);
+        this.$router.go(-1)
+      })
     },
     /** 指定流程办理人员列表 */
-    getUserList() {
+    getDataList() {
       // todo 待根据部门选择人员
       // const params = {
       //
       // }
       userList().then(res =>{
         res.data.forEach(val =>{
-          let obj = {};
-          obj.userId = val.userId;
-          obj.nickName = val.nickName;
-          this.users.push(obj)
+          val.userId = val.userId.toString();
         })
-      })
+        this.users = res.data;
+        let arr = {nickName: "流程发起人", userId: "${INITIATOR}"}
+        this.users.push(arr)
+      });
+      roleList().then(res =>{
+        res.data.forEach(val =>{
+          val.roleId = val.roleId.toString();
+        })
+        this.groups = res.data;
+      });
     },
+    /** 展示xml */
     showXML(data){
       this.xmlTitle = 'xml查看';
       this.xmlOpen = true;
+      debugger
       this.xmlContent = vkbeautify.xml(data);
+    },
+    /** 获取数据类型 */
+    dataType(data){
+      this.users = [];
+      this.groups = [];
+      if (data) {
+        if (data.dataType === 'dynamic') {
+          if (data.userType === 'assignee') {
+            this.users = [{nickName: "${INITIATOR}", userId: "${INITIATOR}"},
+                          {nickName: "#{approval}", userId: "#{approval}"}
+              ]
+          } else if (data.userType === 'candidateUsers') {
+            this.users = [ {nickName: "#{approval}", userId: "#{approval}"}]
+          } else {
+            this.groups = [{roleName: "#{approval}", roleId: "#{approval}"}]
+          }
+        } else {
+          this.getDataList()
+        }
+      }
     }
   },
 };

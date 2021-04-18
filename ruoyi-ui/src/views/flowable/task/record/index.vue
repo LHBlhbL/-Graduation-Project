@@ -25,12 +25,30 @@
                     </el-radio-group>
                   </el-form-item>
                   <el-form-item label="任务接收" prop="targetKey" v-show="taskForm.noUserShow">
-                    <el-radio-group v-model="taskForm.assignee">
+                    <el-radio-group @change="handleCheckChange" v-model="assignee">
                       <<el-radio-button
                       v-for="item in userList"
                       :key="item.userId"
                       :label="item.userId"
                     >{{item.nickName}}</el-radio-button>
+                    </el-radio-group>
+                  </el-form-item>
+                  <el-form-item label="候选人员" prop="targetKey" v-show="taskForm.allUserShow">
+                    <el-checkbox-group @change="handleCheckChange" v-model="users">
+                      <<el-checkbox
+                      v-for="item in userList"
+                      :key="item.userId"
+                      :label="item.userId"
+                    >{{item.nickName}}</el-checkbox>
+                    </el-checkbox-group>
+                  </el-form-item>
+                  <el-form-item label="候选组" prop="targetKey" v-show="taskForm.allGroupShow">
+                    <el-radio-group @change="handleCheckChange" v-model="assignee">
+                      <<el-radio-button
+                      v-for="item in roleList"
+                      :key="item.roleId"
+                      :label="item.roleId"
+                    >{{item.roleName}}</el-radio-button>
                     </el-radio-group>
                   </el-form-item>
                   <el-form-item label="审批意见" prop="comment" :rules="[{ required: true, message: '请输入意见', trigger: 'blur' }]">
@@ -106,7 +124,7 @@
 </template>
 
 <script>
-import { flowRecord } from "@/api/flowable/finished";
+import {flowRecord} from "@/api/flowable/finished";
 import Parser from '@/components/parser/Parser'
 import {definitionStart, getProcessVariables, userList } from "@/api/flowable/definition";
 import {complete, rejectTask, returnList, returnTask, getNextFlowNode} from "@/api/flowable/todo";
@@ -129,16 +147,20 @@ export default {
         returnTaskShow: false, // 是否展示回退表单
         defaultTaskShow: true, // 默认处理
         noUserShow: false, // 审批用户
+        allUserShow: false, // 候选用户
+        allGroupShow: false, // 审批组
         comment:"", // 意见内容
         procInsId: "", // 流程实例编号
         instanceId: "", // 流程实例编号
         deployId: "",  // 流程定义编号
         taskId: "" ,// 流程任务编号
         procDefId: "",  // 流程编号
-        assignee: null,
         vars: "",
       },
       userList:[], // 流程候选人
+      roleList:[], // 流程候选组
+      users:[], // 流程候选人
+      assignee: null,
       formConf: {}, // 默认表单数据
       formConfOpen: false, // 是否加载默认表单数据
       variables: [], // 流程变量数据
@@ -193,10 +215,23 @@ export default {
         return "#b3bdbb";
       }
     },
+    handleCheckChange(val){
+      console.log(val)
+      if (val instanceof Array) {
+        this.taskForm.values = {
+          "approval": val.join(',')
+        }
+      }else {
+        this.taskForm.values = {
+          "approval": val
+        }
+      }
+    },
     /** 流程流转记录 */
     getFlowRecordList(procInsId, deployId) {
       const params = {procInsId: procInsId, deployId: deployId}
       flowRecord(params).then(res => {
+        debugger
         this.flowRecordList = res.data.flowList;
         // 流程过程中不存在初始化表单 直接读取的流程变量众存储的表单值
         if (res.data.formData) {
@@ -210,6 +245,8 @@ export default {
         if (procInsId) {
           this.src = process.env.VUE_APP_BASE_API + "/flowable/task/diagram/" + procInsId;
         }
+      }).catch(res => {
+        this.goBack();
       })
     },
     fillFormData(form, data) {
@@ -223,18 +260,30 @@ export default {
     /** 获取流程变量内容 */
     processVariables(taskId) {
       if (taskId) {
+        // 提交流程申请时填写的表单存入了流程变量中后续任务处理时需要展示
         getProcessVariables(taskId).then(res => {
           // this.variables = res.data.variables;
           this.variablesData = res.data.variables;
           this.variableOpen = true
         });
+        // 根据当前任务或者流程设计配置的下一步节点 todo 暂时未涉及到考虑网关、表达式和多节点情况
         const params = {
           taskId: taskId
         }
         getNextFlowNode(params).then(res => {
-          if (res.data.userList){
+          const data = res.data;
+          if (data) {
+            if (data.type === 'assignee') {
               this.userList = res.data.userList;
               this.taskForm.noUserShow = true;
+
+            } else if (data.type === 'candidateUsers') {
+              this.userList = res.data.userList;
+              this.taskForm.allUserShow = true;
+            } else {
+              this.roleList = res.data.roleList
+              this.taskForm.allGroupShow = true;
+            }
           }
         })
       }
@@ -243,10 +292,6 @@ export default {
     handleComplete() {
       this.$refs["taskForm"].validate(valid => {
         if (valid) {
-          let values = {
-           "approval": this.taskForm.assignee
-          }
-          this.taskForm.values =values
           complete(this.taskForm).then(response => {
             this.msgSuccess(response.msg);
             this.goBack();

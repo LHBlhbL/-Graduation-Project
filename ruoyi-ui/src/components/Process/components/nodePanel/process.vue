@@ -53,7 +53,7 @@ export default {
             xType: 'select',
             name: 'processCategory',
             label: '流程分类',
-            dic: { data: _this.categorys, label: 'name', value: 'id' }
+            dic: { data: _this.categorys, label: 'dictLabel', value: 'dictValue' }
           },
           {
             xType: 'input',

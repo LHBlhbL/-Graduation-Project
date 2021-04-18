@@ -1,10 +1,12 @@
 package com.ruoyi.flowable.controller;
 
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.flowable.domain.dto.FlowProcDefDto;
 import com.ruoyi.flowable.domain.dto.FlowSaveXmlVo;
 import com.ruoyi.flowable.service.IFlowDefinitionService;
+import com.ruoyi.system.service.ISysRoleService;
 import com.ruoyi.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
@@ -44,6 +47,9 @@ public class FlowDefinitionController {
 
     @Autowired
     private ISysUserService userService;
+
+    @Resource
+    private ISysRoleService sysRoleService;
 
 
     @GetMapping(value = "/list")
@@ -170,6 +176,13 @@ public class FlowDefinitionController {
     @GetMapping("/userList")
     public AjaxResult userList(SysUser user) {
         List<SysUser> list = userService.selectUserList(user);
+        return AjaxResult.success(list);
+    }
+
+    @ApiOperation(value = "指定流程办理组列表")
+    @GetMapping("/roleList")
+    public AjaxResult roleList(SysRole role) {
+        List<SysRole> list = sysRoleService.selectRoleList(role);
         return AjaxResult.success(list);
     }
 

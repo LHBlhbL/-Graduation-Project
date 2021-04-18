@@ -41,7 +41,7 @@
           <div ref="canvas" class="canvas" />
         </el-main>
         <el-aside style="width: 400px; min-height: 650px; background-color: #f0f2f5">
-          <panel v-if="modeler" :modeler="modeler" :users="users" :groups="groups" :categorys="categorys" />
+          <panel v-if="modeler" :modeler="modeler" :users="users" :groups="groups" :categorys="categorys" @dataType="dataType" />
         </el-aside>
       </el-container>
     </el-container>
@@ -290,6 +290,7 @@ export default {
     async showXML() {
       try {
         const { xml } = await this.modeler.saveXML({ format: true })
+        debugger
         this.$emit('showXML',xml)
       } catch (err) {
         console.log(err)
@@ -329,6 +330,10 @@ export default {
       a.download = filename
       a.click()
       window.URL.revokeObjectURL(url)
+    },
+    /** 获取数据类型 */
+    dataType(data){
+      this.$emit('dataType', data)
     }
   }
 }

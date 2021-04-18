@@ -44,6 +44,15 @@ export function userList(query) {
   })
 }
 
+// 指定流程办理组列表
+export function roleList(query) {
+  return request({
+    url: '/flowable/definition/roleList',
+    method: 'get',
+    params: query
+  })
+}
+
 // 读取xml文件
 export function readXml(deployId) {
   return request({

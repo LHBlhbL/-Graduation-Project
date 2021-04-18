@@ -66,7 +66,6 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="表单主键" align="center" prop="formId" />
       <el-table-column label="表单名称" align="center" prop="formName" />
-<!--      <el-table-column label="表单内容" align="center" prop="formContent" />-->
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">

@@ -11,11 +11,14 @@ import com.ruoyi.system.domain.SysForm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.repository.ProcessDefinitionQuery;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.image.impl.DefaultProcessDiagramGenerator;
+import org.flowable.task.api.Task;
+import org.flowable.task.api.TaskQuery;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -153,10 +156,12 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
         try {
             // 设置流程发起人Id到流程中
             Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
-            identityService.setAuthenticatedUserId(userId.toString());
-            variables.put("initiator",userId);
+//            identityService.setAuthenticatedUserId(userId.toString());
+            Authentication.setAuthenticatedUserId(userId.toString());
+            variables.put("skip", true);
+            variables.put("INITIATOR",userId.toString());
             variables.put("_FLOWABLE_SKIP_EXPRESSION_ENABLED", true);
-            runtimeService.startProcessInstanceById(procDefId, variables);
+            ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId, variables);
             return AjaxResult.success("流程启动成功");
         } catch (Exception e) {
             e.printStackTrace();
