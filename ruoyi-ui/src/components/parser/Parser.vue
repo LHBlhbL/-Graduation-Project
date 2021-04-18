@@ -175,13 +175,19 @@ export default {
         if (!valid) return false
         // 触发sumit事件
         // this.$emit('submit', this[this.formConf.formModel])
-        this.$emit('submit', this.formConfCopy)
+        const params = {
+          formData: this.formConfCopy,
+          valData: this[this.formConf.formModel]
+        }
+        this.$emit('submit', params)
         return true
       })
     },
     // 传值给父组件
     getData(){
-      this.$emit('getData',this.formConfCopy)
+      debugger
+      this.$emit('getData', this[this.formConf.formModel])
+      // this.$emit('getData',this.formConfCopy)
     }
   },
   render(h) {

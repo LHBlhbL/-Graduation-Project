@@ -161,7 +161,7 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
             variables.put("skip", true);
             variables.put("INITIATOR",userId.toString());
             variables.put("_FLOWABLE_SKIP_EXPRESSION_ENABLED", true);
-            ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId, variables);
+            runtimeService.startProcessInstanceById(procDefId, variables);
             return AjaxResult.success("流程启动成功");
         } catch (Exception e) {
             e.printStackTrace();

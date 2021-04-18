@@ -231,7 +231,6 @@ export default {
     getFlowRecordList(procInsId, deployId) {
       const params = {procInsId: procInsId, deployId: deployId}
       flowRecord(params).then(res => {
-        debugger
         this.flowRecordList = res.data.flowList;
         // 流程过程中不存在初始化表单 直接读取的流程变量众存储的表单值
         if (res.data.formData) {
@@ -330,14 +329,13 @@ export default {
     /** 申请流程表单数据提交 */
     submitForm(data) {
       if (data) {
-        const formData = data;
+        const variables = data.valData;
+        const formData = data.formData;
         formData.disabled = true;
         formData.formBtns = false;
         if (this.taskForm.procDefId) {
-          let variables = {
-            "variables": formData
-          }
-          // 启动流程并将表单数据加入流程变量
+          variables.variables = formData;
+           // 启动流程并将表单数据加入流程变量
           definitionStart(this.taskForm.procDefId, JSON.stringify(variables)).then(res => {
             this.msgSuccess(res.msg);
             this.goBack();
