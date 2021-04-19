@@ -19,6 +19,15 @@ export function complete(data) {
   })
 }
 
+// 委派任务
+export function delegate(data) {
+  return request({
+    url: '/flowable/task/delegate',
+    method: 'post',
+    data: data
+  })
+}
+
 // 退回任务
 export function returnTask(data) {
   return request({

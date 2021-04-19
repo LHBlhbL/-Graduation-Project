@@ -1,17 +1,20 @@
 package com.ruoyi.flowable.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ruoyi.common.constant.ProcessConstants;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.enums.FlowComment;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.flowable.domain.dto.FlowProcDefDto;
 import com.ruoyi.flowable.factory.FlowServiceFactory;
 import com.ruoyi.flowable.service.IFlowDefinitionService;
 import com.ruoyi.flowable.service.ISysDeployFormService;
 import com.ruoyi.system.domain.SysForm;
+import com.ruoyi.system.service.ISysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.flowable.bpmn.model.BpmnModel;
-import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.repository.ProcessDefinitionQuery;
@@ -27,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 流程定义
@@ -40,6 +44,10 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
 
     @Resource
     private ISysDeployFormService sysDeployFormService;
+
+    @Resource
+    private ISysUserService sysUserService;
+
     private static final String BPMN_FILE_SUFFIX = ".bpmn";
 
     @Override
@@ -154,14 +162,28 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
     @Override
     public AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables) {
         try {
+            ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(procDefId)
+                    .latestVersion().singleResult();
+            if (Objects.nonNull(processDefinition) && processDefinition.isSuspended()) {
+                return AjaxResult.error("流程已被挂起,请先激活流程");
+            }
+            //            variables.put("skip", true);
+//            variables.put(ProcessConstants.FLOWABLE_SKIP_EXPRESSION_ENABLED, true);
             // 设置流程发起人Id到流程中
             Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
-//            identityService.setAuthenticatedUserId(userId.toString());
-            Authentication.setAuthenticatedUserId(userId.toString());
-            variables.put("skip", true);
-            variables.put("INITIATOR",userId.toString());
-            variables.put("_FLOWABLE_SKIP_EXPRESSION_ENABLED", true);
-            runtimeService.startProcessInstanceById(procDefId, variables);
+            identityService.setAuthenticatedUserId(userId.toString());
+            List<SysUser> users = sysUserService.selectUserList(new SysUser());
+            List<String> collect = users.stream().map(sysUser -> sysUser.getUserId().toString()).collect(Collectors.toList());
+            variables.put("userList", collect);
+            variables.put(ProcessConstants.PROCESS_INITIATOR, userId);
+            ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId, variables);
+            // 给第一步申请人节点设置任务执行人和意见 todo:第一个节点不设置为申请人节点有点问题？
+            Task task = taskService.createTaskQuery().processInstanceId(processInstance.getProcessInstanceId()).singleResult();
+            if (Objects.nonNull(task)) {
+                taskService.addComment(task.getId(), processInstance.getProcessInstanceId(), FlowComment.NORMAL.getType(), "发起流程申请");
+                taskService.setAssignee(task.getId(), userId.toString());
+                taskService.complete(task.getId(), variables);
+            }
             return AjaxResult.success("流程启动成功");
         } catch (Exception e) {
             e.printStackTrace();

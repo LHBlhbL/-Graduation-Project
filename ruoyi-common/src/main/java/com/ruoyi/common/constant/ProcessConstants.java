@@ -49,4 +49,17 @@ public class ProcessConstants {
      * 自定义属性 userType
      */
     public static final String PROCESS_CUSTOM_USER_TYPE = "userType";
+
+    /**
+     * 初始化人员
+     */
+    public static final String PROCESS_INITIATOR = "initiator";
+
+
+    /**
+     * 流程跳过
+     */
+    public static final String FLOWABLE_SKIP_EXPRESSION_ENABLED = "_FLOWABLE_SKIP_EXPRESSION_ENABLED";
+
+
 }

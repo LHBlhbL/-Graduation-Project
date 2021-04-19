@@ -18,7 +18,7 @@ public interface IFlowTaskService {
      *
      * @param task 请求实体参数
      */
-    void completeTask(FlowTaskVo task);
+    AjaxResult complete(FlowTaskVo task);
 
     /**
      * 驳回任务

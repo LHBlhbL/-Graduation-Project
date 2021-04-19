@@ -24,45 +24,35 @@
                       >{{item.name}}</el-radio-button>
                     </el-radio-group>
                   </el-form-item>
-                  <el-form-item label="任务接收" prop="targetKey" v-show="taskForm.noUserShow">
-                    <el-radio-group @change="handleCheckChange" v-model="assignee">
-                      <<el-radio-button
-                      v-for="item in userList"
-                      :key="item.userId"
-                      :label="item.userId"
-                    >{{item.nickName}}</el-radio-button>
-                    </el-radio-group>
-                  </el-form-item>
-                  <el-form-item label="候选人员" prop="targetKey" v-show="taskForm.allUserShow">
-                    <el-checkbox-group @change="handleCheckChange" v-model="users">
-                      <<el-checkbox
-                      v-for="item in userList"
-                      :key="item.userId"
-                      :label="item.userId"
-                    >{{item.nickName}}</el-checkbox>
-                    </el-checkbox-group>
-                  </el-form-item>
-                  <el-form-item label="候选组" prop="targetKey" v-show="taskForm.allGroupShow">
-                    <el-radio-group @change="handleCheckChange" v-model="assignee">
-                      <<el-radio-button
-                      v-for="item in roleList"
-                      :key="item.roleId"
-                      :label="item.roleId"
-                    >{{item.roleName}}</el-radio-button>
-                    </el-radio-group>
+                  <el-form-item label="任务接收" prop="targetKey" v-show="taskForm.sendUserShow">
+                    <el-select style="width: 50%" v-model="assignee" @change="handleCheckChange" :multiple="taskForm.multiple" placeholder="请选择">
+                      <el-option
+                        v-for="item in userList"
+                        :key="item.userId"
+                        :label="item.nickName"
+                        :value="item.userId">
+                      </el-option>
+                    </el-select>
                   </el-form-item>
                   <el-form-item label="审批意见" prop="comment" :rules="[{ required: true, message: '请输入意见', trigger: 'blur' }]">
                     <el-input style="width: 50%" type="textarea" v-model="taskForm.comment" placeholder="请输入意见"/>
                   </el-form-item>
                   <el-form-item>
                     <div  v-show="taskForm.defaultTaskShow">
-                      <el-button  icon="el-icon-edit-outline" type="primary" size="mini" @click="handleComplete">审批</el-button>
+                      <el-button  icon="el-icon-edit-outline" type="success" size="mini" @click="handleComplete">审批</el-button>
+                      <el-button  icon="el-icon-edit-outline" type="primary" size="mini" @click="handleDelegate">委派</el-button>
+                      <el-button  icon="el-icon-edit-outline" type="primary" size="mini" @click="handleAssign">转办</el-button>
+                      <el-button  icon="el-icon-edit-outline" type="primary" size="mini" @click="handleDelegate">签收</el-button>
                       <el-button  icon="el-icon-refresh-left" type="warning" size="mini" @click="handleReturn">退回</el-button>
                       <el-button  icon="el-icon-circle-close" type="danger" size="mini" @click="handleReject">驳回</el-button>
                     </div>
                     <div v-show="taskForm.returnTaskShow">
                       <el-button type="primary" @click="submitReturnTask">确 定</el-button>
                       <el-button @click="cancelTask">取 消</el-button>
+                    </div>
+                    <div v-show="taskForm.delegateTaskShow">
+                      <el-button type="primary" @click="submitDeleteTask">确 定</el-button>
+                      <el-button @click="cancelDelegateTask">取 消</el-button>
                     </div>
                   </el-form-item>
                 </el-form>
@@ -127,7 +117,7 @@
 import {flowRecord} from "@/api/flowable/finished";
 import Parser from '@/components/parser/Parser'
 import {definitionStart, getProcessVariables, userList } from "@/api/flowable/definition";
-import {complete, rejectTask, returnList, returnTask, getNextFlowNode} from "@/api/flowable/todo";
+import {complete, rejectTask, returnList, returnTask, getNextFlowNode, delegate} from "@/api/flowable/todo";
 export default {
   name: "Record",
   components: {
@@ -145,10 +135,10 @@ export default {
       variablesForm: {}, // 流程变量数据
       taskForm:{
         returnTaskShow: false, // 是否展示回退表单
+        delegateTaskShow: false, // 是否展示回退表单
         defaultTaskShow: true, // 默认处理
-        noUserShow: false, // 审批用户
-        allUserShow: false, // 候选用户
-        allGroupShow: false, // 审批组
+        sendUserShow: false, // 审批用户
+        multiple: false,
         comment:"", // 意见内容
         procInsId: "", // 流程实例编号
         instanceId: "", // 流程实例编号
@@ -158,8 +148,6 @@ export default {
         vars: "",
       },
       userList:[], // 流程候选人
-      roleList:[], // 流程候选组
-      users:[], // 流程候选人
       assignee: null,
       formConf: {}, // 默认表单数据
       formConfOpen: false, // 是否加载默认表单数据
@@ -272,16 +260,19 @@ export default {
         getNextFlowNode(params).then(res => {
           const data = res.data;
           if (data) {
+            this.taskForm.sendUserShow = true;
             if (data.type === 'assignee') {
               this.userList = res.data.userList;
-              this.taskForm.noUserShow = true;
-
             } else if (data.type === 'candidateUsers') {
               this.userList = res.data.userList;
-              this.taskForm.allUserShow = true;
+              this.taskForm.multiple = true;
             } else {
-              this.roleList = res.data.roleList
-              this.taskForm.allGroupShow = true;
+              res.data.roleList.forEach(role =>{
+                role.userId = role.roleId;
+                role.nickName = role.roleName;
+              })
+              this.userList = res.data.roleList;
+              this.taskForm.multiple = false;
             }
           }
         })
@@ -297,6 +288,15 @@ export default {
           });
         }
       });
+    },
+    /** 委派任务 */
+    handleDelegate() {
+      this.taskForm.delegateTaskShow = true;
+      this.taskForm.defaultTaskShow = false;
+
+    },
+    handleAssign(){
+
     },
     /** 返回页面 */
     goBack() {
@@ -360,14 +360,15 @@ export default {
         this.returnTaskList = res.data;
         this.taskForm.returnTaskShow = true;
         this.taskForm.defaultTaskShow = false;
-        this.taskForm.noUserShow = false;
+        this.taskForm.sendUserShow = false;
+        this.taskForm.values = null;
       })
     },
     /** 取消回退任务按钮 */
     cancelTask() {
       this.taskForm.returnTaskShow = false;
       this.taskForm.defaultTaskShow = true;
-      this.taskForm.noUserShow = true;
+      this.taskForm.sendUserShow = true;
       this.returnTaskList = [];
     },
     /** 提交退回任务 */
@@ -380,7 +381,25 @@ export default {
           });
         }
       });
-    }
+    },
+    /** 委派任务 */
+    submitDeleteTask() {
+      this.$refs["taskForm"].validate(valid => {
+        if (valid) {
+          delegate(this.taskForm).then(response => {
+            this.msgSuccess(response.msg);
+            this.goBack();
+          });
+        }
+      });
+    },
+    /** 取消回退任务按钮 */
+    cancelDelegateTask() {
+      this.taskForm.delegateTaskShow = false;
+      this.taskForm.defaultTaskShow = true;
+      this.taskForm.sendUserShow = true;
+      this.returnTaskList = [];
+    },
   }
 };
 </script>

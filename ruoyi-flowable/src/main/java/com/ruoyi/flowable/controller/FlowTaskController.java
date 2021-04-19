@@ -76,8 +76,7 @@ public class FlowTaskController {
     @ApiOperation(value = "审批任务")
     @PostMapping(value = "/complete")
     public AjaxResult complete(@RequestBody FlowTaskVo flowTaskVo) {
-        flowTaskService.completeTask(flowTaskVo);
-        return AjaxResult.success();
+       return flowTaskService.complete(flowTaskVo);
     }
 
     @ApiOperation(value = "驳回任务")
