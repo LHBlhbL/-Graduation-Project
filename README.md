@@ -1,4 +1,4 @@
-## 平台简介
+## 项目说明
 
 基RuoYi-vue 4.x + flowable 6.5 的工作流管理 ~
 
@@ -9,6 +9,14 @@
 ## 演示地址
 
 访问链接：http://129.211.46.183/
+
+## 工作流交流群
+
+QQ群： [![加入QQ群](https://img.shields.io/badge/782924350-blue.svg)](https://jq.qq.com/?_wv=1027&k=2zE87c2G) 点击按钮入群。
+## 项目地址
+Gitee：https://gitee.com/tony2y/RuoYi-flowable.git
+
+GitHub：https://github.com/tony2y/RuoYi-flowable.git
 
 * 前端采用Vue、Element UI。
 * 后端采用Spring Boot、Spring Security、Redis & Jwt。
@@ -47,6 +55,3 @@
 </table>
 
 
-## 工作流交流群
-
-QQ群： [![加入QQ群](https://img.shields.io/badge/782924350-blue.svg)](https://jq.qq.com/?_wv=1027&k=2zE87c2G) 点击按钮入群。
