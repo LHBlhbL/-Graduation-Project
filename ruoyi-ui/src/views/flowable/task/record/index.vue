@@ -204,11 +204,6 @@ export default {
     this.finished =  this.$route.query && this.$route.query.finished
 
   },
-  // watch:{
-  //   $route(){
-  //     this.finished =  this.$route.query && this.$route.query.finished
-  //   }
-  // },
   mounted() {
     // // 表单数据回填，模拟异步请求场景
     // setTimeout(() => {
@@ -306,13 +301,16 @@ export default {
           } else if (data.type === 'candidateUsers') {
             this.userDataList = res.data.userList;
             this.taskForm.multiple = true;
-          } else {
-            res.data.roleList.forEach(role =>{
+          } else if (data.type === 'candidateGroups') {
+            res.data.roleList.forEach(role => {
               role.userId = role.roleId;
               role.nickName = role.roleName;
             })
             this.userDataList = res.data.roleList;
             this.taskForm.multiple = false;
+          } else if (data.type === 'multiInstance') {
+            this.userDataList = res.data.userList;
+            this.taskForm.multiple = true;
           }
           this.taskForm.sendUserShow = true;
         }

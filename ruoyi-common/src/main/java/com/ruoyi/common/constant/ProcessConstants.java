@@ -36,9 +36,19 @@ public class ProcessConstants {
     public static final String PROCESS_APPROVAL = "approval";
 
     /**
+     * 会签人员
+     */
+    public static final String PROCESS_MULTI_INSTANCE_USER = "userList";
+
+    /**
      * nameapace
      */
     public static final String NAMASPASE = "http://flowable.org/bpmn";
+
+    /**
+     * 会签节点
+     */
+    public static final String PROCESS_MULTI_INSTANCE = "multiInstance";
 
     /**
      * 自定义属性 dataType

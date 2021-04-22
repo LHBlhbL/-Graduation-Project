@@ -877,33 +877,45 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             List<UserTask> nextUserTask = FindNextNodeUtil.getNextUserTasks(repositoryService, task, new HashMap<>());
             if (CollectionUtils.isNotEmpty(nextUserTask)) {
                 for (UserTask userTask : nextUserTask) {
-                    MultiInstanceLoopCharacteristics characteristics = userTask.getLoopCharacteristics();
-                    String dataType = userTask.getAttributeValue(ProcessConstants.NAMASPASE, ProcessConstants.PROCESS_CUSTOM_DATA_TYPE);
-                    String userType = userTask.getAttributeValue(ProcessConstants.NAMASPASE, ProcessConstants.PROCESS_CUSTOM_USER_TYPE);
+                    MultiInstanceLoopCharacteristics   multiInstance =  userTask.getLoopCharacteristics();
+                    // 会签节点
+                    if (Objects.nonNull(multiInstance)) {
+                        List<SysUser> list = sysUserService.selectUserList(new SysUser());
 
-                    if (ProcessConstants.DATA_TYPE.equals(dataType)) {
-                        // 指定单个人员
-                        if (ProcessConstants.USER_TYPE_ASSIGNEE.equals(userType)) {
-                            List<SysUser> list = sysUserService.selectUserList(new SysUser());
+                        flowNextDto.setVars(ProcessConstants.PROCESS_MULTI_INSTANCE_USER);
+                        flowNextDto.setType(ProcessConstants.PROCESS_MULTI_INSTANCE);
+                        flowNextDto.setUserList(list);
+                    } else {
 
-                            flowNextDto.setVars(ProcessConstants.PROCESS_APPROVAL);
-                            flowNextDto.setType(ProcessConstants.USER_TYPE_ASSIGNEE);
-                            flowNextDto.setUserList(list);
-                        }
-                        // 候选人员(多个)
-                        if (ProcessConstants.USER_TYPE_USERS.equals(userType)) {
-                            List<SysUser> list = sysUserService.selectUserList(new SysUser());
+                        // 读取自定义节点属性 判断是否是否需要动态指定任务接收人员、组
+                        String dataType = userTask.getAttributeValue(ProcessConstants.NAMASPASE, ProcessConstants.PROCESS_CUSTOM_DATA_TYPE);
+                        String userType = userTask.getAttributeValue(ProcessConstants.NAMASPASE, ProcessConstants.PROCESS_CUSTOM_USER_TYPE);
 
-                            flowNextDto.setVars(ProcessConstants.PROCESS_APPROVAL);
-                            flowNextDto.setType(ProcessConstants.USER_TYPE_USERS);
-                            flowNextDto.setUserList(list);
-                        }
-                        // 候选组
-                        if (ProcessConstants.USER_TYPE_ROUPS.equals(userType)) {
-                            List<SysRole> sysRoles = sysRoleService.selectRoleAll();
-                            flowNextDto.setVars(ProcessConstants.PROCESS_APPROVAL);
-                            flowNextDto.setType(ProcessConstants.USER_TYPE_ROUPS);
-                            flowNextDto.setRoleList(sysRoles);
+                        if (ProcessConstants.DATA_TYPE.equals(dataType)) {
+                            // 指定单个人员
+                            if (ProcessConstants.USER_TYPE_ASSIGNEE.equals(userType)) {
+                                List<SysUser> list = sysUserService.selectUserList(new SysUser());
+
+                                flowNextDto.setVars(ProcessConstants.PROCESS_APPROVAL);
+                                flowNextDto.setType(ProcessConstants.USER_TYPE_ASSIGNEE);
+                                flowNextDto.setUserList(list);
+                            }
+                            // 候选人员(多个)
+                            if (ProcessConstants.USER_TYPE_USERS.equals(userType)) {
+                                List<SysUser> list = sysUserService.selectUserList(new SysUser());
+
+                                flowNextDto.setVars(ProcessConstants.PROCESS_APPROVAL);
+                                flowNextDto.setType(ProcessConstants.USER_TYPE_USERS);
+                                flowNextDto.setUserList(list);
+                            }
+                            // 候选组
+                            if (ProcessConstants.USER_TYPE_ROUPS.equals(userType)) {
+                                List<SysRole> sysRoles = sysRoleService.selectRoleAll();
+
+                                flowNextDto.setVars(ProcessConstants.PROCESS_APPROVAL);
+                                flowNextDto.setType(ProcessConstants.USER_TYPE_ROUPS);
+                                flowNextDto.setRoleList(sysRoles);
+                            }
                         }
                     }
                 }
