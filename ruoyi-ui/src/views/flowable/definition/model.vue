@@ -48,12 +48,14 @@ export default {
   data() {
     return {
       xml: "", // 后端查询到的xml
+      modeler:"",
       xmlOpen: false,
       xmlTitle: '',
       xmlContent: '',
       users: [],
       groups: [],
       categorys: [],
+
     };
   },
   created () {
@@ -72,7 +74,8 @@ export default {
     getModelDetail(deployId) {
       // 发送请求，获取xml
       readXml(deployId).then(res =>{
-        this.xml = res.data
+        this.xml = res.data;
+        this.modeler = res.data
       })
     },
     /** 保存xml */

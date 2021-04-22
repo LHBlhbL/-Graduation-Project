@@ -240,7 +240,7 @@ export default {
           procInsId: row.procInsId,
           deployId: row.deployId,
           taskId: row.taskId,
-          isFinished: 1
+          finished: false
       }})
     },
     /** 修改按钮操作 */

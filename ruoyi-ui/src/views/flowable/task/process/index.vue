@@ -292,7 +292,9 @@ export default {
       this.$router.push({ path: '/flowable/task/record/index',
         query: {
           deployId: row.deploymentId,
-          procDefId:row.id }
+          procDefId:row.id,
+          finished: true
+          }
       })
     },
     /**  撤回流程申请 */
@@ -313,7 +315,7 @@ export default {
           procInsId: row.procInsId,
           deployId: row.deployId,
           taskId: row.taskId,
-          isFinished: 1
+          finished: false
       }})
     },
     /** 修改按钮操作 */

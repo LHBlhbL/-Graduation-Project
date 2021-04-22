@@ -68,6 +68,14 @@ export function readImage(deployId) {
   })
 }
 
+// 读取image文件
+export function getFlowViewer(procInsId) {
+  return request({
+    url: '/flowable/task/flowViewer/' + procInsId,
+    method: 'get'
+  })
+}
+
 // 读取xml文件
 export function saveXml(data) {
   return request({

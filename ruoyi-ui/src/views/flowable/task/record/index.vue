@@ -6,14 +6,15 @@
                 <el-button style="float: right;" type="primary" @click="goBack">返回</el-button>
               </div>
 
-            <!--流程表单填写数据-->
+
             <el-col :span="16" :offset="6" v-if="variableOpen">
+              <!--申请流程初始化表单模块-->
               <div>
                 <parser :key="new Date().getTime()" :form-conf="variablesData" />
               </div>
 
-              <!--审批意见填写-->
-              <div style="margin-left:20px;margin-bottom: 20px;font-size: 14px;" v-if="finished">
+              <!--审批流程模块-->
+              <div style="margin-left:20px;margin-bottom: 20px;font-size: 14px;" v-if="finished === 'true'">
                 <el-form ref="taskForm" :model="taskForm" label-width="80px" size="mini">
                   <el-form-item label="退回节点" prop="targetKey" v-show="taskForm.returnTaskShow">
                     <el-radio-group v-model="taskForm.targetKey">
@@ -27,7 +28,7 @@
                   <el-form-item label="任务接收" prop="targetKey" v-show="taskForm.sendUserShow">
                     <el-select style="width: 50%" v-model="assignee" @change="handleCheckChange" :multiple="taskForm.multiple" placeholder="请选择">
                       <el-option
-                        v-for="item in userList"
+                        v-for="item in userDataList"
                         :key="item.userId"
                         :label="item.nickName"
                         :value="item.userId">
@@ -102,30 +103,54 @@
       </el-card>
 
       <!--流程执行图-->
-      <el-card class="box-card" v-if="src" >
+<!--      <el-card class="box-card" v-if="src" >-->
+<!--        <div slot="header" class="clearfix">-->
+<!--          <span class="el-icon-picture-outline">流程图</span>-->
+<!--        </div>-->
+<!--        <el-col :span="16" :offset="4">-->
+<!--          <el-image :src="src"></el-image>-->
+<!--        </el-col>-->
+<!--      </el-card>-->
+    <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span class="el-icon-picture-outline">流程图</span>
         </div>
-        <el-col :span="16" :offset="4">
-          <el-image :src="src"></el-image>
-        </el-col>
-      </el-card>
+        <flow :xmlData="xmlData" :taskData="taskList"></flow>
+    </el-card>
   </div>
 </template>
 
 <script>
 import {flowRecord} from "@/api/flowable/finished";
 import Parser from '@/components/parser/Parser'
-import {definitionStart, getProcessVariables, userList } from "@/api/flowable/definition";
+import {definitionStart, getProcessVariables, userList, readXml, getFlowViewer } from "@/api/flowable/definition";
 import {complete, rejectTask, returnList, returnTask, getNextFlowNode, delegate} from "@/api/flowable/todo";
+import flow from '@/views/flowable/task/record/flow'
 export default {
   name: "Record",
   components: {
-    Parser
+    Parser,
+    flow
   },
   props: {},
   data() {
     return {
+      // 模型xml数据
+      xmlData: "",
+      taskList: [],
+      // // 任务列表
+      // taskList: [{
+      //   // 任务定义的key
+      //   "key": "Activity_0gtu56i",
+      //   // 任务是否完成
+      //   "completed": false
+      // },
+      //   {
+      //     // 任务定义的key
+      //     "key": "Activity_02fkd13",
+      //     // 任务是否完成
+      //     "completed": true
+      //   }],
       // 遮罩层
       loading: true,
       flowRecordList: [], // 流程流转数据
@@ -146,8 +171,9 @@ export default {
         taskId: "" ,// 流程任务编号
         procDefId: "",  // 流程编号
         vars: "",
+        targetKey:""
       },
-      userList:[], // 流程候选人
+      userDataList:[], // 流程候选人
       assignee: null,
       formConf: {}, // 默认表单数据
       formConfOpen: false, // 是否加载默认表单数据
@@ -155,26 +181,34 @@ export default {
       variablesData: {}, // 流程变量数据
       variableOpen: false, // 是否加载流程变量数据
       returnTaskList: [],  // 回退列表数据
-      finished: false,
-      isFinished: 0
+      finished: 'false'
     };
   },
   created() {
+    this.taskForm.deployId = this.$route.query && this.$route.query.deployId;
+    this.taskForm.taskId  = this.$route.query && this.$route.query.taskId;
     this.taskForm.procInsId = this.$route.query && this.$route.query.procInsId;
     this.taskForm.instanceId = this.$route.query && this.$route.query.procInsId;
     // 初始化表单
-    this.taskForm.deployId = this.$route.query && this.$route.query.deployId;
     this.taskForm.procDefId  = this.$route.query && this.$route.query.procDefId;
-    this.isFinished =  this.$route.query && this.$route.query.isFinished
-
+    // 回显流程记录
+    this.getFlowViewer(this.taskForm.procInsId);
+    this.getModelDetail(this.taskForm.deployId);
     // 流程任务重获取变量表单
-    this.taskForm.taskId  = this.$route.query && this.$route.query.taskId;
     if (this.taskForm.taskId){
       this.processVariables( this.taskForm.taskId)
+      this.getNextFlowNode(this.taskForm.taskId)
       this.taskForm.deployId = null
     }
     this.getFlowRecordList( this.taskForm.procInsId, this.taskForm.deployId);
+    this.finished =  this.$route.query && this.$route.query.finished
+
   },
+  // watch:{
+  //   $route(){
+  //     this.finished =  this.$route.query && this.$route.query.finished
+  //   }
+  // },
   mounted() {
     // // 表单数据回填，模拟异步请求场景
     // setTimeout(() => {
@@ -189,6 +223,18 @@ export default {
     // }, 1000)
   },
   methods: {
+    /** xml 文件 */
+    getModelDetail(deployId) {
+      // 发送请求，获取xml
+      readXml(deployId).then(res =>{
+        this.xmlData = res.data
+      })
+    },
+    getFlowViewer(procInsId){
+      getFlowViewer(procInsId).then(res =>{
+        this.taskList = res.data
+      })
+    },
     setIcon(val) {
       if (val) {
         return "el-icon-check";
@@ -203,8 +249,8 @@ export default {
         return "#b3bdbb";
       }
     },
+    /** 流程变量赋值 */
     handleCheckChange(val){
-      console.log(val)
       if (val instanceof Array) {
         this.taskForm.values = {
           "approval": val.join(',')
@@ -220,17 +266,10 @@ export default {
       const params = {procInsId: procInsId, deployId: deployId}
       flowRecord(params).then(res => {
         this.flowRecordList = res.data.flowList;
-        // 流程过程中不存在初始化表单 直接读取的流程变量众存储的表单值
+        // 流程过程中不存在初始化表单 直接读取的流程变量中存储的表单值
         if (res.data.formData) {
           this.formConf = res.data.formData;
           this.formConfOpen = true
-        }
-        // 处理已办任务页面跳转后会显示审批等操作按钮 todo: 待优化
-        if (this.isFinished == 0) {
-          this.finished = res.data.finished;
-        }
-        if (procInsId) {
-          this.src = process.env.VUE_APP_BASE_API + "/flowable/task/diagram/" + procInsId;
         }
       }).catch(res => {
         this.goBack();
@@ -253,30 +292,31 @@ export default {
           this.variablesData = res.data.variables;
           this.variableOpen = true
         });
-        // 根据当前任务或者流程设计配置的下一步节点 todo 暂时未涉及到考虑网关、表达式和多节点情况
-        const params = {
-          taskId: taskId
-        }
-        getNextFlowNode(params).then(res => {
-          const data = res.data;
-          if (data) {
-            this.taskForm.sendUserShow = true;
-            if (data.type === 'assignee') {
-              this.userList = res.data.userList;
-            } else if (data.type === 'candidateUsers') {
-              this.userList = res.data.userList;
-              this.taskForm.multiple = true;
-            } else {
-              res.data.roleList.forEach(role =>{
-                role.userId = role.roleId;
-                role.nickName = role.roleName;
-              })
-              this.userList = res.data.roleList;
-              this.taskForm.multiple = false;
-            }
-          }
-        })
       }
+    },
+    /** 根据当前任务或者流程设计配置的下一步节点 */
+    getNextFlowNode(taskId){
+      // 根据当前任务或者流程设计配置的下一步节点 todo 暂时未涉及到考虑网关、表达式和多节点情况
+      const params = { taskId: taskId }
+      getNextFlowNode(params).then(res => {
+        const data = res.data;
+        if (data) {
+          if (data.type === 'assignee') {
+            this.userDataList = res.data.userList;
+          } else if (data.type === 'candidateUsers') {
+            this.userDataList = res.data.userList;
+            this.taskForm.multiple = true;
+          } else {
+            res.data.roleList.forEach(role =>{
+              role.userId = role.roleId;
+              role.nickName = role.roleName;
+            })
+            this.userDataList = res.data.roleList;
+            this.taskForm.multiple = false;
+          }
+          this.taskForm.sendUserShow = true;
+        }
+      })
     },
     /** 审批任务 */
     handleComplete() {

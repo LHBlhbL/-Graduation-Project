@@ -189,7 +189,7 @@ export default {
           procInsId: row.procInsId,
           deployId: row.deployId,
           taskId: row.taskId,
-          isFinished: 0
+          finished: true
         }})
     },
     // 取消按钮

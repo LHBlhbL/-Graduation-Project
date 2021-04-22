@@ -171,4 +171,14 @@ public class FlowTaskController {
             }
         }
     }
+
+    /**
+     * 生成流程图
+     *
+     * @param procInsId 任务ID
+     */
+    @RequestMapping("/flowViewer/{procInsId}")
+    public AjaxResult getFlowViewer(@PathVariable("procInsId") String procInsId) {
+        return flowTaskService.getFlowViewer(procInsId);
+    }
 }

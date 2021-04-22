@@ -40,7 +40,9 @@ export default {
     try {
       // let xmlData = this.xmlData.replace('xmlns:camunda', 'xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:camunda')
       // console.log('xmlData', xmlData)
+
       const { warning } = await bpmnViewer.importXML(this.xmlData);
+
       // console.log('rendered', warning);
       let canvas = bpmnViewer.get('canvas');
       // canvas.zoom('fit-viewport')
@@ -143,8 +145,8 @@ export default {
   }
 };
 </script>
-<!--<style lang="less" scoped>-->
-<style >
+<style>
+/*//<style >*/
 .containers {
   position: absolute;
   background-color: #ffffff;

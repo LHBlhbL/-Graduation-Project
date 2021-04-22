@@ -14,6 +14,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.flowable.domain.dto.FlowCommentDto;
 import com.ruoyi.flowable.domain.dto.FlowNextDto;
 import com.ruoyi.flowable.domain.dto.FlowTaskDto;
+import com.ruoyi.flowable.domain.dto.FlowViewerDto;
 import com.ruoyi.flowable.domain.vo.FlowTaskVo;
 import com.ruoyi.flowable.factory.FlowServiceFactory;
 import com.ruoyi.flowable.flow.CustomProcessDiagramGenerator;
@@ -535,13 +536,12 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         FlowNode flowNode = (FlowNode) bpmnModel.getMainProcess().getFlowElement(activityId);
 
         //记录原活动方向
-        List<SequenceFlow> oriSequenceFlows = new ArrayList<SequenceFlow>();
-        oriSequenceFlows.addAll(flowNode.getOutgoingFlows());
+        List<SequenceFlow> oriSequenceFlows = new ArrayList<>(flowNode.getOutgoingFlows());
 
         //清理活动方向
         flowNode.getOutgoingFlows().clear();
         //建立新方向
-        List<SequenceFlow> newSequenceFlowList = new ArrayList<SequenceFlow>();
+        List<SequenceFlow> newSequenceFlowList = new ArrayList<>();
         SequenceFlow newSequenceFlow = new SequenceFlow();
         newSequenceFlow.setId("newSequenceFlowId");
         newSequenceFlow.setSourceFlowElement(flowNode);
@@ -550,14 +550,15 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         flowNode.setOutgoingFlows(newSequenceFlowList);
 
         Authentication.setAuthenticatedUserId(loginUser.getUserId().toString());
-        taskService.addComment(task.getId(), task.getProcessInstanceId(), "撤回");
+        taskService.addComment(task.getId(), task.getProcessInstanceId(), FlowComment.NORMAL.getType(),"撤回");
 
-        Map<String, Object> currentVariables = new HashMap<String, Object>();
-        currentVariables.put("applier", loginUser.getUserName());
+        Map<String, Object> currentVariables = new HashMap<>();
+        currentVariables.put(ProcessConstants.PROCESS_INITIATOR, loginUser.getUserId().toString());
         //完成任务
         taskService.complete(task.getId(), currentVariables);
         //恢复原方向
         flowNode.setOutgoingFlows(oriSequenceFlows);
+
         return AjaxResult.success();
     }
 
@@ -592,6 +593,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
                     .processDefinitionId(task.getProcessDefinitionId())
                     .singleResult();
+            flowTask.setDeployId(pd.getDeploymentId());
             flowTask.setProcDefName(pd.getName());
             flowTask.setProcDefVersion(pd.getVersion());
             flowTask.setProcInsId(task.getProcessInstanceId());
@@ -666,6 +668,9 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         }
         page.setTotal(hisTaskList.size());
         page.setRecords(hisTaskList);
+//        Map<String, Object> result = new HashMap<>();
+//        result.put("result",page);
+//        result.put("finished",true);
         return AjaxResult.success(page);
     }
 
@@ -734,13 +739,13 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
                 }
             }
             map.put("flowList", hisFlowList);
-            // 查询当前任务是否完成
-            List<Task> taskList = taskService.createTaskQuery().processInstanceId(procInsId).list();
-            if (CollectionUtils.isNotEmpty(taskList)) {
-                map.put("finished", true);
-            } else {
-                map.put("finished", false);
-            }
+//            // 查询当前任务是否完成
+//            List<Task> taskList = taskService.createTaskQuery().processInstanceId(procInsId).list();
+//            if (CollectionUtils.isNotEmpty(taskList)) {
+//                map.put("finished", true);
+//            } else {
+//                map.put("finished", false);
+//            }
         }
         // 第一次申请获取初始化表单
         if (StringUtils.isNotBlank(deployId)) {
@@ -815,6 +820,32 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
     }
 
     /**
+     * 获取流程执行过程
+     *
+     * @param procInsId
+     * @return
+     */
+    @Override
+    public AjaxResult getFlowViewer(String procInsId) {
+        List<FlowViewerDto> flowViewerList = new ArrayList<>();
+        FlowViewerDto flowViewerDto;
+        // 获得活动的节点
+        List<HistoricActivityInstance> hisActIns = historyService.createHistoricActivityInstanceQuery()
+                .processInstanceId(procInsId)
+                .orderByHistoricActivityInstanceStartTime()
+                .asc().list();
+        for (HistoricActivityInstance activityInstance : hisActIns) {
+            if (!"sequenceFlow".equals(activityInstance.getActivityType())) {
+                flowViewerDto = new FlowViewerDto();
+                flowViewerDto.setKey(activityInstance.getActivityId());
+                flowViewerDto.setCompleted(!Objects.isNull(activityInstance.getEndTime()));
+                flowViewerList.add(flowViewerDto);
+            }
+        }
+        return AjaxResult.success(flowViewerList);
+    }
+
+    /**
      * 获取流程变量
      *
      * @param taskId
@@ -846,8 +877,10 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             List<UserTask> nextUserTask = FindNextNodeUtil.getNextUserTasks(repositoryService, task, new HashMap<>());
             if (CollectionUtils.isNotEmpty(nextUserTask)) {
                 for (UserTask userTask : nextUserTask) {
+                    MultiInstanceLoopCharacteristics characteristics = userTask.getLoopCharacteristics();
                     String dataType = userTask.getAttributeValue(ProcessConstants.NAMASPASE, ProcessConstants.PROCESS_CUSTOM_DATA_TYPE);
                     String userType = userTask.getAttributeValue(ProcessConstants.NAMASPASE, ProcessConstants.PROCESS_CUSTOM_USER_TYPE);
+
                     if (ProcessConstants.DATA_TYPE.equals(dataType)) {
                         // 指定单个人员
                         if (ProcessConstants.USER_TYPE_ASSIGNEE.equals(userType)) {

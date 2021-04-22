@@ -138,6 +138,13 @@ public interface IFlowTaskService {
     InputStream diagram(String processId);
 
     /**
+     * 获取流程执行过程
+     * @param procInsId
+     * @return
+     */
+    AjaxResult getFlowViewer(String procInsId);
+
+    /**
      * 获取流程变量
      * @param taskId
      * @return
