@@ -63,7 +63,7 @@ public class ProcessConstants {
     /**
      * 初始化人员
      */
-    public static final String PROCESS_INITIATOR = "initiator";
+    public static final String PROCESS_INITIATOR = "INITIATOR";
 
 
     /**

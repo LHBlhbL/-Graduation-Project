@@ -11,6 +11,9 @@ import com.ruoyi.flowable.factory.FlowServiceFactory;
 import com.ruoyi.flowable.service.IFlowDefinitionService;
 import com.ruoyi.flowable.service.ISysDeployFormService;
 import com.ruoyi.system.domain.SysForm;
+import com.ruoyi.system.domain.SysPost;
+import com.ruoyi.system.service.ISysDeptService;
+import com.ruoyi.system.service.ISysPostService;
 import com.ruoyi.system.service.ISysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -23,6 +26,7 @@ import org.flowable.image.impl.DefaultProcessDiagramGenerator;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -47,6 +51,12 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
 
     @Resource
     private ISysUserService sysUserService;
+
+    @Resource
+    private ISysDeptService sysDeptService;
+
+    @Resource
+    private ISysPostService postService;
 
     private static final String BPMN_FILE_SUFFIX = ".bpmn";
 
@@ -167,18 +177,18 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
             if (Objects.nonNull(processDefinition) && processDefinition.isSuspended()) {
                 return AjaxResult.error("流程已被挂起,请先激活流程");
             }
-            //            variables.put("skip", true);
-//            variables.put(ProcessConstants.FLOWABLE_SKIP_EXPRESSION_ENABLED, true);
+//           variables.put("skip", true);
+//           variables.put(ProcessConstants.FLOWABLE_SKIP_EXPRESSION_ENABLED, true);
             // 设置流程发起人Id到流程中
-            Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
-            identityService.setAuthenticatedUserId(userId.toString());
-            variables.put(ProcessConstants.PROCESS_INITIATOR, userId);
+            SysUser sysUser = SecurityUtils.getLoginUser().getUser();
+            identityService.setAuthenticatedUserId(sysUser.getUserId().toString());
+            variables.put(ProcessConstants.PROCESS_INITIATOR, "");
             ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId, variables);
             // 给第一步申请人节点设置任务执行人和意见 todo:第一个节点不设置为申请人节点有点问题？
             Task task = taskService.createTaskQuery().processInstanceId(processInstance.getProcessInstanceId()).singleResult();
             if (Objects.nonNull(task)) {
-                taskService.addComment(task.getId(), processInstance.getProcessInstanceId(), FlowComment.NORMAL.getType(), "发起流程申请");
-                taskService.setAssignee(task.getId(), userId.toString());
+                taskService.addComment(task.getId(), processInstance.getProcessInstanceId(), FlowComment.NORMAL.getType(), sysUser.getNickName() + "发起流程申请");
+//                taskService.setAssignee(task.getId(), sysUser.getUserId().toString());
                 taskService.complete(task.getId(), variables);
             }
             return AjaxResult.success("流程启动成功");

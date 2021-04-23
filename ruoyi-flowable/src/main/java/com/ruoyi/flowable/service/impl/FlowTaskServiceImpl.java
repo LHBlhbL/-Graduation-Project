@@ -505,7 +505,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         String myTaskId = null;
         HistoricTaskInstance myTask = null;
         for (HistoricTaskInstance hti : htiList) {
-            if (loginUser.getUserId().toString().equals(hti.getAssignee())) {
+            if (StringUtils.isBlank(hti.getAssignee())) {
                 myTaskId = hti.getId();
                 myTask = hti;
                 break;

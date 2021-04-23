@@ -1,4 +1,4 @@
-package com.ruoyi.web.controller.survey;
+package com.ruoyi.flowable.survey;
 
 import java.util.List;
 
