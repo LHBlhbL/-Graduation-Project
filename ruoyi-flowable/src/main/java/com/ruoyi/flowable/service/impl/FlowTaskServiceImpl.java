@@ -493,7 +493,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
     public AjaxResult stopProcess(FlowTaskVo flowTaskVo) {
         Task task = taskService.createTaskQuery().processInstanceId(flowTaskVo.getInstanceId()).singleResult();
         if (task == null) {
-            throw new CustomException("流程未启动或已执行完成，无法撤回");
+            throw new CustomException("流程未启动或已执行完成，取消申请失败");
         }
 
         SysUser loginUser = SecurityUtils.getLoginUser().getUser();
