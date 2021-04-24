@@ -4,11 +4,11 @@ package com.ruoyi.flowable.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
-import com.ruoyi.common.constant.ProcessConstants;
+import com.ruoyi.flowable.common.constant.ProcessConstants;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
-import com.ruoyi.common.enums.FlowComment;
+import com.ruoyi.flowable.common.enums.FlowComment;
 import com.ruoyi.common.exception.CustomException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.flowable.domain.dto.FlowCommentDto;
@@ -481,6 +481,43 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         }
         page.setRecords(flowList);
         return AjaxResult.success(page);
+    }
+
+    /**
+     * 取消申请
+     *
+     * @param flowTaskVo
+     * @return
+     */
+    @Override
+    public AjaxResult stopProcess(FlowTaskVo flowTaskVo) {
+        Task task = taskService.createTaskQuery().processInstanceId(flowTaskVo.getInstanceId()).singleResult();
+        if (task == null) {
+            throw new CustomException("流程未启动或已执行完成，无法撤回");
+        }
+
+        SysUser loginUser = SecurityUtils.getLoginUser().getUser();
+        ProcessInstance processInstance =
+                runtimeService.createProcessInstanceQuery().processInstanceId(flowTaskVo.getInstanceId()).singleResult();
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
+        if (Objects.nonNull(bpmnModel)) {
+            Process process = bpmnModel.getMainProcess();
+            List<EndEvent> endNodes = process.findFlowElementsOfType(EndEvent.class, false);
+            if (CollectionUtils.isNotEmpty(endNodes)) {
+                Authentication.setAuthenticatedUserId(loginUser.getUserId().toString());
+                taskService.addComment(task.getId(), processInstance.getProcessInstanceId(), FlowComment.STOP.getType(),
+                        StringUtils.isBlank(flowTaskVo.getComment()) ? "取消申请" : flowTaskVo.getComment());
+                String endId = endNodes.get(0).getId();
+                List<Execution> executions =
+                        runtimeService.createExecutionQuery().parentId(processInstance.getProcessInstanceId()).list();
+                List<String> executionIds = new ArrayList<>();
+                executions.forEach(execution -> executionIds.add(execution.getId()));
+                runtimeService.createChangeActivityStateBuilder().moveExecutionsToSingleActivityId(executionIds,
+                        endId).changeState();
+            }
+        }
+
+        return AjaxResult.success();
     }
 
     /**

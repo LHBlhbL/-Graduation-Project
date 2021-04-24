@@ -88,6 +88,13 @@ public interface IFlowTaskService {
     AjaxResult myProcess(Integer pageNum, Integer pageSize);
 
     /**
+     * 取消申请
+     * @param flowTaskVo
+     * @return
+     */
+    AjaxResult stopProcess(FlowTaskVo flowTaskVo);
+
+    /**
      * 撤回流程
      * @param flowTaskVo
      * @return

@@ -40,6 +40,12 @@ public class FlowTaskController {
         return flowTaskService.myProcess(pageNum, pageSize);
     }
 
+    @ApiOperation(value = "取消申请", response = FlowTaskDto.class)
+    @PostMapping(value = "/stopProcess")
+    public AjaxResult stopProcess(@RequestBody FlowTaskVo flowTaskVo) {
+        return flowTaskService.stopProcess(flowTaskVo);
+    }
+
     @ApiOperation(value = "撤回流程", response = FlowTaskDto.class)
     @PostMapping(value = "/revokeProcess")
     public AjaxResult revokeProcess(@RequestBody FlowTaskVo flowTaskVo) {

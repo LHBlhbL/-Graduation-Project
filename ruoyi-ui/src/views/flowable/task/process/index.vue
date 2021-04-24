@@ -107,8 +107,8 @@
             size="mini"
             type="text"
             icon="el-icon-tickets"
-            @click="handleRevoke(scope.row)"
-          >撤回</el-button>
+            @click="handleStop(scope.row)"
+          >取消申请</el-button>
           <el-button
             size="mini"
             type="text"
@@ -171,7 +171,7 @@ import {
   exportDeployment,
   flowRecord
 } from "@/api/flowable/finished";
-import { myProcessList,revokeProcess } from "@/api/flowable/process";
+import { myProcessList,stopProcess } from "@/api/flowable/process";
 import {listDefinition} from "@/api/flowable/definition";
 export default {
   name: "Deploy",
@@ -297,13 +297,12 @@ export default {
           }
       })
     },
-    /**  撤回流程申请 */
-    handleRevoke(row){
+    /**  取消流程申请 */
+    handleStop(row){
       const params = {
-        procInsId: null,
         instanceId: row.procInsId
       }
-      revokeProcess(params).then( res => {
+      stopProcess(params).then( res => {
         this.msgSuccess(res.msg);
         this.getList();
       });

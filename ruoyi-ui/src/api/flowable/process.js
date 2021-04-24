@@ -19,10 +19,10 @@ export function complete(data) {
   })
 }
 
-// 撤回任务
-export function revokeProcess(data) {
+// 取消申请
+export function stopProcess(data) {
   return request({
-    url: '/flowable/task/revokeProcess',
+    url: '/flowable/task/stopProcess',
     method: 'post',
     data: data
   })

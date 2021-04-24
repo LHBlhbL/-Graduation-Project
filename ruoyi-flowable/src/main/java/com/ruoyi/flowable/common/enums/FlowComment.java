@@ -1,4 +1,4 @@
-package com.ruoyi.common.enums;
+package com.ruoyi.flowable.common.enums;
 
 /**
  * 流程意见类型
@@ -15,7 +15,8 @@ public enum FlowComment {
     REBACK("2", "退回意见"),
     REJECT("3", "驳回意见"),
     DELEGATE("4", "委派意见"),
-    ASSIGN("5", "转办意见");
+    ASSIGN("5", "转办意见"),
+    STOP("6", "终止流程");
 
     /**
      * 类型
