@@ -491,8 +491,8 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
      */
     @Override
     public AjaxResult stopProcess(FlowTaskVo flowTaskVo) {
-        Task task = taskService.createTaskQuery().processInstanceId(flowTaskVo.getInstanceId()).singleResult();
-        if (task == null) {
+        List<Task> task = taskService.createTaskQuery().processInstanceId(flowTaskVo.getInstanceId()).list();
+        if (CollectionUtils.isEmpty(task)) {
             throw new CustomException("流程未启动或已执行完成，取消申请失败");
         }
 
@@ -505,8 +505,8 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             List<EndEvent> endNodes = process.findFlowElementsOfType(EndEvent.class, false);
             if (CollectionUtils.isNotEmpty(endNodes)) {
                 Authentication.setAuthenticatedUserId(loginUser.getUserId().toString());
-                taskService.addComment(task.getId(), processInstance.getProcessInstanceId(), FlowComment.STOP.getType(),
-                        StringUtils.isBlank(flowTaskVo.getComment()) ? "取消申请" : flowTaskVo.getComment());
+//                taskService.addComment(task.getId(), processInstance.getProcessInstanceId(), FlowComment.STOP.getType(),
+//                        StringUtils.isBlank(flowTaskVo.getComment()) ? "取消申请" : flowTaskVo.getComment());
                 String endId = endNodes.get(0).getId();
                 List<Execution> executions =
                         runtimeService.createExecutionQuery().parentId(processInstance.getProcessInstanceId()).list();

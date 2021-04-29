@@ -159,7 +159,8 @@ export default {
         await this.modeler.importXML(data)
         this.adjustPalette()
         this.fitViewport()
-        if (this.taskList) {
+        if (this.taskList !==undefined && this.taskList.length > 0 ) {
+          debugger
           this.fillColor()
         }
       } catch (err) {

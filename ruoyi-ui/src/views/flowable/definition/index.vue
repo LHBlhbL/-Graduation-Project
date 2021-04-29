@@ -72,7 +72,7 @@
       <el-table-column label="流程编号" width="300" align="center" prop="deploymentId" />
       <el-table-column label="流程标识" align="center" prop="key" />
       <el-table-column label="流程分类" align="center" prop="category" />
-      <el-table-column label="流程名称" align="center">
+      <el-table-column label="流程名称(流程图)" align="center">
         <template slot-scope="scope">
           <el-button type="text" @click="handleReadImage(scope.row.deploymentId)">
             <span>{{ scope.row.name }}</span>
@@ -213,8 +213,9 @@
     </el-dialog>
 
     <!-- 流程图 -->
-    <el-dialog :title="readImage.title" :visible.sync="readImage.open" append-to-body>
-      <el-image :src="readImage.src"></el-image>
+    <el-dialog :title="readImage.title" :visible.sync="readImage.open" width="70%" append-to-body>
+      <!-- <el-image :src="readImage.src"></el-image> -->
+       <flow :xmlData="xmlData"/>
     </el-dialog>
 
     <!--表单配置详情-->
@@ -235,15 +236,17 @@
 </template>
 
 <script>
-import { listDefinition, updateState, delDeployment, addDeployment, updateDeployment, exportDeployment, definitionStart } from "@/api/flowable/definition";
+import { listDefinition, updateState, delDeployment, addDeployment, updateDeployment, exportDeployment, definitionStart, readXml} from "@/api/flowable/definition";
 import { getToken } from "@/utils/auth";
 import { getForm, addDeployForm ,listForm } from "@/api/flowable/form";
 import Parser from '@/components/parser/Parser'
+import flow from '@/views/flowable/task/record/flow'
 
 export default {
   name: "Definition",
   components: {
-    Parser
+    Parser,
+    flow
   },
   data() {
     return {
@@ -309,6 +312,8 @@ export default {
         deployId: null
 
       },
+      // xml
+      xmlData:"",
       // 表单参数
       form: {},
       // 表单校验
@@ -380,7 +385,11 @@ export default {
     handleReadImage(deploymentId){
       this.readImage.title = "流程图";
       this.readImage.open = true;
-      this.readImage.src = process.env.VUE_APP_BASE_API + "/flowable/definition/readImage/" + deploymentId;
+      // this.readImage.src = process.env.VUE_APP_BASE_API + "/flowable/definition/readImage/" + deploymentId;
+       // 发送请求，获取xml
+      readXml(deploymentId).then(res =>{
+        this.xmlData = res.data
+      })
     },
     /** 表单查看 */
     handleForm(formId){
