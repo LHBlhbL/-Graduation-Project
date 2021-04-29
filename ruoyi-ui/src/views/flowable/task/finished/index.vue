@@ -91,13 +91,13 @@
             icon="el-icon-tickets"
             @click="handleFlowRecord(scope.row)"
           >流转记录</el-button>
-          <el-button
+           <el-button
             size="mini"
             type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['system:deployment:remove']"
-          >删除</el-button>
+            icon="el-icon-tickets"
+            @click="handleRevoke(scope.row)"
+          >撤回
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -113,7 +113,7 @@
 </template>
 
 <script>
-import { finishedList, getDeployment, delDeployment, addDeployment, updateDeployment, exportDeployment } from "@/api/flowable/finished";
+import { finishedList, getDeployment, delDeployment, addDeployment, updateDeployment, exportDeployment, revokeProcess } from "@/api/flowable/finished";
 
 export default {
   name: "Deploy",
@@ -242,6 +242,16 @@ export default {
           taskId: row.taskId,
           finished: false
       }})
+    },
+    /** 撤回任务 */
+    handleRevoke(row){
+      const params = {
+        instanceId: row.procInsId
+      }
+      revokeProcess(params).then( res => {
+        this.msgSuccess(res.msg);
+        this.getList();
+      });
     },
     /** 修改按钮操作 */
     handleUpdate(row) {

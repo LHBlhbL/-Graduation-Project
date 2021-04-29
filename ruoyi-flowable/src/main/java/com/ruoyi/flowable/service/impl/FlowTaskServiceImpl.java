@@ -542,7 +542,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         String myTaskId = null;
         HistoricTaskInstance myTask = null;
         for (HistoricTaskInstance hti : htiList) {
-            if (StringUtils.isBlank(hti.getAssignee())) {
+            if (loginUser.getUserId().toString().equals(hti.getAssignee())) {
                 myTaskId = hti.getId();
                 myTask = hti;
                 break;
@@ -575,26 +575,6 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         //记录原活动方向
         List<SequenceFlow> oriSequenceFlows = new ArrayList<>(flowNode.getOutgoingFlows());
 
-        //清理活动方向
-        flowNode.getOutgoingFlows().clear();
-        //建立新方向
-        List<SequenceFlow> newSequenceFlowList = new ArrayList<>();
-        SequenceFlow newSequenceFlow = new SequenceFlow();
-        newSequenceFlow.setId("newSequenceFlowId");
-        newSequenceFlow.setSourceFlowElement(flowNode);
-        newSequenceFlow.setTargetFlowElement(myFlowNode);
-        newSequenceFlowList.add(newSequenceFlow);
-        flowNode.setOutgoingFlows(newSequenceFlowList);
-
-        Authentication.setAuthenticatedUserId(loginUser.getUserId().toString());
-        taskService.addComment(task.getId(), task.getProcessInstanceId(), FlowComment.NORMAL.getType(),"撤回");
-
-        Map<String, Object> currentVariables = new HashMap<>();
-        currentVariables.put(ProcessConstants.PROCESS_INITIATOR, loginUser.getUserId().toString());
-        //完成任务
-        taskService.complete(task.getId(), currentVariables);
-        //恢复原方向
-        flowNode.setOutgoingFlows(oriSequenceFlows);
 
         return AjaxResult.success();
     }
