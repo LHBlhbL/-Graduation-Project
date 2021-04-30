@@ -267,26 +267,27 @@ export default {
   },
 
   mounted() {
+    const that = this;
     if (Array.isArray(drawingListInDB) && drawingListInDB.length > 0) {
-      this.drawingList = drawingListInDB
+      that.drawingList = drawingListInDB
     } else {
-      this.drawingList = drawingDefalut
+      that.drawingList = drawingDefalut
     }
-    this.activeFormItem(this.drawingList[0])
+    this.activeFormItem(that.drawingList[0])
     // // if (formConfInDB) {
     // //   this.formConf = formConfInDB
     // // }
-    this.drawingList = [];
-    const formId =  this.$route.query && this.$route.query.formId;
+    that.drawingList = [];
+    const formId =  that.$route.query && that.$route.query.formId;
     if (formId) {
       getForm(formId).then(res =>{
-        this.formConf = JSON.parse(res.data.formContent);
-        // this.drawingList = this.formConf.fields;
-        this.form = res.data;
+        that.formConf = JSON.parse(res.data.formContent);
+        that.drawingList = that.formConf.fields;
+        that.form = res.data;
       })
     }else {
       if (formConfInDB) {
-        this.formConf = formConfInDB
+        that.formConf = formConfInDB
       }
     }
     loadBeautifier(btf => {
