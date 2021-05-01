@@ -153,8 +153,8 @@
       <pagination
         v-show="processTotal>0"
         :total="processTotal"
-        :page.sync="queryProcessParams.pageNum"
-        :limit.sync="queryProcessParams.pageSize"
+        :page.sync="queryParams.pageNum"
+        :limit.sync="queryParams.pageSize"
         @pagination="getList"
       />
     </el-dialog>
@@ -200,11 +200,6 @@ export default {
       // 是否显示弹出层
       open: false,
       src: "",
-      // 查询参数
-      queryProcessParams: {
-        pageNum: 1,
-        pageSize: 10
-      },
       definitionList:[],
       // 查询参数
       queryParams: {
@@ -236,7 +231,7 @@ export default {
       this.loading = true;
       myProcessList(this.queryParams).then(response => {
         this.myProcessList = response.data.records;
-        this.total = response.data.total;
+        this.processTotal = response.data.total;
         this.loading = false;
       });
     },
