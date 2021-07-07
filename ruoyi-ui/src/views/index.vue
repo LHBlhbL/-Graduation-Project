@@ -18,7 +18,7 @@
           <div class="body">
             <p>
               <i class="el-icon-user-solid"></i> QQ群：
-              <a href="https://jq.qq.com/?_wv=1027&k=VvjN2nvu" target="_blank"
+              <a href="https://jq.qq.com/?_wv=1027&k=2zE87c2G" target="_blank"
                 > 782924350</a
               >
             </p>
