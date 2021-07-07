@@ -31,7 +31,7 @@ public class FlowInstanceController {
     @ApiOperation(value = "根据流程定义id启动流程实例")
     @PostMapping("/startBy/{procDefId}")
     public AjaxResult startById(@ApiParam(value = "流程定义id") @PathVariable(value = "procDefId") String procDefId,
-                                @ApiParam(value = "变量集合,json对象") @RequestBody @RequestParam(required = false) Map<String, Object> variables) {
+                                @ApiParam(value = "变量集合,json对象") @RequestBody Map<String, Object> variables) {
         return flowInstanceService.startProcessInstanceById(procDefId, variables);
 
     }

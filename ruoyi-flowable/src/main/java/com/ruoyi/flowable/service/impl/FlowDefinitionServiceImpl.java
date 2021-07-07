@@ -127,7 +127,7 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
     public AjaxResult readXml(String deployId) throws IOException {
         ProcessDefinition definition = repositoryService.createProcessDefinitionQuery().deploymentId(deployId).singleResult();
         InputStream inputStream = repositoryService.getResourceAsStream(definition.getDeploymentId(), definition.getResourceName());
-        String result = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        String result = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
         return AjaxResult.success("", result);
     }
 
