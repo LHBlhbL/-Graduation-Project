@@ -10,7 +10,7 @@
 
 访问链接：http://129.211.46.183/
 
-#####为了方便体验，请勿删除和改动初始化的几个流程和表单，感谢！有其它流程实现，请自行定义新流程、表单。
+##### 为了方便体验，请勿删除和改动初始化的几个流程和表单，感谢！有其它流程实现，请自行定义新流程、表单。
 
 ## 工作流交流群
 
@@ -51,7 +51,7 @@ GitHub：https://github.com/tony2y/RuoYi-flowable.git
         <td><img src="https://images.gitee.com/uploads/images/2021/0407/212924_eb53cb0f_2042292.png"/></td>
     </tr>  
     <tr>
-        <td><img src="https://images.gitee.com/uploads/images/2021/0407/213017_d2d7c9c5_2042292.png"/></td>
+        <td><img src="https://images.gitee.com/uploads/images/2021/0708/113619_496e5f03_2042292.png"/></td>
         <td><img src="https://images.gitee.com/uploads/images/2021/0407/213126_462c4290_2042292.png"/></td>
     </tr>
 </table>

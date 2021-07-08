@@ -51,9 +51,14 @@
             <span>捐赠支持</span>
           </div>
           <div class="body">
-<!--            <span style="display: inline-block; height: 30px; line-height: 30px"-->
-<!--              >你可以请作者喝杯咖啡表示鼓励</span-->
-<!--            >-->
+            <img
+              src="https://oscimg.oschina.net/oscnet/up-88f17f916de7a895cf2a84d2ce769e9b2ca.JPEG"
+              alt="donate"
+              width="100%"
+            />
+            <span style="display: inline-block; height: 30px; line-height: 30px"
+              >你可以请作者喝杯咖啡表示鼓励</span
+            >
           </div>
         </el-card>
       </el-col>
