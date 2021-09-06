@@ -29,7 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectSysDeployFormByDeployId" resultType="com.ruoyi.system.domain.SysForm">
         select t1.form_content as formContent,t1.form_name as formName,t1.form_id as formId from sys_form t1 left join sys_deploy_form t2 on t1.form_id = t2.form_id
-        where t2.deploy_id = #{deployId}
+        where t2.deploy_id = #{deployId} limit 1
     </select>
 
     <insert id="insertSysDeployForm" parameterType="SysDeployForm" useGeneratedKeys="true" keyProperty="id">

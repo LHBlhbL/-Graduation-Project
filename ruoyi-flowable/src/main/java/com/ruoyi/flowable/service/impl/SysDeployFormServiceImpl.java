@@ -1,6 +1,7 @@
 package com.ruoyi.flowable.service.impl;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.ruoyi.system.domain.SysForm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,12 @@ public class SysDeployFormServiceImpl implements ISysDeployFormService
     @Override
     public int insertSysDeployForm(SysDeployForm sysDeployForm)
     {
-        return sysDeployFormMapper.insertSysDeployForm(sysDeployForm);
+        SysForm sysForm = sysDeployFormMapper.selectSysDeployFormByDeployId(sysDeployForm.getDeployId());
+        if (Objects.isNull(sysForm)) {
+            return sysDeployFormMapper.insertSysDeployForm(sysDeployForm);
+        }else {
+            return 1;
+        }
     }
 
     /**
