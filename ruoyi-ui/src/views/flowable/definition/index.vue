@@ -99,62 +99,30 @@
         </template>
       </el-table-column>
       <el-table-column label="部署时间" align="center" prop="deploymentTime" width="180"/>
-      <el-table-column label="操作" align="center" width="300" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit-outline"
-            @click="handleLoadXml(scope.row)"
-          >编辑</el-button>
-<!--          <el-button-->
-<!--            size="mini"-->
-<!--            type="text"-->
-<!--            icon="el-icon-picture-outline"-->
-<!--            @click="handleReadImage(scope.row)"-->
-<!--          >流程图</el-button>-->
-<!--          <el-button-->
-<!--            size="mini"-->
-<!--            type="text"-->
-<!--            icon="el-icon-caret-right"-->
-<!--            @click="handleDefinitionStart(scope.row)"-->
-<!--          >启动</el-button>-->
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-connection"
-            v-if="scope.row.formId == null"
-            @click="handleAddForm(scope.row)"
-          >配置表单</el-button>
-<!--          <el-button-->
-<!--            size="mini"-->
-<!--            type="text"-->
-<!--            icon="el-icon-connection"-->
-<!--            v-else-->
-<!--            @click="handleAddForm(scope.row)"-->
-<!--          >更换表单</el-button>-->
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-video-pause"
-            style="color: #f56c6c"
-            v-if="scope.row.suspensionState === 1"
-            @click="handleUpdateSuspensionState(scope.row)"
-          >挂起</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-video-play"
-            style="color: #11c629"
-            v-if="scope.row.suspensionState === 2"
-            @click="handleUpdateSuspensionState(scope.row)"
-          >激活</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-          >删除</el-button>
+          <el-dropdown>
+            <span class="el-dropdown-link">
+              更多操作<i class="el-icon-arrow-down el-icon--right"></i>
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item icon="el-icon-edit-outline" @click.native="handleLoadXml(scope.row)">
+                编辑
+              </el-dropdown-item>
+              <el-dropdown-item icon="el-icon-connection" @click.native="handleAddForm(scope.row)" v-if="scope.row.formId == null">
+                配置表单
+              </el-dropdown-item>
+              <el-dropdown-item icon="el-icon-video-pause" @click.native="handleUpdateSuspensionState(scope.row)" v-if="scope.row.suspensionState === 1">
+                挂起
+              </el-dropdown-item>
+              <el-dropdown-item icon="el-icon-video-play" @click.native="handleUpdateSuspensionState(scope.row)" v-if="scope.row.suspensionState === 2">
+                激活
+              </el-dropdown-item>
+              <el-dropdown-item icon="el-icon-delete" @click.native="handleDelete(scope.row)" v-hasPermi="['system:deployment:remove']">
+                删除
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </template>
       </el-table-column>
     </el-table>
