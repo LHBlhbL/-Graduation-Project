@@ -442,41 +442,14 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             flowTask.setProcDefVersion(pd.getVersion());
             flowTask.setCategory(pd.getCategory());
             flowTask.setProcDefVersion(pd.getVersion());
-
-            // 当前所处流程
-//            Task task = taskService.createTaskQuery().processInstanceId(hisIns.getId()).singleResult();
-            List<Task> taskList = taskService.createTaskQuery().processInstanceId(hisIns.getId()).list();
-            if (CollectionUtils.isNotEmpty(taskList)) {
-//                flowTask.setTaskName(task.getName());
-                flowTask.setTaskId(taskList.get(0).getId());
-//                // 指定审批人员信息
-//                if (StringUtils.isNotBlank(task.getAssignee())) {
-//                    SysUser sysUser = sysUserService.selectUserById(Long.parseLong(task.getAssignee()));
-//                    flowTask.setAssigneeId(sysUser.getUserId());
-//                    flowTask.setAssigneeName(sysUser.getNickName());
-//                    flowTask.setDeptName(sysUser.getDept().getDeptName());
-//                } else {
-//                    // 候选审批人员信息
-//                    List<IdentityLink> linksForTask = taskService.getIdentityLinksForTask(task.getId());
-//                    StringBuilder stringBuilder = new StringBuilder();
-//                    for (IdentityLink identityLink : linksForTask) {
-//                        if ("candidate".equals(identityLink.getType())) {
-//                            if (StringUtils.isNotBlank(identityLink.getUserId())) {
-//                                SysUser sysUser = sysUserService.selectUserById(Long.parseLong(identityLink.getUserId()));
-//                                stringBuilder.append(sysUser.getNickName()).append(",");
-//                            }
-//                            if (StringUtils.isNotBlank(identityLink.getGroupId())) {
-//                                SysRole sysRole = sysRoleService.selectRoleById(Long.parseLong(identityLink.getGroupId()));
-//                                stringBuilder.append(sysRole.getRoleName()).append(",");
-//                            }
-//                        }
-//                    }
-//                    flowTask.setCandidate(stringBuilder.substring(0, stringBuilder.length() - 1));
-//                }
-            } else {
-                List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
-                flowTask.setTaskId(historicTaskInstance.get(0).getId());
-            }
+            // 当前所处流程 todo: 本地启动放开以下注释
+//            List<Task> taskList = taskService.createTaskQuery().processInstanceId(hisIns.getId()).list();
+//            if (CollectionUtils.isNotEmpty(taskList)) {
+//                flowTask.setTaskId(taskList.get(0).getId());
+//            } else {
+//                List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
+//                flowTask.setTaskId(historicTaskInstance.get(0).getId());
+//            }
             flowList.add(flowTask);
         }
         page.setRecords(flowList);
