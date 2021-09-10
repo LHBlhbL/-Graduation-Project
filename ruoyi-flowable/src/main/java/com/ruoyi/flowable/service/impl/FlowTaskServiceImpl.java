@@ -36,6 +36,7 @@ import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.ProcessEngineConfiguration;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
@@ -412,12 +413,12 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
     public AjaxResult myProcess(Integer pageNum, Integer pageSize) {
         Page<FlowTaskDto> page = new Page<>();
         Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
-        List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery()
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery()
                 .startedBy(userId.toString())
                 .orderByProcessInstanceStartTime()
-                .desc()
-                .listPage(pageNum - 1, pageSize);
-        page.setTotal(historicProcessInstances.size());
+                .desc();
+        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.listPage(pageNum - 1, pageSize);
+        page.setTotal(historicProcessInstanceQuery.count());
         List<FlowTaskDto> flowList = new ArrayList<>();
         for (HistoricProcessInstance hisIns : historicProcessInstances) {
             FlowTaskDto flowTask = new FlowTaskDto();
