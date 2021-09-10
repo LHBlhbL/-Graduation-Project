@@ -194,11 +194,41 @@
     </el-dialog>
 
     <!--挂载表单-->
-    <el-dialog :title="formDeployTitle" :visible.sync="formDeployOpen" width="30%" append-to-body>
-      <el-select v-model="formDeployParam.formId" placeholder="请选择表单">
-        <el-option v-for="form in formList" :label="form.formName" :value="form.formId"/>
-      </el-select>
-      <el-button type="primary" @click="submitFormDeploy">确 定</el-button>
+    <el-dialog :title="formDeployTitle" :visible.sync="formDeployOpen" width="60%" append-to-body>
+      <el-row :gutter="24">
+        <el-col :span="10" :xs="24">
+          <el-table
+            ref="singleTable"
+            :data="formList"
+            border
+            highlight-current-row
+            @current-change="handleCurrentChange"
+            style="width: 100%">
+            <el-table-column label="表单编号" align="center" prop="formId" />
+            <el-table-column label="表单名称" align="center" prop="formName" />
+            <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+              <template slot-scope="scope">
+                <el-button size="mini" type="text" @click="submitFormDeploy(scope.row)">确定</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <pagination
+            small
+            layout="prev, pager, next"
+            v-show="formTotal>0"
+            :total="formTotal"
+            :page.sync="formQueryParams.pageNum"
+            :limit.sync="formQueryParams.pageSize"
+            @pagination="ListFormDeploy"
+          />
+        </el-col>
+        <el-col :span="14" :xs="24">
+          <div v-if="currentRow">
+            <parser :key="new Date().getTime()" :form-conf="currentRow" />
+          </div>
+        </el-col>
+      </el-row>
     </el-dialog>
   </div>
 </template>
@@ -240,7 +270,8 @@ export default {
       formTitle: "",
       formDeployOpen: false,
       formDeployTitle: "",
-      formList: null,
+      formList: [],
+      formTotal:0,
       formConf: {}, // 默认表单数据
       readImage:{
         open: false,
@@ -275,11 +306,16 @@ export default {
         parentDeploymentId: null,
         engineVersion: null
       },
-      formDeployParam:{
-        formId: 0,
-        deployId: null
-
+      formQueryParams:{
+        pageNum: 1,
+        pageSize: 10,
       },
+      // 挂载表单到流程实例
+      formDeployParam:{
+        formId: null,
+        deployId: null
+      },
+      currentRow: null,
       // xml
       xmlData:"",
       // 表单参数
@@ -376,12 +412,13 @@ export default {
     /** 挂载表单弹框 */
     handleAddForm(row){
       this.formDeployParam.deployId = row.deploymentId
-      const queryParams = {
-            pageNum: 1,
-            pageSize: 10
-         }
-      listForm(queryParams).then(res =>{
+      this.ListFormDeploy()
+    },
+    /** 挂载表单列表 */
+    ListFormDeploy(){
+      listForm(this.formQueryParams).then(res =>{
         this.formList = res.rows;
+        this.formTotal = res.total;
         this.formDeployOpen = true;
         this.formDeployTitle = "挂载表单";
       })
@@ -400,12 +437,18 @@ export default {
     //   })
     // },
     /** 挂载表单 */
-    submitFormDeploy(){
+    submitFormDeploy(row){
+      this.formDeployParam.formId = row.formId;
       addDeployForm(this.formDeployParam).then(res =>{
         this.msgSuccess(res.msg);
         this.formDeployOpen = false;
         this.getList();
       })
+    },
+    handleCurrentChange(data) {
+      if (data) {
+        this.currentRow = JSON.parse(data.formContent);
+      }
     },
     /** 挂起/激活流程 */
     handleUpdateSuspensionState(row){

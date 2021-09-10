@@ -228,7 +228,7 @@ export default {
       this.loading = true;
       myProcessList(this.queryParams).then(response => {
         this.myProcessList = response.data.records;
-        this.processTotal = response.data.total;
+        this.total = response.data.total;
         this.loading = false;
       });
     },
