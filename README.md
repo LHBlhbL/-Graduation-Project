@@ -2,6 +2,8 @@
 
 基RuoYi-vue 4.x + flowable 6.5 的工作流管理 ~
 
+记得右上角点个 star 持续关注更新哟~~
+
 一直想学习和入门flowable, 期间大量面向百度编程解决了很多问题, 感谢 [flowable初级使用手册](https://www.shangmayuan.com/a/538a0b230dbe4798b273305b.html)
 ,零基础学习很值得一看。最后感谢 [若依框架](https://gitee.com/y_project/RuoYi-Vue) ,快速集成开发爽到飞起 ~~~
 

@@ -160,7 +160,6 @@ export default {
         this.adjustPalette()
         this.fitViewport()
         if (this.taskList !==undefined && this.taskList.length > 0 ) {
-          debugger
           this.fillColor()
         }
       } catch (err) {
@@ -256,8 +255,8 @@ export default {
 
             })
           }
-          
-        } 
+
+        }
         // 并行网关
         else if (n.$type === 'bpmn:ParallelGateway') {
           if (completeTask) {
