@@ -72,7 +72,7 @@
 
     <el-table v-loading="loading" :data="myProcessList" border @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="流程编号" width="300" align="center" prop="procInsId"/>
+      <el-table-column label="流程编号" align="center" prop="procInsId" :show-overflow-tooltip="true"/>
       <el-table-column label="流程名称" align="center" prop="procDefName" />
       <el-table-column label="流程类别" align="center" prop="category" width="100px" />
       <el-table-column label="流程版本" align="center" width="80px">
@@ -152,7 +152,7 @@
         :total="processTotal"
         :page.sync="queryParams.pageNum"
         :limit.sync="queryParams.pageSize"
-        @pagination="getList"
+        @pagination="listDefinition"
       />
     </el-dialog>
 
@@ -273,6 +273,9 @@ export default {
     handleAdd() {
       this.open = true;
       this.title = "发起流程";
+      this.listDefinition();
+    },
+    listDefinition(){
       listDefinition(this.queryParams).then(response => {
         this.definitionList = response.data.records;
         this.processTotal = response.data.total;

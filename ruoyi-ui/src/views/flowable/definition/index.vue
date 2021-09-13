@@ -69,8 +69,8 @@
 
     <el-table v-loading="loading" fit :data="definitionList" border   @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="流程编号" width="300" align="center" prop="deploymentId" />
-      <el-table-column label="流程标识" align="center" prop="key" />
+      <el-table-column label="流程编号" align="center" prop="deploymentId" :show-overflow-tooltip="true"/>
+      <el-table-column label="流程标识" align="center" prop="key" :show-overflow-tooltip="true" />
       <el-table-column label="流程分类" align="center" prop="category" />
       <el-table-column label="流程名称(流程图)" align="center">
         <template slot-scope="scope">
