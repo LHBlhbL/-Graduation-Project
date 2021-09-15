@@ -17,7 +17,7 @@
 <!--                <el-button  icon="el-icon-edit-outline" type="primary" size="mini" @click="handleAssign">转办</el-button>-->
 <!--                <el-button  icon="el-icon-edit-outline" type="primary" size="mini" @click="handleDelegate">签收</el-button>-->
             <el-button  icon="el-icon-refresh-left" type="warning" size="mini" @click="handleReturn">退回</el-button>
-<!--            <el-button  icon="el-icon-circle-close" type="danger" size="mini" @click="handleReject">驳回</el-button>-->
+            <el-button  icon="el-icon-circle-close" type="danger" size="mini" @click="handleReject">驳回</el-button>
           </div>
      </el-col>
 
@@ -130,23 +130,36 @@
 
     <!--退回流程-->
     <el-dialog :title="returnTitle" :visible.sync="returnOpen" width="40%" append-to-body>
-      <el-form ref="taskForm" :model="taskForm" label-width="80px" >
-          <el-form-item label="退回节点" prop="targetKey">
-            <el-radio-group v-model="taskForm.targetKey">
-              <el-radio-button
-                v-for="item in returnTaskList"
-                :key="item.id"
-                :label="item.id"
-              >{{item.name}}</el-radio-button>
-            </el-radio-group>
+        <el-form ref="taskForm" :model="taskForm" label-width="80px" >
+            <el-form-item label="退回节点" prop="targetKey">
+              <el-radio-group v-model="taskForm.targetKey">
+                <el-radio-button
+                  v-for="item in returnTaskList"
+                  :key="item.id"
+                  :label="item.id"
+                >{{item.name}}</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+          <el-form-item label="退回意见" prop="comment" :rules="[{ required: true, message: '请输入意见', trigger: 'blur' }]">
+            <el-input style="width: 50%" type="textarea" v-model="taskForm.comment" placeholder="请输入意见"/>
           </el-form-item>
-        <el-form-item label="审批意见" prop="comment" :rules="[{ required: true, message: '请输入意见', trigger: 'blur' }]">
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="returnOpen = false">取 消</el-button>
+            <el-button type="primary" @click="taskReturn">确 定</el-button>
+        </span>
+    </el-dialog>
+
+    <!--驳回流程-->
+    <el-dialog :title="rejectTitle" :visible.sync="rejectOpen" width="40%" append-to-body>
+      <el-form ref="taskForm" :model="taskForm" label-width="80px" >
+        <el-form-item label="驳回意见" prop="comment" :rules="[{ required: true, message: '请输入意见', trigger: 'blur' }]">
           <el-input style="width: 50%" type="textarea" v-model="taskForm.comment" placeholder="请输入意见"/>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-          <el-button @click="returnOpen = false">取 消</el-button>
-          <el-button type="primary" @click="taskReturn">确 定</el-button>
+          <el-button @click="rejectOpen = false">取 消</el-button>
+          <el-button type="primary" @click="taskReject">确 定</el-button>
         </span>
     </el-dialog>
   </div>
@@ -225,6 +238,8 @@ export default {
       completeOpen: false,
       returnTitle: null,
       returnOpen: false,
+      rejectOpen: false,
+      rejectTitle: null,
       userData:[],
     };
   },
@@ -477,6 +492,11 @@ export default {
     },
     /** 驳回任务 */
     handleReject() {
+      this.rejectOpen = true;
+      this.rejectTitle = "驳回流程";
+    },
+    /** 驳回任务 */
+    taskReject() {
       this.$refs["taskForm"].validate(valid => {
         if (valid) {
           rejectTask(this.taskForm).then(res => {
