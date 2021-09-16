@@ -35,17 +35,6 @@
           v-hasPermi="['system:deployment:add']"
         >新增流程</el-button>
       </el-col>
-<!--      <el-col :span="1.5">-->
-<!--        <el-button-->
-<!--          type="success"-->
-<!--          plain-->
-<!--          icon="el-icon-edit"-->
-<!--          size="mini"-->
-<!--          :disabled="single"-->
-<!--          @click="handleUpdate"-->
-<!--          v-hasPermi="['system:deployment:edit']"-->
-<!--        >修改</el-button>-->
-<!--      </el-col>-->
       <el-col :span="1.5">
         <el-button
           type="danger"
@@ -73,7 +62,7 @@
     <el-table v-loading="loading" :data="myProcessList" border @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="流程编号" align="center" prop="procInsId" :show-overflow-tooltip="true"/>
-      <el-table-column label="流程名称" align="center" prop="procDefName" />
+      <el-table-column label="流程名称" align="center" prop="procDefName" :show-overflow-tooltip="true"/>
       <el-table-column label="流程类别" align="center" prop="category" width="100px" />
       <el-table-column label="流程版本" align="center" width="80px">
         <template slot-scope="scope">
@@ -125,10 +114,9 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改流程定义对话框 -->
+    <!-- 发起流程 -->
     <el-dialog :title="title" :visible.sync="open" width="60%" append-to-body>
       <el-table v-loading="processLoading" fit :data="definitionList" border >
-        <el-table-column label="流程编号" width="300" align="center" prop="deploymentId" />
         <el-table-column label="流程名称" align="center" prop="name" />
         <el-table-column label="流程版本" align="center">
           <template slot-scope="scope">

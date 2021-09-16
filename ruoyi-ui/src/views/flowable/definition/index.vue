@@ -72,14 +72,14 @@
       <el-table-column label="流程编号" align="center" prop="deploymentId" :show-overflow-tooltip="true"/>
       <el-table-column label="流程标识" align="center" prop="key" :show-overflow-tooltip="true" />
       <el-table-column label="流程分类" align="center" prop="category" />
-      <el-table-column label="流程名称(流程图)" align="center">
+      <el-table-column label="流程名称" align="center" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           <el-button type="text" @click="handleReadImage(scope.row.deploymentId)">
             <span>{{ scope.row.name }}</span>
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="挂载表单" align="center">
+      <el-table-column label="业务表单" align="center" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           <el-button v-if="scope.row.formId" type="text" @click="handleForm(scope.row.formId)">
             <span>{{ scope.row.formName }}</span>
