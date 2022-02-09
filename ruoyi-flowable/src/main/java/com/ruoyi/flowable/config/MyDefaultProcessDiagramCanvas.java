@@ -1,6 +1,5 @@
 package com.ruoyi.flowable.config;
 
-import com.sun.prism.paint.Color;
 import org.flowable.bpmn.model.AssociationDirection;
 import org.flowable.image.impl.DefaultProcessDiagramCanvas;
 
