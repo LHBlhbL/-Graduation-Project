@@ -65,10 +65,10 @@ export default {
       codeUrl: "",
       cookiePassword: "",
       loginForm: {
-        username: "tony",
+        username: "tony1",
         password: "123456",
         rememberMe: false,
-        code: "",
+        code: "1",
         uuid: ""
       },
       loginRules: {
