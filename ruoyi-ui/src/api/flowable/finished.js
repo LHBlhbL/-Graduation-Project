@@ -65,8 +65,8 @@ export function updateDeployment(data) {
 // 删除流程定义
 export function delDeployment(id) {
   return request({
-    url: '/system/deployment/' + id,
-    method: 'delete'
+    url: '/system/deployment/delete/' + id,
+    method: 'get'
   })
 }
 

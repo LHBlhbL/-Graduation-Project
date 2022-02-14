@@ -97,8 +97,11 @@
               <el-dropdown-item icon="el-icon-circle-close" @click.native="handleStop(scope.row)">
                 取消申请
               </el-dropdown-item>
-              <el-dropdown-item icon="el-icon-delete" @click.native="handleDelete(scope.row)" v-hasPermi="['system:deployment:remove']">
+              <el-dropdown-item icon="el-icon-delete" @click.native="handleDelete(scope.row)"  v-hasPermi="['system:procinst:remove']">
                 删除
+              </el-dropdown-item>
+              <el-dropdown-item icon="el-icon-download" @click.native="handleExport()"  v-hasPermi="['system:procinst:export']" >
+                导出
               </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
@@ -158,6 +161,7 @@ import {
 } from "@/api/flowable/finished";
 import { myProcessList,stopProcess } from "@/api/flowable/process";
 import {listDefinition} from "@/api/flowable/definition";
+import {delProcinst,exportProcinst} from "@/api/system/procinst";
 export default {
   name: "Deploy",
   components: {
@@ -332,13 +336,13 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$confirm('是否确认删除流程定义编号为"' + ids + '"的数据项?', "警告", {
+      const ids = row.procInsId ;
+      this.$confirm('是否确认删除编号为"' + ids + '"的数据项?', "警告", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       }).then(function() {
-        return delDeployment(ids);
+        return delProcinst(ids);
       }).then(() => {
         this.getList();
         this.msgSuccess("删除成功");
@@ -347,12 +351,12 @@ export default {
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$confirm('是否确认导出所有流程定义数据项?', "警告", {
+      this.$confirm('是否确认导出数据项?', "警告", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       }).then(function() {
-        return exportDeployment(queryParams);
+        return exportProcinst(queryParams);
       }).then(response => {
         this.download(response.msg);
       })
