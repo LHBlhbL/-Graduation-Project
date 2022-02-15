@@ -100,9 +100,6 @@
               <el-dropdown-item icon="el-icon-delete" @click.native="handleDelete(scope.row)"  v-hasPermi="['system:procinst:remove']">
                 删除
               </el-dropdown-item>
-              <el-dropdown-item icon="el-icon-download" @click.native="handleExport()"  v-hasPermi="['system:procinst:export']" >
-                导出
-              </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </template>

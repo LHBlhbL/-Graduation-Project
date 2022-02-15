@@ -444,13 +444,13 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             flowTask.setCategory(pd.getCategory());
             flowTask.setProcDefVersion(pd.getVersion());
             // 当前所处流程 todo: 本地启动放开以下注释
-//            List<Task> taskList = taskService.createTaskQuery().processInstanceId(hisIns.getId()).list();
-//            if (CollectionUtils.isNotEmpty(taskList)) {
-//                flowTask.setTaskId(taskList.get(0).getId());
-//            } else {
-//                List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
-//                flowTask.setTaskId(historicTaskInstance.get(0).getId());
-//            }
+            List<Task> taskList = taskService.createTaskQuery().processInstanceId(hisIns.getId()).list();
+            if (CollectionUtils.isNotEmpty(taskList)) {
+                flowTask.setTaskId(taskList.get(0).getId());
+            } else {
+                List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
+                flowTask.setTaskId(historicTaskInstance.get(0).getId());
+            }
             flowList.add(flowTask);
         }
         page.setRecords(flowList);

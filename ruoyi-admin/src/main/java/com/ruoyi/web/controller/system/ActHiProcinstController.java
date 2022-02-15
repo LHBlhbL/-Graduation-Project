@@ -98,7 +98,6 @@ public class ActHiProcinstController extends BaseController
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
-        System.out.println(ids+"}}}}}}}}}}}");
         return toAjax(actHiProcinstService.deleteActHiProcinstByIds(ids));
     }
 }
