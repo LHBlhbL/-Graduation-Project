@@ -4,6 +4,8 @@ package com.ruoyi.flowable.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
+import com.ruoyi.common.core.domain.model.LoginUser;
+import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.flowable.common.constant.ProcessConstants;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysRole;
@@ -22,6 +24,7 @@ import com.ruoyi.flowable.flow.FindNextNodeUtil;
 import com.ruoyi.flowable.flow.FlowableUtils;
 import com.ruoyi.flowable.service.IFlowTaskService;
 import com.ruoyi.flowable.service.ISysDeployFormService;
+import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.domain.SysForm;
 import com.ruoyi.system.service.ISysRoleService;
 import com.ruoyi.system.service.ISysUserService;
@@ -48,6 +51,7 @@ import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,6 +76,9 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
 
     @Resource
     private ISysRoleService sysRoleService;
+
+    @Autowired
+    private TokenService tokenService;
 
 
     @Resource
@@ -560,6 +567,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
      * @param pageSize 每页条数
      * @return
      */
+    //im old eight i can eat small hamburger do you want to eat one
     @Override
     public AjaxResult todoList(Integer pageNum, Integer pageSize) {
         Page<FlowTaskDto> page = new Page<>();
@@ -572,6 +580,9 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         page.setTotal(taskQuery.count());
         List<Task> taskList = taskQuery.listPage(pageNum - 1, pageSize);
         List<FlowTaskDto> flowList = new ArrayList<>();
+        LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+        SysUser user = loginUser.getUser();
+        Long userId1 = user.getUserId();
         for (Task task : taskList) {
             FlowTaskDto flowTask = new FlowTaskDto();
             // 当前流程信息
@@ -580,6 +591,15 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             flowTask.setCreateTime(task.getCreateTime());
             flowTask.setProcDefId(task.getProcessDefinitionId());
             flowTask.setTaskName(task.getName());
+            String assignee = task.getAssignee();
+
+            if(assignee != null)
+            {
+                if(!assignee.equals(userId1.toString()))
+                    continue;
+            }
+
+
             // 流程定义信息
             ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
                     .processDefinitionId(task.getProcessDefinitionId())
@@ -598,7 +618,6 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
                 break;
             System.out.println(historicProcessInstance);
 
-            System.out.println(Long.parseLong(historicProcessInstance.getStartUserId())+"testLHB");
             SysUser startUser = sysUserService.selectUserById(Long.parseLong(historicProcessInstance.getStartUserId()));
 //            SysUser startUser = sysUserService.selectUserById(Long.parseLong(task.getAssignee()));
             flowTask.setStartUserId(startUser.getNickName());
@@ -737,12 +756,12 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             }
             map.put("flowList", hisFlowList);
 //            // 查询当前任务是否完成
-//            List<Task> taskList = taskService.createTaskQuery().processInstanceId(procInsId).list();
-//            if (CollectionUtils.isNotEmpty(taskList)) {
-//                map.put("finished", true);
-//            } else {
-//                map.put("finished", false);
-//            }
+            List<Task> taskList = taskService.createTaskQuery().processInstanceId(procInsId).list();
+            if (CollectionUtils.isNotEmpty(taskList)) {
+                map.put("finished", true);
+            } else {
+                map.put("finished", false);
+            }
         }
         // 第一次申请获取初始化表单
         if (StringUtils.isNotBlank(deployId)) {
