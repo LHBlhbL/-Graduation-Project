@@ -1,19 +1,20 @@
 <template>
   <div class="app-container">
+
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="${comment}" prop="deptId">
+      <el-form-item label="项目编号" prop="deptId">
         <el-input
           v-model="queryParams.deptId"
-          placeholder="请输入${comment}"
+          placeholder="请输入项目编号"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="${comment}" prop="projectName">
+      <el-form-item label="项目名称" prop="projectName">
         <el-input
           v-model="queryParams.projectName"
-          placeholder="请输入${comment}"
+          placeholder="请输入项目名称"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
@@ -116,20 +117,20 @@
     <!-- 添加或修改【请填写功能名称】对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="${comment}" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入${comment}"/>
+        <el-form-item label="项目名称" prop="projectName">
+          <el-input v-model="form.projectName" placeholder="请输入项目名称"/>
         </el-form-item>
-        <el-form-item label="${comment}" prop="projectName">
-          <el-input v-model="form.projectName" placeholder="请输入${comment}"/>
+        <el-form-item label="所属部门" prop="deptId">
+          <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" @input="insertPrincipals" placeholder="请选择所属部门" />
         </el-form-item>
-        <el-form-item label="${comment}" prop="projectPrincipal">
-          <el-input v-model="form.projectPrincipal" placeholder="请输入${comment}"/>
+        <el-form-item label="负责人" prop="projectPrincipal">
+          <treeselect v-model="form.projectPrincipal" :options="principalOptions"  :show-count="true" placeholder="请输入项目负责人"/>
         </el-form-item>
-        <el-form-item label="${comment}" prop="expensesTotal">
-          <el-input v-model="form.expensesTotal" placeholder="请输入${comment}"/>
+        <el-form-item label="项目经费" prop="expensesTotal">
+          <el-input v-model="form.expensesTotal" placeholder="请输入项目经费"/>
         </el-form-item>
-        <el-form-item label="${comment}" prop="expensesLeft">
-          <el-input v-model="form.expensesLeft" placeholder="请输入${comment}"/>
+        <el-form-item label="经费剩余" prop="expensesLeft">
+          <el-input v-model="form.expensesLeft" placeholder="请输入项目剩余经费"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -142,10 +143,13 @@
 
 <script>
 import {listProject, getProject, delProject, addProject, updateProject, exportProject} from "@/api/system/project";
+import { treeselect } from "@/api/system/dept";
+import Treeselect from "@riophae/vue-treeselect";
+import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 
 export default {
   name: "Project",
-  components: {},
+  components: {Treeselect},
   data() {
     return {
       // 遮罩层
@@ -162,6 +166,9 @@ export default {
       total: 0,
       // 【请填写功能名称】表格数据
       projectList: [],
+      // 部门树选项
+      deptOptions: undefined,
+      principalOptions: undefined,
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -174,7 +181,7 @@ export default {
         projectName: null,
         projectPrincipal: null,
         expensesTotal: null,
-        expensesLeft: null
+        expensesLeft: null,
       },
       // 表单参数
       form: {},
@@ -184,6 +191,7 @@ export default {
   },
   created() {
     this.getList();
+    this.getTreeselect();
   },
   methods: {
     /** 查询【请填写功能名称】列表 */
@@ -193,6 +201,16 @@ export default {
         this.projectList = response.rows;
         this.total = response.total;
         this.loading = false;
+      });
+    },
+    insertPrincipals(){
+      alert("12");
+    },
+
+    /** 查询部门下拉树结构 */
+    getTreeselect() {
+      treeselect().then(response => {
+        this.deptOptions = response.data;
       });
     },
     // 取消按钮
@@ -206,12 +224,9 @@ export default {
         projectId: null,
         deptId: null,
         projectName: null,
-
         projectPrincipal: null,
-
         expensesTotal: null,
-
-        expensesLeft: null
+        expensesLeft: null,
       };
       this.resetForm("form");
     },
@@ -234,8 +249,9 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
+      this.getTreeselect();
       this.open = true;
-      this.title = "添加【请填写功能名称】";
+      this.title = "添加项目";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -244,7 +260,7 @@ export default {
       getProject(projectId).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改【请填写功能名称】";
+        this.title = "修改项目";
       });
     },
     /** 提交按钮 */
