@@ -51,3 +51,10 @@ export function exportProject(query) {
     params: query
   })
 }
+
+export function userTreeselect(deptId) {
+  return request({
+    url: '/system/project/userTreeselect/'+deptId,
+    method: 'get'
+  })
+}

@@ -121,7 +121,7 @@
           <el-input v-model="form.projectName" placeholder="请输入项目名称"/>
         </el-form-item>
         <el-form-item label="所属部门" prop="deptId">
-          <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" @input="insertPrincipals" placeholder="请选择所属部门" />
+          <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" @input="updatePrincipals" placeholder="请选择所属部门" />
         </el-form-item>
         <el-form-item label="负责人" prop="projectPrincipal">
           <treeselect v-model="form.projectPrincipal" :options="principalOptions"  :show-count="true" placeholder="请输入项目负责人"/>
@@ -142,7 +142,7 @@
 </template>
 
 <script>
-import {listProject, getProject, delProject, addProject, updateProject, exportProject} from "@/api/system/project";
+import {listProject, getProject, delProject,userTreeselect, addProject, updateProject, exportProject} from "@/api/system/project";
 import { treeselect } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
@@ -167,8 +167,12 @@ export default {
       // 【请填写功能名称】表格数据
       projectList: [],
       // 部门树选项
+      // 查询参数
+      queryParam: {
+        deptId: undefined
+      },
       deptOptions: undefined,
-      principalOptions: undefined,
+      principalOptions: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -203,8 +207,14 @@ export default {
         this.loading = false;
       });
     },
-    insertPrincipals(){
-      alert("12");
+    updatePrincipals(){
+     this.getPrincipals();
+    },
+    getPrincipals(){
+      userTreeselect(this.form.deptId).then(response => {
+          this.principalOptions=response.data;
+        }
+      );
     },
 
     /** 查询部门下拉树结构 */

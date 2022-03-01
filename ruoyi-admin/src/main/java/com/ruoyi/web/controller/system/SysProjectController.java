@@ -101,4 +101,10 @@ public class SysProjectController extends BaseController
     {
         return toAjax(sysProjectService.deleteSysProjectByIds(projectIds));
     }
+
+    @GetMapping(value = "/userTreeselect/{deptId}")
+    public AjaxResult userTreeselect(@PathVariable("deptId")Long deptId)
+    {
+        return AjaxResult.success(sysProjectService.buildUserTree(deptId));
+    }
 }

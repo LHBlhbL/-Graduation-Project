@@ -73,6 +73,7 @@ public class SysDeptServiceImpl implements ISysDeptService
         {
             returnList = depts;
         }
+        System.out.println(returnList);
         return returnList;
     }
 

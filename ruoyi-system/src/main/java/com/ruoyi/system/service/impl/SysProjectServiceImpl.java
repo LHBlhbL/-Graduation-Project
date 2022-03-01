@@ -1,8 +1,13 @@
 package com.ruoyi.system.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.ruoyi.common.core.domain.TreeSelect;
+import com.ruoyi.common.core.domain.entity.SysDeptUser;
 import com.ruoyi.system.domain.SysProject;
+import com.ruoyi.system.mapper.SysUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.SysProjectMapper;
@@ -19,6 +24,9 @@ public class SysProjectServiceImpl implements ISysProjectService
 {
     @Autowired
     private SysProjectMapper sysProjectMapper;
+
+    @Autowired
+    private SysUserMapper sysUserMapper;
 
     /**
      * 查询【请填写功能名称】
@@ -90,5 +98,12 @@ public class SysProjectServiceImpl implements ISysProjectService
     public int deleteSysProjectById(Long projectId)
     {
         return sysProjectMapper.deleteSysProjectById(projectId);
+    }
+
+    @Override
+    public List<TreeSelect> buildUserTree(Long deptId) {
+        List<SysDeptUser> returnList = new ArrayList<>();
+        returnList = sysUserMapper.getNameByDept(deptId);
+        return returnList.stream().map(TreeSelect::new).collect(Collectors.toList());
     }
 }

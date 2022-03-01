@@ -1,5 +1,7 @@
 package com.ruoyi.system.service;
 
+import com.ruoyi.common.core.domain.TreeSelect;
+import com.ruoyi.common.core.domain.entity.SysDeptUser;
 import com.ruoyi.system.domain.SysProject;
 
 import java.util.List;
@@ -59,4 +61,6 @@ public interface ISysProjectService
      * @return 结果
      */
     public int deleteSysProjectById(Long projectId);
+
+    public List<TreeSelect> buildUserTree(Long deptId);
 }
