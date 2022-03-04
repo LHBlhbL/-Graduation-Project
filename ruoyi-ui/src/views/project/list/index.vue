@@ -1,10 +1,9 @@
 <template>
   <div class="app-container">
-
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="项目编号" prop="deptId">
+      <el-form-item label="项目编号" prop="projectId">
         <el-input
-          v-model="queryParams.deptId"
+          v-model="queryParams.projectId"
           placeholder="请输入项目编号"
           clearable
           size="small"
@@ -20,6 +19,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -35,55 +35,32 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['system:project:add']"
-        >新增
-        </el-button>
+        >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:project:edit']"
-        >修改
-        </el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:project:remove']"
-        >删除
-        </el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:project:export']"
-        >导出
-        </el-button>
-      </el-col>
+
+
+
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center"/>
-      <el-table-column label="项目编号" align="center" prop="projectId"/>
-      <el-table-column label="项目名称" align="center" prop="projectName"/>
-      <el-table-column label="项目所属部门" align="center" prop="deptId"/>
-      <el-table-column label="项目负责人" align="center" prop="projectPrincipal"/>
-      <el-table-column label="项目经费" align="center" prop="expensesTotal"/>
-      <el-table-column label="项目剩余经费" align="center" prop="expensesLeft"/>
+      <el-table-column type="selection" width="55" align="center" />
+      <el-table-column label="项目编号" align="center" prop="projectId" />
+      <el-table-column label="项目部门" align="center" prop="dept.deptName" />
+      <el-table-column label="项目名称" align="center" prop="projectName" />
+      <el-table-column label="项目负责人" align="center" prop="projectPrincipal" />
+      <el-table-column label="项目经费" align="center" prop="expensesTotal" />
+      <el-table-column label="剩余经费" align="center" prop="expensesLeft" />
+      <el-table-column label="状态" align="center" key="status" >
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.status"
+            active-value="0"
+            inactive-value="1"
+            @change="handleStatusChange(scope.row)"
+          ></el-switch>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -92,16 +69,14 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['system:project:edit']"
-          >修改
-          </el-button>
+          >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:project:remove']"
-          >删除
-          </el-button>
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -114,24 +89,35 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改【请填写功能名称】对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="项目名称" prop="projectName">
-          <el-input v-model="form.projectName" placeholder="请输入项目名称"/>
-        </el-form-item>
-        <el-form-item label="所属部门" prop="deptId">
+    <!-- 添加或修改项目对话框 -->
+    <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="120px">
+        <el-form-item label="项目所属部门" prop="deptId">
           <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" @input="updatePrincipals" placeholder="请选择所属部门" />
+        </el-form-item>
+        <el-form-item label="项目名称" prop="projectName">
+          <el-input v-model="form.projectName" placeholder="请输入项目名称" />
         </el-form-item>
         <el-form-item label="负责人" prop="projectPrincipal">
           <treeselect v-model="form.projectPrincipal" :options="principalOptions"  :show-count="true" placeholder="请输入项目负责人"/>
         </el-form-item>
         <el-form-item label="项目经费" prop="expensesTotal">
-          <el-input v-model="form.expensesTotal" placeholder="请输入项目经费"/>
+          <el-input v-model="form.expensesTotal" placeholder="请输入项目经费" />
         </el-form-item>
-        <el-form-item label="经费剩余" prop="expensesLeft">
-          <el-input v-model="form.expensesLeft" placeholder="请输入项目剩余经费"/>
-        </el-form-item>
+        <el-col :span="12">
+          <el-form-item label="状态">
+            <el-radio-group v-model="form.status">
+              <el-radio
+                v-for="dict in statusOptions"
+                :key="dict.dictValue"
+                :label="dict.dictValue"
+              >{{dict.dictLabel}}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-col>
+<!--        <el-form-item label="${comment}" prop="expensesLeft">-->
+<!--          <el-input v-model="form.expensesLeft" placeholder="请输入${comment}" />-->
+<!--        </el-form-item>-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -142,14 +128,14 @@
 </template>
 
 <script>
-import {listProject, getProject, delProject,userTreeselect, addProject, updateProject, exportProject} from "@/api/system/project";
+import { listProject, getProject, delProject, addProject, updateProject, exportProject,userTreeselect } from "@/api/project/list";
 import { treeselect } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
-
 export default {
   name: "Project",
-  components: {Treeselect},
+  components: {Treeselect
+  },
   data() {
     return {
       // 遮罩层
@@ -166,13 +152,8 @@ export default {
       total: 0,
       // 【请填写功能名称】表格数据
       projectList: [],
-      // 部门树选项
-      // 查询参数
-      queryParam: {
-        deptId: undefined
-      },
       deptOptions: undefined,
-      principalOptions: [],
+      principalOptions: undefined,
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -186,16 +167,25 @@ export default {
         projectPrincipal: null,
         expensesTotal: null,
         expensesLeft: null,
+        status:null
       },
       // 表单参数
       form: {},
       // 表单校验
-      rules: {}
+      rules: {
+        expensesTotal:[{
+          pattern: /^0{1}(\.\d*)|(^[1-9][0-9]*)+(\.\d*)?$/,
+          message: "请输入正确金额",
+          trigger: "blur"
+        }]
+      }
     };
   },
   created() {
     this.getList();
-    this.getTreeselect();
+    this.getDicts("sys_normal_disable").then(response => {
+      this.statusOptions = response.data;
+    });
   },
   methods: {
     /** 查询【请填写功能名称】列表 */
@@ -207,29 +197,24 @@ export default {
         this.loading = false;
       });
     },
-    updatePrincipals(){
-     this.getPrincipals();
-    },
-    getPrincipals(){
-      if(this.form.deptId!=null){
-        userTreeselect(this.form.deptId).then(response => {
-            this.principalOptions=response.data;
-          }
-        );
-      }
-
-    },
-
-    /** 查询部门下拉树结构 */
-    getTreeselect() {
-      treeselect().then(response => {
-        this.deptOptions = response.data;
-      });
-    },
     // 取消按钮
     cancel() {
       this.open = false;
       this.reset();
+    },
+    handleStatusChange(row) {
+      let text = row.status === "0" ? "启用" : "停用";
+      this.$confirm('确认要"' + text + '""' + row.projectName + '"项目吗?', "警告", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(function() {
+        return changeUserStatus(row.projectId, row.status);
+      }).then(() => {
+        this.msgSuccess(text + "成功");
+      }).catch(function() {
+        row.status = row.status === "0" ? "1" : "0";
+      });
     },
     // 表单重置
     reset() {
@@ -240,6 +225,7 @@ export default {
         projectPrincipal: null,
         expensesTotal: null,
         expensesLeft: null,
+        status:"0",
       };
       this.resetForm("form");
     },
@@ -253,18 +239,35 @@ export default {
       this.resetForm("queryForm");
       this.handleQuery();
     },
+    /** 查询部门下拉树结构 */
+    getTreeselect() {
+      treeselect().then(response => {
+        this.deptOptions = response.data;
+      });
+    },
+    updatePrincipals(){
+      this.getPrincipals();
+    },
+    getPrincipals(){
+      if(this.form.deptId!=null){
+        userTreeselect(this.form.deptId).then(response => {
+            this.principalOptions=response.data;
+          }
+        );
+      }
+    },
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.projectId)
-      this.single = selection.length !== 1
+      this.single = selection.length!==1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
-      this.getTreeselect();
       this.open = true;
       this.title = "添加项目";
+      this.getTreeselect();
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -273,7 +276,7 @@ export default {
       getProject(projectId).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改项目";
+        this.title = "修改【请填写功能名称】";
       });
     },
     /** 提交按钮 */
@@ -300,28 +303,28 @@ export default {
     handleDelete(row) {
       const projectIds = row.projectId || this.ids;
       this.$confirm('是否确认删除【请填写功能名称】编号为"' + projectIds + '"的数据项?', "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(function () {
-        return delProject(projectIds);
-      }).then(() => {
-        this.getList();
-        this.msgSuccess("删除成功");
-      })
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(function() {
+          return delProject(projectIds);
+        }).then(() => {
+          this.getList();
+          this.msgSuccess("删除成功");
+        })
     },
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
       this.$confirm('是否确认导出所有【请填写功能名称】数据项?', "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(function () {
-        return exportProject(queryParams);
-      }).then(response => {
-        this.download(response.msg);
-      })
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(function() {
+          return exportProject(queryParams);
+        }).then(response => {
+          this.download(response.msg);
+        })
     }
   }
 };

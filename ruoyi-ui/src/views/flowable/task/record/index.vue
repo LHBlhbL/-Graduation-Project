@@ -29,6 +29,8 @@
       </el-col>
     </el-card>
 
+
+
     <!--流程流转记录-->
     <el-card class="box-card" v-if="flowRecordList">
           <div slot="header" class="clearfix">
@@ -71,56 +73,6 @@
 
     <!--审批正常流程-->
     <el-dialog :title="completeTitle" :visible.sync="completeOpen" width="60%" append-to-body>
-<!--      <el-row :gutter="20">-->
-<!--        &lt;!&ndash;部门数据&ndash;&gt;-->
-<!--        <el-col :span="4" :xs="24">-->
-<!--          <h6>部门列表</h6>-->
-<!--          <div class="head-container">-->
-<!--            <el-input-->
-<!--              v-model="deptName"-->
-<!--              placeholder="请输入部门名称"-->
-<!--              clearable-->
-<!--              size="small"-->
-<!--              prefix-icon="el-icon-search"-->
-<!--              style="margin-bottom: 20px"-->
-<!--            />-->
-<!--          </div>-->
-<!--          <div class="head-container">-->
-<!--            <el-tree-->
-<!--              :data="deptOptions"-->
-<!--              :props="defaultProps"-->
-<!--              :expand-on-click-node="false"-->
-<!--              :filter-node-method="filterNode"-->
-<!--              ref="tree"-->
-<!--              default-expand-all-->
-<!--              @node-click="handleNodeClick"-->
-<!--            />-->
-<!--          </div>-->
-<!--        </el-col>-->
-<!--        <el-col :span="12" :xs="24">-->
-<!--          <h6>待选人员</h6>-->
-<!--          <el-table-->
-<!--            ref="singleTable"-->
-<!--            :data="userList"-->
-<!--            border-->
-<!--            style="width: 100%"-->
-<!--            @selection-change="handleSelectionChange">-->
-<!--            <el-table-column type="selection" width="50" align="center" />-->
-<!--            <el-table-column label="用户名" align="center" prop="nickName" />-->
-<!--            <el-table-column label="部门" align="center" prop="dept.deptName" />-->
-<!--          </el-table>-->
-<!--        </el-col>-->
-<!--        <el-col :span="8" :xs="24">-->
-<!--          <h6>已选人员</h6>-->
-<!--          <el-tag-->
-<!--            v-for="tag in userData"-->
-<!--            :key="tag.nickName"-->
-<!--            closable-->
-<!--            @close="handleClose(tag)">-->
-<!--            {{tag.nickName}} {{tag.dept.deptName}}-->
-<!--          </el-tag>-->
-<!--        </el-col>-->
-<!--      </el-row>-->
       <span slot="footer" class="dialog-footer">
         <el-input style="width: 50%;margin-right: 34%" type="textarea" v-model="taskForm.comment" placeholder="请输入处理意见"/>
         <el-button @click="completeOpen = false">取 消</el-button>

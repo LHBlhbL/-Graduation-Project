@@ -2,23 +2,31 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ruoyi.system.mapper.SysProjectMapper">
-
-    <resultMap type="SysProject" id="SysProjectResult">
+<mapper namespace="com.ruoyi.project.mapper.ProjectMapper">
+    
+    <resultMap type="Project" id="ProjectResult">
         <result property="projectId"    column="project_id"    />
         <result property="deptId"    column="dept_id"    />
         <result property="projectName"    column="project_name"    />
         <result property="projectPrincipal"    column="project_principal"    />
         <result property="expensesTotal"    column="expenses_total"    />
         <result property="expensesLeft"    column="expenses_left"    />
+        <result property="status" column="status"     />
+        <association property="dept"    column="dept_id" javaType="ProjectDept" resultMap="deptResult" />
     </resultMap>
 
-    <sql id="selectSysProjectVo">
-        select project_id, dept_id, project_name, project_principal, expenses_total, expenses_left from sys_project
+    <resultMap id="deptResult" type="ProjectDept">
+        <id     property="deptId"   column="dept_id"     />
+        <result property="deptName" column="dept_name"   />
+    </resultMap>
+
+    <sql id="selectProjectVo">
+        select project_id, dept_id, project_name, project_principal, expenses_total, expenses_left, status from project
     </sql>
 
-    <select id="selectSysProjectList" parameterType="SysProject" resultMap="SysProjectResult">
-        <include refid="selectSysProjectVo"/>
+    <select id="selectProjectList" parameterType="Project" resultMap="ProjectResult">
+        select p.project_id, p.dept_id, p.project_name, p.project_principal, p.expenses_total, p.expenses_left, d.dept_name from project p
+        left join sys_dept d on p.dept_id = d.dept_id
         <where>
             <if test="deptId != null "> and dept_id = #{deptId}</if>
             <if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
@@ -27,14 +35,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="expensesLeft != null "> and expenses_left = #{expensesLeft}</if>
         </where>
     </select>
-
-    <select id="selectSysProjectById" parameterType="Long" resultMap="SysProjectResult">
-        <include refid="selectSysProjectVo"/>
+    
+    <select id="selectProjectById" parameterType="Long" resultMap="ProjectResult">
+        <include refid="selectProjectVo"/>
         where project_id = #{projectId}
     </select>
-
-    <insert id="insertSysProject" parameterType="SysProject">
-        insert into sys_project
+        
+    <insert id="insertProject" parameterType="Project">
+        insert into project
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="projectId != null">project_id,</if>
             <if test="deptId != null">dept_id,</if>
@@ -42,6 +50,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="projectPrincipal != null">project_principal,</if>
             <if test="expensesTotal != null">expenses_total,</if>
             <if test="expensesLeft != null">expenses_left,</if>
+            <if test="status !=null">status,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="projectId != null">#{projectId},</if>
@@ -50,27 +59,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="projectPrincipal != null">#{projectPrincipal},</if>
             <if test="expensesTotal != null">#{expensesTotal},</if>
             <if test="expensesLeft != null">#{expensesLeft},</if>
+            <if test="status !=null">#{status},</if>
          </trim>
     </insert>
 
-    <update id="updateSysProject" parameterType="SysProject">
-        update sys_project
+    <update id="updateProject" parameterType="Project">
+        update project
         <trim prefix="SET" suffixOverrides=",">
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="projectName != null">project_name = #{projectName},</if>
             <if test="projectPrincipal != null">project_principal = #{projectPrincipal},</if>
             <if test="expensesTotal != null">expenses_total = #{expensesTotal},</if>
             <if test="expensesLeft != null">expenses_left = #{expensesLeft},</if>
+            <if test="status !=null">status = #{status},</if>
         </trim>
         where project_id = #{projectId}
     </update>
 
-    <delete id="deleteSysProjectById" parameterType="Long">
-        delete from sys_project where project_id = #{projectId}
+    <delete id="deleteProjectById" parameterType="Long">
+        delete from project where project_id = #{projectId}
     </delete>
 
-    <delete id="deleteSysProjectByIds" parameterType="String">
-        delete from sys_project where project_id in
+    <delete id="deleteProjectByIds" parameterType="String">
+        delete from project where project_id in 
         <foreach item="projectId" collection="array" open="(" separator="," close=")">
             #{projectId}
         </foreach>

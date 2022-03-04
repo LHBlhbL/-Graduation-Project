@@ -78,6 +78,11 @@
             <artifactId>ruoyi-flowable</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-project</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

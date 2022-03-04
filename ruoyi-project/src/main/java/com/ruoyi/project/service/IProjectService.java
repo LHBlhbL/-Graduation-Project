@@ -1,18 +1,18 @@
-package com.ruoyi.system.service;
-
-import com.ruoyi.common.core.domain.TreeSelect;
-import com.ruoyi.common.core.domain.entity.SysDeptUser;
-import com.ruoyi.system.domain.SysProject;
+package com.ruoyi.project.service;
 
 import java.util.List;
+
+import com.ruoyi.common.core.domain.TreeSelect;
+import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.project.domain.Project;
 
 /**
  * 【请填写功能名称】Service接口
  * 
  * @author ruoyi
- * @date 2022-02-22
+ * @date 2022-03-02
  */
-public interface ISysProjectService 
+public interface IProjectService 
 {
     /**
      * 查询【请填写功能名称】
@@ -20,31 +20,31 @@ public interface ISysProjectService
      * @param projectId 【请填写功能名称】ID
      * @return 【请填写功能名称】
      */
-    public SysProject selectSysProjectById(Long projectId);
+    public Project selectProjectById(Long projectId);
 
     /**
      * 查询【请填写功能名称】列表
      * 
-     * @param sysProject 【请填写功能名称】
+     * @param project 【请填写功能名称】
      * @return 【请填写功能名称】集合
      */
-    public List<SysProject> selectSysProjectList(SysProject sysProject);
+    public List<Project> selectProjectList(Project project);
 
     /**
      * 新增【请填写功能名称】
      * 
-     * @param sysProject 【请填写功能名称】
+     * @param project 【请填写功能名称】
      * @return 结果
      */
-    public int insertSysProject(SysProject sysProject);
+    public int insertProject(Project project);
 
     /**
      * 修改【请填写功能名称】
      * 
-     * @param sysProject 【请填写功能名称】
+     * @param project 【请填写功能名称】
      * @return 结果
      */
-    public int updateSysProject(SysProject sysProject);
+    public int updateProject(Project project);
 
     /**
      * 批量删除【请填写功能名称】
@@ -52,7 +52,7 @@ public interface ISysProjectService
      * @param projectIds 需要删除的【请填写功能名称】ID
      * @return 结果
      */
-    public int deleteSysProjectByIds(Long[] projectIds);
+    public int deleteProjectByIds(Long[] projectIds);
 
     /**
      * 删除【请填写功能名称】信息
@@ -60,7 +60,9 @@ public interface ISysProjectService
      * @param projectId 【请填写功能名称】ID
      * @return 结果
      */
-    public int deleteSysProjectById(Long projectId);
+    public int deleteProjectById(Long projectId);
 
     public List<TreeSelect> buildUserTree(Long deptId);
+
+    public int updateProjectStatus(Project project);
 }

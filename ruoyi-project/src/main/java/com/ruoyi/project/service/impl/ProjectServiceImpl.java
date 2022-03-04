@@ -1,4 +1,4 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.project.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,24 +6,25 @@ import java.util.stream.Collectors;
 
 import com.ruoyi.common.core.domain.TreeSelect;
 import com.ruoyi.common.core.domain.entity.SysDeptUser;
-import com.ruoyi.system.domain.SysProject;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.system.mapper.SysUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.ruoyi.system.mapper.SysProjectMapper;
-import com.ruoyi.system.service.ISysProjectService;
+import com.ruoyi.project.mapper.ProjectMapper;
+import com.ruoyi.project.domain.Project;
+import com.ruoyi.project.service.IProjectService;
 
 /**
  * 【请填写功能名称】Service业务层处理
  * 
  * @author ruoyi
- * @date 2022-02-22
+ * @date 2022-03-02
  */
 @Service
-public class SysProjectServiceImpl implements ISysProjectService 
+public class ProjectServiceImpl implements IProjectService 
 {
     @Autowired
-    private SysProjectMapper sysProjectMapper;
+    private ProjectMapper projectMapper;
 
     @Autowired
     private SysUserMapper sysUserMapper;
@@ -35,45 +36,46 @@ public class SysProjectServiceImpl implements ISysProjectService
      * @return 【请填写功能名称】
      */
     @Override
-    public SysProject selectSysProjectById(Long projectId)
+    public Project selectProjectById(Long projectId)
     {
-        return sysProjectMapper.selectSysProjectById(projectId);
+        return projectMapper.selectProjectById(projectId);
     }
 
     /**
      * 查询【请填写功能名称】列表
      * 
-     * @param sysProject 【请填写功能名称】
+     * @param project 【请填写功能名称】
      * @return 【请填写功能名称】
      */
     @Override
-    public List<SysProject> selectSysProjectList(SysProject sysProject)
+    public List<Project> selectProjectList(Project project)
     {
-        return sysProjectMapper.selectSysProjectList(sysProject);
+        return projectMapper.selectProjectList(project);
     }
 
     /**
      * 新增【请填写功能名称】
      * 
-     * @param sysProject 【请填写功能名称】
+     * @param project 【请填写功能名称】
      * @return 结果
      */
     @Override
-    public int insertSysProject(SysProject sysProject)
+    public int insertProject(Project project)
     {
-        return sysProjectMapper.insertSysProject(sysProject);
+        project.setExpensesLeft(project.getExpensesTotal());
+        return projectMapper.insertProject(project);
     }
 
     /**
      * 修改【请填写功能名称】
      * 
-     * @param sysProject 【请填写功能名称】
+     * @param project 【请填写功能名称】
      * @return 结果
      */
     @Override
-    public int updateSysProject(SysProject sysProject)
+    public int updateProject(Project project)
     {
-        return sysProjectMapper.updateSysProject(sysProject);
+        return projectMapper.updateProject(project);
     }
 
     /**
@@ -83,9 +85,9 @@ public class SysProjectServiceImpl implements ISysProjectService
      * @return 结果
      */
     @Override
-    public int deleteSysProjectByIds(Long[] projectIds)
+    public int deleteProjectByIds(Long[] projectIds)
     {
-        return sysProjectMapper.deleteSysProjectByIds(projectIds);
+        return projectMapper.deleteProjectByIds(projectIds);
     }
 
     /**
@@ -95,9 +97,9 @@ public class SysProjectServiceImpl implements ISysProjectService
      * @return 结果
      */
     @Override
-    public int deleteSysProjectById(Long projectId)
+    public int deleteProjectById(Long projectId)
     {
-        return sysProjectMapper.deleteSysProjectById(projectId);
+        return projectMapper.deleteProjectById(projectId);
     }
 
     @Override
@@ -105,5 +107,10 @@ public class SysProjectServiceImpl implements ISysProjectService
         List<SysDeptUser> returnList = new ArrayList<>();
         returnList = sysUserMapper.getNameByDept(deptId);
         return returnList.stream().map(TreeSelect::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public int updateProjectStatus(Project project) {
+        return projectMapper.updateProject(project);
     }
 }

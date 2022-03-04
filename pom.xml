@@ -217,6 +217,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-project</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.flowable</groupId>
                 <artifactId>flowable-spring-boot-starter-basic</artifactId>
                 <version>${flowable.version}</version>
@@ -274,6 +280,7 @@
         <module>ruoyi-generator</module>
         <module>ruoyi-common</module>
         <module>ruoyi-flowable</module>
+        <module>ruoyi-project</module>
     </modules>
     <packaging>pom</packaging>
 

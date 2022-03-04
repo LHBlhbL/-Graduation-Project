@@ -1,10 +1,9 @@
-package com.ruoyi.web.controller.system;
+package com.ruoyi.project.controller;
 
 import java.util.List;
-
-import com.ruoyi.system.domain.SysProject;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,7 +16,8 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.system.service.ISysProjectService;
+import com.ruoyi.project.domain.Project;
+import com.ruoyi.project.service.IProjectService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
 
@@ -25,24 +25,26 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * 【请填写功能名称】Controller
  * 
  * @author ruoyi
- * @date 2022-02-22
+ * @date 2022-03-02
  */
 @RestController
-@RequestMapping("/system/project")
-public class SysProjectController extends BaseController
+@RequestMapping("/project")
+public class ProjectController extends BaseController
 {
     @Autowired
-    private ISysProjectService sysProjectService;
+    private IProjectService projectService;
+
+
 
     /**
-     * 查询【请填写功能名称】列表
+     * 查询项目列表
      */
-    @PreAuthorize("@ss.hasPermi('system:project:list')")
     @GetMapping("/list")
-    public TableDataInfo list(SysProject sysProject)
+    public TableDataInfo list(Project project)
     {
         startPage();
-        List<SysProject> list = sysProjectService.selectSysProjectList(sysProject);
+        List<Project> list = projectService.selectProjectList(project);
+        System.out.println(list);
         return getDataTable(list);
     }
 
@@ -52,10 +54,10 @@ public class SysProjectController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:project:export')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(SysProject sysProject)
+    public AjaxResult export(Project project)
     {
-        List<SysProject> list = sysProjectService.selectSysProjectList(sysProject);
-        ExcelUtil<SysProject> util = new ExcelUtil<SysProject>(SysProject.class);
+        List<Project> list = projectService.selectProjectList(project);
+        ExcelUtil<Project> util = new ExcelUtil<Project>(Project.class);
         return util.exportExcel(list, "project");
     }
 
@@ -66,7 +68,7 @@ public class SysProjectController extends BaseController
     @GetMapping(value = "/{projectId}")
     public AjaxResult getInfo(@PathVariable("projectId") Long projectId)
     {
-        return AjaxResult.success(sysProjectService.selectSysProjectById(projectId));
+        return AjaxResult.success(projectService.selectProjectById(projectId));
     }
 
     /**
@@ -75,9 +77,9 @@ public class SysProjectController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:project:add')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody SysProject sysProject)
+    public AjaxResult add(@RequestBody Project project)
     {
-        return toAjax(sysProjectService.insertSysProject(sysProject));
+        return toAjax(projectService.insertProject(project));
     }
 
     /**
@@ -86,9 +88,9 @@ public class SysProjectController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:project:edit')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody SysProject sysProject)
+    public AjaxResult edit(@RequestBody Project project)
     {
-        return toAjax(sysProjectService.updateSysProject(sysProject));
+        return toAjax(projectService.updateProject(project));
     }
 
     /**
@@ -99,12 +101,18 @@ public class SysProjectController extends BaseController
 	@DeleteMapping("/{projectIds}")
     public AjaxResult remove(@PathVariable Long[] projectIds)
     {
-        return toAjax(sysProjectService.deleteSysProjectByIds(projectIds));
+        return toAjax(projectService.deleteProjectByIds(projectIds));
     }
 
     @GetMapping(value = "/userTreeselect/{deptId}")
     public AjaxResult userTreeselect(@PathVariable("deptId")Long deptId)
     {
-        return AjaxResult.success(sysProjectService.buildUserTree(deptId));
+        return AjaxResult.success(projectService.buildUserTree(deptId));
+    }
+
+    @Log(title = "用户管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/changeStatus")
+    public AjaxResult changeStatus(@RequestBody Project project){
+        return AjaxResult.success(projectService.updateProjectStatus(project));
     }
 }

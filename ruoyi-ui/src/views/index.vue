@@ -4,7 +4,7 @@
       <el-col :sm="24" :lg="18" style="padding-left: 20px">
         <div class="block">
           <h2 class="demonstration">人活着就是为了樱岛麻衣 (≧▽≦) </h2>
-          <el-image style="width: 40%" :fit="contain" src="https://oscimg.oschina.net/oscnet/up-eb83b8d00104b97842d19dbadeec90fbb54.JPEG"/>
+          <el-image style="width: 40%" :fit="contain" src="/static/images/secret.jpg"/>
         </div>
       </el-col>
     </el-row>
@@ -52,7 +52,7 @@
           </div>
           <div class="body">
             <img
-              src="https://oscimg.oschina.net/oscnet/up-88f17f916de7a895cf2a84d2ce769e9b2ca.JPEG"
+              src=""
               alt="donate"
               width="100%"
             />
