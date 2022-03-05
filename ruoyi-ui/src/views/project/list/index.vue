@@ -48,7 +48,7 @@
       <el-table-column label="项目编号" align="center" prop="projectId" />
       <el-table-column label="项目部门" align="center" prop="dept.deptName" />
       <el-table-column label="项目名称" align="center" prop="projectName" />
-      <el-table-column label="项目负责人" align="center" prop="projectPrincipal" />
+      <el-table-column label="项目负责人" align="center" prop="principal.principalName" />
       <el-table-column label="项目经费" align="center" prop="expensesTotal" />
       <el-table-column label="剩余经费" align="center" prop="expensesLeft" />
       <el-table-column label="状态" align="center" key="status" >
@@ -98,8 +98,8 @@
         <el-form-item label="项目名称" prop="projectName">
           <el-input v-model="form.projectName" placeholder="请输入项目名称" />
         </el-form-item>
-        <el-form-item label="负责人" prop="projectPrincipal">
-          <treeselect v-model="form.projectPrincipal" :options="principalOptions"  :show-count="true" placeholder="请输入项目负责人"/>
+        <el-form-item label="负责人" prop="principalID">
+          <treeselect v-model="form.principalId" :options="principalOptions"  :show-count="true" placeholder="请输入项目负责人"/>
         </el-form-item>
         <el-form-item label="项目经费" prop="expensesTotal">
           <el-input v-model="form.expensesTotal" placeholder="请输入项目经费" />
@@ -164,7 +164,7 @@ export default {
         pageSize: 10,
         deptId: null,
         projectName: null,
-        projectPrincipal: null,
+        principalId: null,
         expensesTotal: null,
         expensesLeft: null,
         status:null
@@ -222,7 +222,7 @@ export default {
         projectId: null,
         deptId: null,
         projectName: null,
-        projectPrincipal: null,
+        principalId: null,
         expensesTotal: null,
         expensesLeft: null,
         status:"0",

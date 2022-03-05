@@ -8,11 +8,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="projectId"    column="project_id"    />
         <result property="deptId"    column="dept_id"    />
         <result property="projectName"    column="project_name"    />
-        <result property="projectPrincipal"    column="project_principal"    />
+        <result property="principalId"    column="principal_id"    />
         <result property="expensesTotal"    column="expenses_total"    />
         <result property="expensesLeft"    column="expenses_left"    />
         <result property="status" column="status"     />
         <association property="dept"    column="dept_id" javaType="ProjectDept" resultMap="deptResult" />
+        <association property="principal" column="user_id" javaType="ProjectPrincipal" resultMap="principalNameResult"/>
     </resultMap>
 
     <resultMap id="deptResult" type="ProjectDept">
@@ -20,17 +21,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="deptName" column="dept_name"   />
     </resultMap>
 
+    <resultMap id="principalNameResult" type="ProjectPrincipal">
+        <id property="principalId" column="user_id"/>
+        <id property="principalName" column="nick_name"/>
+    </resultMap>
+
     <sql id="selectProjectVo">
-        select project_id, dept_id, project_name, project_principal, expenses_total, expenses_left, status from project
+        select project_id, dept_id, project_name, principal_id, expenses_total, expenses_left, status from project
     </sql>
 
     <select id="selectProjectList" parameterType="Project" resultMap="ProjectResult">
-        select p.project_id, p.dept_id, p.project_name, p.project_principal, p.expenses_total, p.expenses_left, d.dept_name from project p
+        select p.project_id, p.dept_id, p.project_name, p.principal_id, p.expenses_total, p.expenses_left, d.dept_name, u.nick_name from project p
         left join sys_dept d on p.dept_id = d.dept_id
+        left join sys_user u on p.principal_id = u.user_id
         <where>
             <if test="deptId != null "> and dept_id = #{deptId}</if>
             <if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
-            <if test="projectPrincipal != null  and projectPrincipal != ''"> and project_principal = #{projectPrincipal}</if>
+            <if test="principalId != null  and principalId != ''"> and principal_id = #{principalId}</if>
             <if test="expensesTotal != null "> and expenses_total = #{expensesTotal}</if>
             <if test="expensesLeft != null "> and expenses_left = #{expensesLeft}</if>
         </where>
@@ -47,7 +54,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="projectId != null">project_id,</if>
             <if test="deptId != null">dept_id,</if>
             <if test="projectName != null">project_name,</if>
-            <if test="projectPrincipal != null">project_principal,</if>
+            <if test="principalId != null">principal_id,</if>
             <if test="expensesTotal != null">expenses_total,</if>
             <if test="expensesLeft != null">expenses_left,</if>
             <if test="status !=null">status,</if>
@@ -56,7 +63,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="projectId != null">#{projectId},</if>
             <if test="deptId != null">#{deptId},</if>
             <if test="projectName != null">#{projectName},</if>
-            <if test="projectPrincipal != null">#{projectPrincipal},</if>
+            <if test="principalId != null">#{principalId},</if>
             <if test="expensesTotal != null">#{expensesTotal},</if>
             <if test="expensesLeft != null">#{expensesLeft},</if>
             <if test="status !=null">#{status},</if>
@@ -68,7 +75,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="SET" suffixOverrides=",">
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="projectName != null">project_name = #{projectName},</if>
-            <if test="projectPrincipal != null">project_principal = #{projectPrincipal},</if>
+            <if test="principalId != null">principal_id = #{principalId},</if>
             <if test="expensesTotal != null">expenses_total = #{expensesTotal},</if>
             <if test="expensesLeft != null">expenses_left = #{expensesLeft},</if>
             <if test="status !=null">status = #{status},</if>

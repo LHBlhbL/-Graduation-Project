@@ -34,8 +34,7 @@ public class Project extends BaseEntity {
     /**
      * $column.columnComment
      */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
-    private String projectPrincipal;
+    private Long principalId;
 
     /**
      * $column.columnComment
@@ -50,6 +49,16 @@ public class Project extends BaseEntity {
     private Long expensesLeft;
 
     private ProjectDept dept;
+
+    private ProjectPrincipal principal;
+
+    public ProjectPrincipal getPrincipal() {
+        return principal;
+    }
+
+    public void setPrincipal(ProjectPrincipal principal) {
+        this.principal = principal;
+    }
 
     public ProjectDept getDept() {
         return dept;
@@ -93,13 +102,6 @@ public class Project extends BaseEntity {
         return projectName;
     }
 
-    public void setProjectPrincipal(String projectPrincipal) {
-        this.projectPrincipal = projectPrincipal;
-    }
-
-    public String getProjectPrincipal() {
-        return projectPrincipal;
-    }
 
     public void setExpensesTotal(Long expensesTotal) {
         this.expensesTotal = expensesTotal;
@@ -117,17 +119,26 @@ public class Project extends BaseEntity {
         return expensesLeft;
     }
 
+    public Long getPrincipalId() {
+        return principalId;
+    }
+
+    public void setPrincipalId(Long principalId) {
+        this.principalId = principalId;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
                 .append("projectId", getProjectId())
                 .append("deptId", getDeptId())
                 .append("projectName", getProjectName())
-                .append("projectPrincipal", getProjectPrincipal())
+                .append("principalId", getPrincipalId())
                 .append("expensesTotal", getExpensesTotal())
                 .append("expensesLeft", getExpensesLeft())
                 .append("status", getStatus())
                 .append("dept",getDept())
+                .append("principal",getPrincipal())
                 .toString();
     }
 }
