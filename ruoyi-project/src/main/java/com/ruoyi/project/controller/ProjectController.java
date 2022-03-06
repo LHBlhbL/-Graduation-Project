@@ -1,6 +1,9 @@
 package com.ruoyi.project.controller;
 
 import java.util.List;
+
+import com.ruoyi.project.domain.ProjectFlow;
+import com.ruoyi.project.service.IProjectFlowService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -34,6 +37,9 @@ public class ProjectController extends BaseController
     @Autowired
     private IProjectService projectService;
 
+    @Autowired
+    private IProjectFlowService flowService;
+
 
 
 
@@ -45,7 +51,6 @@ public class ProjectController extends BaseController
     {
         startPage();
         List<Project> list = projectService.selectProjectList(project);
-        System.out.println(list);
         return getDataTable(list);
     }
 
@@ -116,4 +121,12 @@ public class ProjectController extends BaseController
     public AjaxResult changeStatus(@RequestBody Project project){
         return AjaxResult.success(projectService.updateProjectStatus(project));
     }
+    @Log(title = "用户管理", businessType = BusinessType.INSERT)
+    @PutMapping( "/flow/add")
+    public AjaxResult addFlow(@RequestBody ProjectFlow projectFlow)
+    {
+        return AjaxResult.success(flowService.insertProjectFlow(projectFlow));
+    }
+
+
 }

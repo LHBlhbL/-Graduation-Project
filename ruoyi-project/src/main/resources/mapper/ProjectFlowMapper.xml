@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.mapper.ProjectFlowMapper">
+
+    <resultMap type="ProjectFlow" id="ProjectFlowResult">
+        <result property="id" column="id"/>
+        <result property="projectId" column="project_id"/>
+        <result property="deployId" column="deploy_id"/>
+        <result property="procDefId" column="proc_def_id"/>
+    </resultMap>
+
+    <sql id="selectProjectFlowVo">
+        select id, project_id, deploy_id, proc_def_id
+        from project_flow
+    </sql>
+
+    <select id="selectProjectFlowList" parameterType="ProjectFlow" resultMap="ProjectFlowResult">
+        <include refid="selectProjectFlowVo"/>
+        <where>
+            <if test="projectId != null ">and project_id = #{projectId}</if>
+
+        </where>
+    </select>
+
+    <select id="selectProjectFlowById" parameterType="Long" resultMap="ProjectFlowResult">
+        <include refid="selectProjectFlowVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertProjectFlow" parameterType="ProjectFlow">
+        insert into project_flow
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="deployId != null">deploy_id,</if>
+            <if test="procDefId != null">proc_def_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="deployId != null">#{deployId},</if>
+            <if test="procDefId != null">#{procDefId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateProjectFlow" parameterType="ProjectFlow">
+        update project_flow
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="deployId != null">deploy_id = #{deployId},</if>
+            <if test="procDefId != null">proc_def_id = #{procDefId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteProjectFlowById" parameterType="Long">
+        delete
+        from project_flow
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteProjectFlowByIds" parameterType="String">
+        delete from project_flow where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

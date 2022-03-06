@@ -74,3 +74,18 @@ export function changeProjectStatus(projectId, status) {
     data: data
   })
 }
+
+
+// 部署配置实例
+export function addProjectPro(projectId,deployId,procDefId) {
+  const data = {
+    projectId,
+    deployId,
+    procDefId
+  }
+  return request({
+    url: '/project/flow/add',
+    method: 'put',
+    data:data
+  })
+}

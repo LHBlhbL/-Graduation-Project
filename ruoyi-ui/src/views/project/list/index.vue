@@ -51,6 +51,7 @@
       <el-table-column label="项目负责人" align="center" prop="principal.principalName" />
       <el-table-column label="项目经费" align="center" prop="expensesTotal" />
       <el-table-column label="剩余经费" align="center" prop="expensesLeft" />
+      <el-table-column label="流程配置" align="center" prop="name" />
       <el-table-column label="状态" align="center" key="status" >
         <template slot-scope="scope">
           <el-switch
@@ -68,15 +69,19 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:project:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['system:project:remove']"
           >删除</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-share"
+            @click="handleConfigure(scope.row)"
+          >配置</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -124,12 +129,42 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog :title="title" :visible.sync="openConfigure" width="60%" append-to-body>
+      <el-table v-loading="processLoading" fit :data="definitionList" border >
+        <el-table-column label="流程名称" align="center" prop="name" />
+        <el-table-column label="流程版本" align="center">
+          <template slot-scope="scope">
+            <el-tag size="medium" >v{{ scope.row.version }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="流程分类" align="center" prop="category" />
+        <el-table-column label="操作" align="center" width="300" class-name="small-padding fixed-width">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-edit-outline"
+              @click="handleConfProcess(scope.row)"
+            >配置流程</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <pagination
+        v-show="processTotal>0"
+        :total="processTotal"
+        :page.sync="queryParams.pageNum"
+        :limit.sync="queryParams.pageSize"
+        @pagination="listDefinition"
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listProject, getProject, delProject, addProject, updateProject, exportProject,userTreeselect } from "@/api/project/list";
+import { listProject, getProject, delProject, addProject, updateProject, exportProject,userTreeselect,addProjectPro } from "@/api/project/list";
 import { treeselect } from "@/api/system/dept";
+import {listDefinition} from "@/api/flowable/definition";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 export default {
@@ -154,10 +189,13 @@ export default {
       projectList: [],
       deptOptions: undefined,
       principalOptions: undefined,
+      definitionList:undefined,
       // 弹出层标题
       title: "",
       // 是否显示弹出层
       open: false,
+      openConfigure:false,
+      projectIdPro: undefined,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -168,6 +206,19 @@ export default {
         expensesTotal: null,
         expensesLeft: null,
         status:null
+      },
+      queryParamsCon: {
+        pageNum: 1,
+        pageSize: 10,
+        name: null,
+        category: null,
+        key: null,
+        tenantId: null,
+        deployTime: null,
+        derivedFrom: null,
+        derivedFromRoot: null,
+        parentDeploymentId: null,
+        engineVersion: null
       },
       // 表单参数
       form: {},
@@ -312,6 +363,31 @@ export default {
           this.getList();
           this.msgSuccess("删除成功");
         })
+    },
+    handleConfigure(row){
+      this.openConfigure = true;
+      this.title = "配置流程";
+      this.projectIdPro = row.projectId;
+      this.listDefinition();
+    },
+    listDefinition(){
+      listDefinition(this.queryParamsCon).then(response => {
+        this.definitionList = response.data.records;
+        this.processTotal = response.data.total;
+        this.processLoading = false;
+      });
+    },
+    handleConfProcess(row) {
+      const data = {
+        projectId:this.projectIdPro,
+        deployId: row.deploymentId,
+        procDefId: row.id
+      }
+      alert("12");
+      addProjectPro(this.projectIdPro,row.deploymentId,row.id).then(res => {
+        this.msgSuccess(res.msg);
+        this.openConfigure=false;
+      });
     },
     /** 导出按钮操作 */
     handleExport() {

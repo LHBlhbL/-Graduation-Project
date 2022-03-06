@@ -31,7 +31,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </sql>
 
     <select id="selectProjectList" parameterType="Project" resultMap="ProjectResult">
-        select p.project_id, p.dept_id, p.project_name, p.principal_id, p.expenses_total, p.expenses_left, d.dept_name, u.nick_name from project p
+        select p.project_id, p.dept_id, p.project_name, p.principal_id, p.expenses_total, p.expenses_left, p.status, d.dept_name, u.nick_name from project p
         left join sys_dept d on p.dept_id = d.dept_id
         left join sys_user u on p.principal_id = u.user_id
         <where>
