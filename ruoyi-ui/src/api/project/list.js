@@ -89,3 +89,12 @@ export function addProjectPro(projectId,deployId,procDefId) {
     data:data
   })
 }
+
+export function getProcess(projectId)
+{
+  return request({
+    url:'/project/flow/form',
+    method:'put',
+    data:projectId
+  })
+}

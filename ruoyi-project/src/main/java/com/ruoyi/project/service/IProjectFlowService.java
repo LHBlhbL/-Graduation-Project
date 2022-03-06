@@ -19,6 +19,8 @@ public interface IProjectFlowService
      */
     public ProjectFlow selectProjectFlowById(Long id);
 
+    public ProjectFlow selectProjectFlowByPId(Long projectId);
+
     /**
      * 查询【请填写功能名称】列表
      * 

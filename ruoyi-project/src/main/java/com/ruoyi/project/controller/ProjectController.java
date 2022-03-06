@@ -26,14 +26,13 @@ import com.ruoyi.common.core.page.TableDataInfo;
 
 /**
  * 【请填写功能名称】Controller
- * 
+ *
  * @author ruoyi
  * @date 2022-03-02
  */
 @RestController
 @RequestMapping("/project")
-public class ProjectController extends BaseController
-{
+public class ProjectController extends BaseController {
     @Autowired
     private IProjectService projectService;
 
@@ -41,14 +40,11 @@ public class ProjectController extends BaseController
     private IProjectFlowService flowService;
 
 
-
-
     /**
      * 查询项目列表
      */
     @GetMapping("/list")
-    public TableDataInfo list(Project project)
-    {
+    public TableDataInfo list(Project project) {
         startPage();
         List<Project> list = projectService.selectProjectList(project);
         return getDataTable(list);
@@ -60,8 +56,7 @@ public class ProjectController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:project:export')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(Project project)
-    {
+    public AjaxResult export(Project project) {
         List<Project> list = projectService.selectProjectList(project);
         ExcelUtil<Project> util = new ExcelUtil<Project>(Project.class);
         return util.exportExcel(list, "project");
@@ -72,8 +67,7 @@ public class ProjectController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:project:query')")
     @GetMapping(value = "/{projectId}")
-    public AjaxResult getInfo(@PathVariable("projectId") Long projectId)
-    {
+    public AjaxResult getInfo(@PathVariable("projectId") Long projectId) {
         return AjaxResult.success(projectService.selectProjectById(projectId));
     }
 
@@ -83,8 +77,7 @@ public class ProjectController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:project:add')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody Project project)
-    {
+    public AjaxResult add(@RequestBody Project project) {
         return toAjax(projectService.insertProject(project));
     }
 
@@ -94,8 +87,7 @@ public class ProjectController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:project:edit')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody Project project)
-    {
+    public AjaxResult edit(@RequestBody Project project) {
         return toAjax(projectService.updateProject(project));
     }
 
@@ -104,28 +96,31 @@ public class ProjectController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:project:remove')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{projectIds}")
-    public AjaxResult remove(@PathVariable Long[] projectIds)
-    {
+    @DeleteMapping("/{projectIds}")
+    public AjaxResult remove(@PathVariable Long[] projectIds) {
         return toAjax(projectService.deleteProjectByIds(projectIds));
     }
 
     @GetMapping(value = "/userTreeselect/{deptId}")
-    public AjaxResult userTreeselect(@PathVariable("deptId")Long deptId)
-    {
+    public AjaxResult userTreeselect(@PathVariable("deptId") Long deptId) {
         return AjaxResult.success(projectService.buildUserTree(deptId));
     }
 
-    @Log(title = "用户管理", businessType = BusinessType.UPDATE)
+    @Log(title = "状态转换", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
-    public AjaxResult changeStatus(@RequestBody Project project){
+    public AjaxResult changeStatus(@RequestBody Project project) {
         return AjaxResult.success(projectService.updateProjectStatus(project));
     }
-    @Log(title = "用户管理", businessType = BusinessType.INSERT)
-    @PutMapping( "/flow/add")
-    public AjaxResult addFlow(@RequestBody ProjectFlow projectFlow)
-    {
+
+    @Log(title = "流程配置", businessType = BusinessType.INSERT)
+    @PutMapping("/flow/add")
+    public AjaxResult addFlow(@RequestBody ProjectFlow projectFlow) {
         return AjaxResult.success(flowService.insertProjectFlow(projectFlow));
+    }
+
+    @PutMapping("/flow/form")
+    public AjaxResult getForm(@RequestBody Long projectId) {
+        return AjaxResult.success(flowService.selectProjectFlowByPId(projectId));
     }
 
 

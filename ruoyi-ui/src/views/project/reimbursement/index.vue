@@ -30,23 +30,24 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="projectList"  >
+    <el-table v-loading="loading" :data="projectList">
       <div v-if="!status">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="项目编号" align="center" prop="projectId" />
-      <el-table-column label="项目部门" align="center" prop="dept.deptName" />
-      <el-table-column label="项目名称" align="center" prop="projectName" />
-      <el-table-column label="项目负责人" align="center" prop="principal.principalName" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="startReim(scope.row)"
-          >报销申请</el-button>
-        </template>
-      </el-table-column>
+        <el-table-column type="selection" width="55" align="center"/>
+        <el-table-column label="项目编号" align="center" prop="projectId"/>
+        <el-table-column label="项目部门" align="center" prop="dept.deptName"/>
+        <el-table-column label="项目名称" align="center" prop="projectName"/>
+        <el-table-column label="项目负责人" align="center" prop="principal.principalName"/>
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-edit"
+              @click="startProcess(scope.row)"
+            >报销申请
+            </el-button>
+          </template>
+        </el-table-column>
       </div>
     </el-table>
 
@@ -63,13 +64,15 @@
 </template>
 
 <script>
-import { listProject, getProject,  addProject, updateProject, userTreeselect } from "@/api/project/list";
-import { treeselect } from "@/api/system/dept";
+import {listProject, getProject, addProject, updateProject, userTreeselect, getProcess} from "@/api/project/list";
+import {treeselect} from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
+
 export default {
   name: "Project",
-  components: {Treeselect
+  components: {
+    Treeselect
   },
   data() {
     return {
@@ -102,14 +105,12 @@ export default {
         principalId: null,
         expensesTotal: null,
         expensesLeft: null,
-        status:null
+        status: null
       },
       // 表单参数
       form: {},
       // 表单校验
-      rules: {
-
-      }
+      rules: {}
     };
   },
   created() {
@@ -142,7 +143,7 @@ export default {
         principalId: null,
         expensesTotal: null,
         expensesLeft: null,
-        status:"0",
+        status: "0",
       };
       this.resetForm("form");
     },
@@ -150,6 +151,19 @@ export default {
     handleQuery() {
       this.queryParams.pageNum = 1;
       this.getList();
+    },
+    startProcess(row) {
+      getProcess(row.projectId).then(response => {
+        this.$router.push({
+          path: '/flowable/task/record/index',
+          query: {
+            deployId: response.data.deployId,
+            procDefId: response.data.procDefId,
+            finished: true
+          }
+        })
+      });
+
     },
     /** 重置按钮操作 */
     resetQuery() {
@@ -162,13 +176,13 @@ export default {
         this.deptOptions = response.data;
       });
     },
-    updatePrincipals(){
+    updatePrincipals() {
       this.getPrincipals();
     },
-    getPrincipals(){
-      if(this.form.deptId!=null){
+    getPrincipals() {
+      if (this.form.deptId != null) {
         userTreeselect(this.form.deptId).then(response => {
-            this.principalOptions=response.data;
+            this.principalOptions = response.data;
           }
         );
       }
@@ -176,7 +190,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.projectId)
-      this.single = selection.length!==1
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */

@@ -31,6 +31,11 @@ public class ProjectFlowServiceImpl implements IProjectFlowService
         return projectFlowMapper.selectProjectFlowById(id);
     }
 
+    @Override
+    public ProjectFlow selectProjectFlowByPId(Long projectId) {
+        return projectFlowMapper.selectProjectFlowByPId(projectId);
+    }
+
     /**
      * 查询【请填写功能名称】列表
      * 

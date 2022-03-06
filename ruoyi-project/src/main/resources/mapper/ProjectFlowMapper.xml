@@ -16,6 +16,12 @@
         from project_flow
     </sql>
 
+    <select id="selectProjectFlowByPId" parameterType="long" resultMap="ProjectFlowResult">
+        <include refid="selectProjectFlowVo" />
+        <where>
+            <if test="projectId != null ">and project_id = #{projectId}</if>
+        </where>
+    </select>
     <select id="selectProjectFlowList" parameterType="ProjectFlow" resultMap="ProjectFlowResult">
         <include refid="selectProjectFlowVo"/>
         <where>

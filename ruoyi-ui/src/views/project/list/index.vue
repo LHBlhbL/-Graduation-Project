@@ -327,6 +327,8 @@ export default {
       getProject(projectId).then(response => {
         this.form = response.data;
         this.open = true;
+        this.getTreeselect();
+        this.getPrincipals();
         this.title = "修改【请填写功能名称】";
       });
     },
@@ -378,12 +380,6 @@ export default {
       });
     },
     handleConfProcess(row) {
-      const data = {
-        projectId:this.projectIdPro,
-        deployId: row.deploymentId,
-        procDefId: row.id
-      }
-      alert("12");
       addProjectPro(this.projectIdPro,row.deploymentId,row.id).then(res => {
         this.msgSuccess(res.msg);
         this.openConfigure=false;
