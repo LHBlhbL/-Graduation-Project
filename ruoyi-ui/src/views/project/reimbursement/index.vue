@@ -66,6 +66,7 @@
 <script>
 import {listProject, getProject, addProject, updateProject, userTreeselect, getProcess} from "@/api/project/list";
 import {treeselect} from "@/api/system/dept";
+import {remiList} from "@/api/project/reimbursement"
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 
@@ -123,7 +124,7 @@ export default {
     /** 查询【请填写功能名称】列表 */
     getList() {
       this.loading = true;
-      listProject(this.queryParams).then(response => {
+      remiList().then(response => {
         this.projectList = response.rows;
         this.total = response.total;
         this.loading = false;

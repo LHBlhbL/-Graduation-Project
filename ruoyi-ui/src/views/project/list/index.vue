@@ -52,6 +52,11 @@
       <el-table-column label="项目经费" align="center" prop="expensesTotal" />
       <el-table-column label="剩余经费" align="center" prop="expensesLeft" />
       <el-table-column label="流程配置" align="center" prop="name" />
+      <el-table-column label="流程版本" align="center" width="80px">
+        <template slot-scope="scope">
+          <el-tag size="medium" >v{{ scope.row.procDefVersion }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" align="center" key="status" >
         <template slot-scope="scope">
           <el-switch
@@ -162,7 +167,7 @@
 </template>
 
 <script>
-import { listProject, getProject, delProject, addProject, updateProject, exportProject,userTreeselect,addProjectPro } from "@/api/project/list";
+import { listProject, changeProjectStatus,getProject, delProject, addProject, updateProject, exportProject,userTreeselect,addProjectPro } from "@/api/project/list";
 import { treeselect } from "@/api/system/dept";
 import {listDefinition} from "@/api/flowable/definition";
 import Treeselect from "@riophae/vue-treeselect";
@@ -260,7 +265,7 @@ export default {
         cancelButtonText: "取消",
         type: "warning"
       }).then(function() {
-        return changeUserStatus(row.projectId, row.status);
+        return changeProjectStatus(row.projectId, row.status);
       }).then(() => {
         this.msgSuccess(text + "成功");
       }).catch(function() {

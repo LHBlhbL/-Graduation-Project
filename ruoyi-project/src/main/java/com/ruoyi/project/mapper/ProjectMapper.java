@@ -58,4 +58,6 @@ public interface ProjectMapper
      * @return 结果
      */
     public int deleteProjectByIds(Long[] projectIds);
+
+    public List<Project> selectRemiList();
 }

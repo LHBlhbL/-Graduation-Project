@@ -69,7 +69,7 @@ export function changeProjectStatus(projectId, status) {
     status
   }
   return request({
-    url: '/system/user/changeStatus',
+    url: '/project/changeStatus',
     method: 'put',
     data: data
   })
