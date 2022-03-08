@@ -30,7 +30,7 @@ public class ProjectFlow extends BaseEntity
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private String procDefId;
 
-    public void setId(Long id) 
+    public void setId(Long id)
     {
         this.id = id;
     }

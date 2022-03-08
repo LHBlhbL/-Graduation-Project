@@ -9,6 +9,13 @@ export function listDefinition(query) {
   })
 }
 
+export function listDefinitionPro(query) {
+  return request({
+    url: '/flowable/definition/listPro',
+    method: 'get',
+    params: query
+  })
+}
 // 部署流程实例
 export function definitionStart(procDefId,data) {
   return request({

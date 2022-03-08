@@ -59,6 +59,12 @@ public class FlowDefinitionController {
         return AjaxResult.success(flowDefinitionService.list(pageNum, pageSize));
     }
 
+    @GetMapping("/listPro")
+    public AjaxResult listPro(@RequestParam Integer pageNum, @RequestParam Integer pageSize)
+    {
+        return AjaxResult.success(flowDefinitionService.listPro(pageNum, pageSize));
+    }
+
 
     @ApiOperation(value = "导入流程文件", notes = "上传bpmn20的xml文件")
     @PostMapping("/import")

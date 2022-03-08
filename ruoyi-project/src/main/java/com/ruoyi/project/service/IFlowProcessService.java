@@ -1,0 +1,12 @@
+package com.ruoyi.project.service;
+
+import com.ruoyi.common.core.domain.AjaxResult;
+
+import java.util.Map;
+
+public interface IFlowProcessService {
+
+     AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables);
+
+     AjaxResult onGoingList(Integer pageNum, Integer pageSize);
+}

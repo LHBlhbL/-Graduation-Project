@@ -26,6 +26,8 @@ public interface IFlowDefinitionService {
      */
     Page<FlowProcDefDto> list(Integer pageNum, Integer pageSize);
 
+    public Page<FlowProcDefDto> listPro(Integer pageNum, Integer pageSize);
+
     /**
      * 导入流程文件
      *

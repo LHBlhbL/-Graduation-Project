@@ -98,3 +98,12 @@ export function getProcess(projectId)
     data:projectId
   })
 }
+
+// 查询流程定义列表
+export function listDefinitionPro(query) {
+  return request({
+    url: '/project/definition/list',
+    method: 'get',
+    params: query
+  })
+}

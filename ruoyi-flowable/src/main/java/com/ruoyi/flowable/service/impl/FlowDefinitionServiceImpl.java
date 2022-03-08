@@ -102,6 +102,40 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
     }
 
 
+    public Page<FlowProcDefDto> listPro(Integer pageNum, Integer pageSize) {
+        Page<FlowProcDefDto> page = new Page<>();
+        // 流程定义列表数据查询
+        ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery()
+//                .latestVersion()
+                .orderByProcessDefinitionKey().asc();
+        page.setTotal(processDefinitionQuery.count());
+        List<ProcessDefinition> processDefinitionList = processDefinitionQuery.listPage(pageNum - 1, pageSize);
+
+        List<FlowProcDefDto> dataList = new ArrayList<>();
+        for (ProcessDefinition processDefinition : processDefinitionList) {
+            String deploymentId = processDefinition.getDeploymentId();
+            Deployment deployment = repositoryService.createDeploymentQuery().deploymentId(deploymentId).singleResult();
+            FlowProcDefDto reProcDef = new FlowProcDefDto();
+            BeanUtils.copyProperties(processDefinition, reProcDef);
+            SysForm sysForm = sysDeployFormService.selectSysDeployFormByDeployId(deploymentId);
+            if (Objects.nonNull(sysForm)) {
+                reProcDef.setFormName(sysForm.getFormName());
+                reProcDef.setFormId(sysForm.getFormId());
+            }
+            // 流程定义时间
+            reProcDef.setDeploymentTime(deployment.getDeploymentTime());
+
+            if(reProcDef.getFormId()!=null)
+            {
+                dataList.add(reProcDef);
+            }
+
+        }
+        page.setRecords(dataList);
+        return page;
+    }
+
+
     /**
      * 导入流程文件
      *
