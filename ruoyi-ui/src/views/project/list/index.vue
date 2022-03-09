@@ -51,10 +51,10 @@
       <el-table-column label="项目负责人" align="center" prop="principal.principalName" />
       <el-table-column label="项目经费" align="center" prop="expensesTotal" />
       <el-table-column label="剩余经费" align="center" prop="expensesLeft" />
-      <el-table-column label="流程名称" align="center" prop="name" />
+      <el-table-column label="流程名称" align="center" prop="procName" />
       <el-table-column label="流程版本" align="center" width="80px">
         <template slot-scope="scope">
-          <el-tag size="medium" >v{{ scope.row.procDefVersion }}</el-tag>
+          <el-tag size="medium" >v{{ scope.row.version }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" key="status" >

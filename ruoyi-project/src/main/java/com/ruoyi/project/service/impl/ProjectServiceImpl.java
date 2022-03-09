@@ -1,9 +1,15 @@
 package com.ruoyi.project.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.ruoyi.flowable.factory.FlowServiceFactory;
+import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.history.HistoricProcessInstanceQuery;
+import org.flowable.engine.repository.ProcessDefinition;
 import com.ruoyi.common.core.domain.TreeSelect;
 import com.ruoyi.common.core.domain.entity.SysDeptUser;
 import com.ruoyi.common.core.domain.entity.SysUser;
@@ -23,7 +29,7 @@ import com.ruoyi.project.service.IProjectService;
  * @date 2022-03-02
  */
 @Service
-public class ProjectServiceImpl implements IProjectService 
+public class ProjectServiceImpl extends FlowServiceFactory implements IProjectService
 {
     @Autowired
     private ProjectMapper projectMapper;
@@ -52,7 +58,28 @@ public class ProjectServiceImpl implements IProjectService
     @Override
     public List<Project> selectProjectList(Project project)
     {
-        return projectMapper.selectProjectList(project);
+        List<Project> returnList=projectMapper.selectProjectList(project);
+        ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery()
+//                .latestVersion()
+                .orderByProcessDefinitionKey().asc();
+        List<ProcessDefinition> processDefinitionList = processDefinitionQuery.listPage(1 - 1, 10);
+        Map<String,String> name = new HashMap<>();
+        Map<String,Integer> version = new HashMap<>();
+        for(ProcessDefinition processDefinition:processDefinitionList)
+        {
+            String p=processDefinition.getDeploymentId();
+            name.put(p,processDefinition.getName());
+            version.put(p,processDefinition.getVersion());
+
+        }
+
+        for(Project list:returnList)
+        {
+            String deploy=list.getFlow().getDeployId();
+            list.setProcName(name.get(deploy));
+            list.setVersion(version.get(deploy));
+        }
+        return returnList;
     }
 
     /**

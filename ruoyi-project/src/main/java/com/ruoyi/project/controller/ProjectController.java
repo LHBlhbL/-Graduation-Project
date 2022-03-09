@@ -74,7 +74,6 @@ public class ProjectController extends BaseController {
     /**
      * 新增【请填写功能名称】
      */
-    @PreAuthorize("@ss.hasPermi('system:project:add')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody Project project) {
@@ -84,7 +83,6 @@ public class ProjectController extends BaseController {
     /**
      * 修改【请填写功能名称】
      */
-    @PreAuthorize("@ss.hasPermi('system:project:edit')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody Project project) {
@@ -94,7 +92,6 @@ public class ProjectController extends BaseController {
     /**
      * 删除【请填写功能名称】
      */
-    @PreAuthorize("@ss.hasPermi('system:project:remove')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.DELETE)
     @DeleteMapping("/{projectIds}")
     public AjaxResult remove(@PathVariable Long[] projectIds) {

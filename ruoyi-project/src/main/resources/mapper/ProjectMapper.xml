@@ -14,6 +14,14 @@
         <result property="status" column="status"/>
         <association property="dept" column="dept_id" javaType="ProjectDept" resultMap="deptResult"/>
         <association property="principal" column="user_id" javaType="ProjectPrincipal" resultMap="principalNameResult"/>
+        <association property="flow" column="project_id" javaType="ProjectFlow" resultMap="ProjectFlowResult"/>
+    </resultMap>
+
+    <resultMap type="ProjectFlow" id="ProjectFlowResult">
+        <result property="id" column="id"/>
+        <result property="projectId" column="project_id"/>
+        <result property="deployId" column="deploy_id"/>
+        <result property="procDefId" column="proc_def_id"/>
     </resultMap>
 
     <resultMap id="deptResult" type="ProjectDept">
@@ -27,6 +35,10 @@
         <result property="principalName" column="nick_name"/>
     </resultMap>
 
+    <resultMap type="String" id="ProcessResult">
+        <result property="projectName" column="project_name"/>
+    </resultMap>
+
     <sql id="selectProjectVo">
         select project_id, dept_id, project_name, principal_id, expenses_total, expenses_left, status
         from project
@@ -34,9 +46,10 @@
 
     <select id="selectProjectList" parameterType="Project" resultMap="ProjectResult">
         select p.project_id, p.dept_id, p.project_name, p.principal_id, p.expenses_total, p.expenses_left, p.status,
-        d.dept_name, u.nick_name from project p
+        d.dept_name, u.nick_name,f.proc_def_id,f.deploy_id from project p
         left join sys_dept d on p.dept_id = d.dept_id
         left join sys_user u on p.principal_id = u.user_id
+        left join project_flow f on p.project_id = f.project_id
         <where>
             <if test="deptId != null ">and dept_id = #{deptId}</if>
             <if test="projectName != null  and projectName != ''">and project_name like concat('%', #{projectName},

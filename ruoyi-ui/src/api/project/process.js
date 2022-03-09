@@ -1,8 +1,8 @@
 import request from "../../utils/request";
 
-export function onGoingList(query) {
+export function processList(query) {
   return request({
-    url: '/flowable/process/onGoingList',
+    url: '/reim/process/list',
     method: 'get',
     params: query
   })

@@ -42,6 +42,26 @@ public class Project extends BaseEntity {
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Long expensesTotal;
 
+    private int version;
+
+    private String procName;
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    public String getProcName() {
+        return procName;
+    }
+
+    public void setProcName(String procName) {
+        this.procName = procName;
+    }
+
     /**
      * $column.columnComment
      */
@@ -51,6 +71,16 @@ public class Project extends BaseEntity {
     private ProjectDept dept;
 
     private ProjectPrincipal principal;
+
+    private ProjectFlow flow;
+
+    public ProjectFlow getFlow() {
+        return flow;
+    }
+
+    public void setFlow(ProjectFlow flow) {
+        this.flow = flow;
+    }
 
     public ProjectPrincipal getPrincipal() {
         return principal;
@@ -139,6 +169,9 @@ public class Project extends BaseEntity {
                 .append("status", getStatus())
                 .append("dept",getDept())
                 .append("principal",getPrincipal())
+                .append("flow",getFlow())
+                .append("procName",getProcName())
+                .append("version",getVersion())
                 .toString();
     }
 }

@@ -8,5 +8,5 @@ public interface IFlowProcessService {
 
      AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables);
 
-     AjaxResult onGoingList(Integer pageNum, Integer pageSize);
+     AjaxResult processList(Integer pageNum, Integer pageSize);
 }
