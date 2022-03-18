@@ -567,7 +567,6 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
      * @param pageSize 每页条数
      * @return
      */
-    //im old eight i can eat small hamburger do you want to eat one
     @Override
     public AjaxResult todoList(Integer pageNum, Integer pageSize) {
         Page<FlowTaskDto> page = new Page<>();
@@ -613,10 +612,9 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
                     .processInstanceId(task.getProcessInstanceId())
                     .singleResult();
-            //傻逼bug，够都不写
+
             if(historicProcessInstance==null)
                 break;
-            System.out.println(historicProcessInstance);
 
             SysUser startUser = sysUserService.selectUserById(Long.parseLong(historicProcessInstance.getStartUserId()));
 //            SysUser startUser = sysUserService.selectUserById(Long.parseLong(task.getAssignee()));
@@ -676,6 +674,8 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
             HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
                     .processInstanceId(histTask.getProcessInstanceId())
                     .singleResult();
+            if (historicProcessInstance==null)
+                continue;
             SysUser startUser = sysUserService.selectUserById(Long.parseLong(historicProcessInstance.getStartUserId()));
             flowTask.setStartUserId(startUser.getNickName());
             flowTask.setStartUserName(startUser.getNickName());

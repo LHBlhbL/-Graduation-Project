@@ -22,6 +22,16 @@ public class ProjectFlow extends BaseEntity
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Long projectId;
 
+    private String projectName;
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
     /** $column.columnComment */
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private String deployId;
@@ -74,6 +84,7 @@ public class ProjectFlow extends BaseEntity
             .append("projectId", getProjectId())
             .append("deployId", getDeployId())
             .append("procDefId", getProcDefId())
+                .append("projectName",getProjectName())
             .toString();
     }
 }

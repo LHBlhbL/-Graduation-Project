@@ -6,3 +6,11 @@ export function remiList(){
     method:'get'
   })
 }
+
+export function todoList(query){
+  return request({
+    url:'/reim/todoList',
+    method:'get',
+    params:query
+  })
+}

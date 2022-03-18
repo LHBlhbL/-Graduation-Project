@@ -107,6 +107,19 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/project',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'record/index',
+        component: (resolve) => require(['@/views/project/record/index'], resolve),
+        name: 'Record',
+        meta: { title: '流程处理', icon: '' }
+      }
+      ]
+  },
+  {
     path: '/flowable',
     component: Layout,
     hidden: true,

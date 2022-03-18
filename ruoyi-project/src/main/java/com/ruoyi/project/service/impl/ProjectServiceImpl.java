@@ -77,7 +77,10 @@ public class ProjectServiceImpl extends FlowServiceFactory implements IProjectSe
         {
             String deploy=list.getFlow().getDeployId();
             list.setProcName(name.get(deploy));
-            list.setVersion(version.get(deploy));
+            if (version.containsKey(deploy))
+            {
+                list.setVersion(version.get(deploy));
+            }
         }
         return returnList;
     }

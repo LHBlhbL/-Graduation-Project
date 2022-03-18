@@ -210,6 +210,7 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
 //           variables.put("skip", true);
 //           variables.put(ProcessConstants.FLOWABLE_SKIP_EXPRESSION_ENABLED, true);
             // 设置流程发起人Id到流程中
+
             SysUser sysUser = SecurityUtils.getLoginUser().getUser();
             identityService.setAuthenticatedUserId(sysUser.getUserId().toString());
             variables.put(ProcessConstants.PROCESS_INITIATOR, "");

@@ -11,16 +11,26 @@
         <result property="procDefId" column="proc_def_id"/>
     </resultMap>
 
+    <resultMap id="FlowTaskNameResult" type="FlowTaskName">
+        <result property="projectName" column="project_name"/>
+        <result property="deployId" column="deploy_id"/>
+    </resultMap>
+
     <sql id="selectProjectFlowVo">
         select id, project_id, deploy_id, proc_def_id
         from project_flow
     </sql>
 
     <select id="selectProjectFlowByPId" parameterType="long" resultMap="ProjectFlowResult">
-        <include refid="selectProjectFlowVo" />
+        <include refid="selectProjectFlowVo"/>
         <where>
             <if test="projectId != null ">and project_id = #{projectId}</if>
         </where>
+    </select>
+
+    <select id="selectProjectName" resultMap="FlowTaskNameResult">
+        select p.project_name,f.deploy_id from project_flow f
+        left join project p on f.project_id = p.project_id
     </select>
     <select id="selectProjectFlowList" parameterType="ProjectFlow" resultMap="ProjectFlowResult">
         <include refid="selectProjectFlowVo"/>

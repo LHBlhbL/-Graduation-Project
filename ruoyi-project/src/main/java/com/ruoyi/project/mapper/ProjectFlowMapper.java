@@ -1,7 +1,11 @@
 package com.ruoyi.project.mapper;
 
 import java.util.List;
+import java.util.Map;
+
+import com.ruoyi.project.domain.FlowTaskName;
 import com.ruoyi.project.domain.ProjectFlow;
+import org.apache.ibatis.annotations.MapKey;
 
 /**
  * 【请填写功能名称】Mapper接口
@@ -60,4 +64,7 @@ public interface ProjectFlowMapper
     public int deleteProjectFlowByIds(Long[] ids);
 
     public ProjectFlow selectProjectFlowByPId(Long ProjectId);
+
+
+    public List<FlowTaskName> selectProjectName();
 }

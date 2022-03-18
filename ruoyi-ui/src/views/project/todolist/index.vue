@@ -30,13 +30,13 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="projectList">
+    <el-table v-loading="loading" :data="todoList">
       <div v-if="!status">
         <el-table-column type="selection" width="55" align="center"/>
         <el-table-column label="项目编号" align="center" prop="projectId"/>
         <el-table-column label="项目部门" align="center" prop="dept.deptName"/>
-        <el-table-column label="项目名称" align="center" prop="projectName"/>
-        <el-table-column label="项目负责人" align="center" prop="principal.principalName"/>
+        <el-table-column label="项目名称" align="center" prop="startDeptName"/>
+        <el-table-column label="项目发起人" align="center" prop="startUserName"/>
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button
@@ -44,7 +44,7 @@
               type="text"
               icon="el-icon-edit"
               @click="startProcess(scope.row)"
-            >报销申请
+            >处理
             </el-button>
           </template>
         </el-table-column>
@@ -65,8 +65,7 @@
 
 <script>
 import {listProject, getProject, addProject, updateProject, userTreeselect, getProcess} from "@/api/project/list";
-import {treeselect} from "@/api/system/dept";
-import {remiList} from "@/api/project/reimbursement"
+import {todoList} from "@/api/project/reimbursement"
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 
@@ -87,6 +86,7 @@ export default {
       multiple: true,
       // 显示搜索条件
       showSearch: true,
+      todoList:[],
       // 总条数
       total: 0,
       // 【请填写功能名称】表格数据
@@ -95,19 +95,12 @@ export default {
       principalOptions: undefined,
       // 弹出层标题
       title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        deptId: null,
-        projectName: null,
-        principalId: null,
-        expensesTotal: null,
-        expensesLeft: null,
-        status: null
       },
+      // 是否显示弹出层
+      open: false,
       // 表单参数
       form: {},
       // 表单校验
@@ -116,16 +109,13 @@ export default {
   },
   created() {
     this.getList();
-    this.getDicts("sys_normal_disable").then(response => {
-      this.statusOptions = response.data;
-    });
   },
   methods: {
     /** 查询【请填写功能名称】列表 */
     getList() {
       this.loading = true;
-      remiList().then(response => {
-        this.projectList = response.rows;
+      todoList(this.queryParams).then(response => {
+        this.todoList = response.data.records;
         this.total = response.total;
         this.loading = false;
       });
@@ -173,66 +163,7 @@ export default {
       this.resetForm("queryForm");
       this.handleQuery();
     },
-    /** 查询部门下拉树结构 */
-    getTreeselect() {
-      treeselect().then(response => {
-        this.deptOptions = response.data;
-      });
-    },
-    updatePrincipals() {
-      this.getPrincipals();
-    },
-    getPrincipals() {
-      if (this.form.deptId != null) {
-        userTreeselect(this.form.deptId).then(response => {
-            this.principalOptions = response.data;
-          }
-        );
-      }
-    },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.projectId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.open = true;
-      this.title = "添加项目";
-      this.getTreeselect();
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const projectId = row.projectId || this.ids
-      getProject(projectId).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改【请填写功能名称】";
-      });
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.projectId != null) {
-            updateProject(this.form).then(response => {
-              this.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addProject(this.form).then(response => {
-              this.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
-        }
-      });
-    },
+
 
 
   }
