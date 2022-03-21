@@ -137,7 +137,7 @@ public class ProjectServiceImpl extends FlowServiceFactory implements IProjectSe
     @Override
     public List<TreeSelect> buildUserTree(Long deptId) {
         List<SysDeptUser> returnList = new ArrayList<>();
-        returnList = sysUserMapper.getNameByDept(deptId);
+    //    returnList = sysUserMapper.getNameByDept(deptId);
         return returnList.stream().map(TreeSelect::new).collect(Collectors.toList());
     }
 

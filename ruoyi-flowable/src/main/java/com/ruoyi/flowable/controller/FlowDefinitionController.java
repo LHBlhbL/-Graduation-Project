@@ -3,7 +3,7 @@ package com.ruoyi.flowable.controller;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
-import com.ruoyi.flowable.domain.dto.FlowProcDefDto;
+import com.ruoyi.system.domain.FlowProcDefDto;
 import com.ruoyi.flowable.domain.dto.FlowSaveXmlVo;
 import com.ruoyi.flowable.service.IFlowDefinitionService;
 import com.ruoyi.system.service.ISysRoleService;
@@ -55,14 +55,9 @@ public class FlowDefinitionController {
     @GetMapping(value = "/list")
     @ApiOperation(value = "流程定义列表", response = FlowProcDefDto.class)
     public AjaxResult list(@ApiParam(value = "当前页码", required = true) @RequestParam Integer pageNum,
-                           @ApiParam(value = "每页条数", required = true) @RequestParam Integer pageSize) {
-        return AjaxResult.success(flowDefinitionService.list(pageNum, pageSize));
-    }
-
-    @GetMapping("/listPro")
-    public AjaxResult listPro(@RequestParam Integer pageNum, @RequestParam Integer pageSize)
-    {
-        return AjaxResult.success(flowDefinitionService.listPro(pageNum, pageSize));
+                           @ApiParam(value = "每页条数", required = true) @RequestParam Integer pageSize,
+                           @ApiParam(value = "流程名称", required = false) @RequestParam(required = false) String name) {
+        return AjaxResult.success(flowDefinitionService.list(name,pageNum, pageSize));
     }
 
 

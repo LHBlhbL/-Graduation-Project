@@ -2,7 +2,8 @@
   <div class="app-container">
     <el-card class="box-card" >
         <div slot="header" class="clearfix">
-          <span class="el-icon-document">基础信息</span>
+          <span class="el-icon-document">{{projectName}}</span>
+          <span>基础信息</span>
           <el-button style="float: right;" type="primary" @click="goBack">返回</el-button>
         </div>
 
@@ -117,13 +118,14 @@
 <script>
 import {flowRecord} from "@/api/flowable/finished";
 import Parser from '@/components/parser/Parser'
-import {definitionStart, getProcessVariables, readXml, getFlowViewer} from "@/api/flowable/definition";
+import { getProcessVariables, readXml, getFlowViewer} from "@/api/flowable/definition";
 import {complete, rejectTask, returnList, returnTask, getNextFlowNode, delegate} from "@/api/flowable/todo";
 import flow from '@/views/flowable/task/record/flow'
 import {treeselect} from "@/api/system/dept";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import Treeselect from "@riophae/vue-treeselect";
 import {listUser} from "@/api/system/user";
+import {definitionStart} from "@/api/project/reimbursement"
 
 export default {
   name: "Record",
@@ -142,6 +144,8 @@ export default {
       deptName: undefined,
       // 部门树选项
       deptOptions: undefined,
+      projectName:undefined,
+      projectId:undefined,
       // 用户表格数据
       userList: null,
       defaultProps: {
@@ -197,6 +201,8 @@ export default {
     this.taskForm.taskId  = this.$route.query && this.$route.query.taskId;
     this.taskForm.procInsId = this.$route.query && this.$route.query.procInsId;
     this.taskForm.instanceId = this.$route.query && this.$route.query.procInsId;
+    this.projectName = this.$route.query.projectName;
+    this.projectId = this.$route.query.projectId;
     // 初始化表单
     this.taskForm.procDefId  = this.$route.query && this.$route.query.procDefId;
     // 回显流程记录
@@ -210,6 +216,7 @@ export default {
     }
     this.getFlowRecordList( this.taskForm.procInsId, this.taskForm.deployId);
     this.finished =  this.$route.query && this.$route.query.finished
+    alert(this.projectName);
   },
   mounted() {
     // // 表单数据回填，模拟异步请求场景
@@ -332,7 +339,6 @@ export default {
       if (taskId) {
         // 提交流程申请时填写的表单存入了流程变量中后续任务处理时需要展示
         getProcessVariables(taskId).then(res => {
-          // this.variables = res.data.variables;
           this.variablesData = res.data.variables;
           this.variableOpen = true
         });
@@ -432,7 +438,7 @@ export default {
         if (this.taskForm.procDefId) {
           variables.variables = formData;
            // 启动流程并将表单数据加入流程变量
-          definitionStart(this.taskForm.procDefId, JSON.stringify(variables)).then(res => {
+          definitionStart(this.taskForm.procDefId, JSON.stringify(variables),this.projectName).then(res => {
             this.msgSuccess(res.msg);
             this.goBack();
           })

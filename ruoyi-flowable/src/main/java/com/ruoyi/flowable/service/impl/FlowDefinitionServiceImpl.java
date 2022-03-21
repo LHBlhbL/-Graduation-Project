@@ -1,21 +1,25 @@
 package com.ruoyi.flowable.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.ruoyi.flowable.common.constant.ProcessConstants;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.flowable.common.enums.FlowComment;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.flowable.domain.dto.FlowProcDefDto;
+import com.ruoyi.system.domain.FlowProcDefDto;
 import com.ruoyi.flowable.factory.FlowServiceFactory;
 import com.ruoyi.flowable.service.IFlowDefinitionService;
 import com.ruoyi.flowable.service.ISysDeployFormService;
 import com.ruoyi.system.domain.SysForm;
+import com.ruoyi.system.mapper.FlowDeployMapper;
 import com.ruoyi.system.service.ISysDeptService;
 import com.ruoyi.system.service.ISysPostService;
 import com.ruoyi.system.service.ISysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.ProcessDefinition;
@@ -54,6 +58,9 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
     @Resource
     private ISysPostService postService;
 
+    @Resource
+    private FlowDeployMapper flowDeployMapper;
+
     private static final String BPMN_FILE_SUFFIX = ".bpmn";
 
     @Override
@@ -73,64 +80,43 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
      * @return 流程定义分页列表数据
      */
     @Override
-    public Page<FlowProcDefDto> list(Integer pageNum, Integer pageSize) {
+    public Page<FlowProcDefDto> list(String name, Integer pageNum, Integer pageSize) {
         Page<FlowProcDefDto> page = new Page<>();
-        // 流程定义列表数据查询
-        ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery()
-//                .latestVersion()
-                .orderByProcessDefinitionKey().asc();
-        page.setTotal(processDefinitionQuery.count());
-        List<ProcessDefinition> processDefinitionList = processDefinitionQuery.listPage(pageNum - 1, pageSize);
-
-        List<FlowProcDefDto> dataList = new ArrayList<>();
-        for (ProcessDefinition processDefinition : processDefinitionList) {
-            String deploymentId = processDefinition.getDeploymentId();
-            Deployment deployment = repositoryService.createDeploymentQuery().deploymentId(deploymentId).singleResult();
-            FlowProcDefDto reProcDef = new FlowProcDefDto();
-            BeanUtils.copyProperties(processDefinition, reProcDef);
-            SysForm sysForm = sysDeployFormService.selectSysDeployFormByDeployId(deploymentId);
+//        // 流程定义列表数据查询
+//        final ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();
+//        if (StringUtils.isNotEmpty(name)) {
+//            processDefinitionQuery.processDefinitionNameLike(name);
+//        }
+////        processDefinitionQuery.orderByProcessDefinitionKey().asc();
+//        page.setTotal(processDefinitionQuery.count());
+//        List<ProcessDefinition> processDefinitionList = processDefinitionQuery.listPage(pageSize * (pageNum - 1), pageSize);
+//
+//        List<FlowProcDefDto> dataList = new ArrayList<>();
+//        for (ProcessDefinition processDefinition : processDefinitionList) {
+//            String deploymentId = processDefinition.getDeploymentId();
+//            Deployment deployment = repositoryService.createDeploymentQuery().deploymentId(deploymentId).singleResult();
+//            FlowProcDefDto reProcDef = new FlowProcDefDto();
+//            BeanUtils.copyProperties(processDefinition, reProcDef);
+//            SysForm sysForm = sysDeployFormService.selectSysDeployFormByDeployId(deploymentId);
+//            if (Objects.nonNull(sysForm)) {
+//                reProcDef.setFormName(sysForm.getFormName());
+//                reProcDef.setFormId(sysForm.getFormId());
+//            }
+//            // 流程定义时间
+//            reProcDef.setDeploymentTime(deployment.getDeploymentTime());
+//            dataList.add(reProcDef);
+//        }
+        PageHelper.startPage(pageNum, pageSize);
+        final List<FlowProcDefDto> dataList = flowDeployMapper.selectDeployList(name);
+        // 加载挂表单
+        for (FlowProcDefDto procDef : dataList) {
+            SysForm sysForm = sysDeployFormService.selectSysDeployFormByDeployId(procDef.getDeploymentId());
             if (Objects.nonNull(sysForm)) {
-                reProcDef.setFormName(sysForm.getFormName());
-                reProcDef.setFormId(sysForm.getFormId());
+                procDef.setFormName(sysForm.getFormName());
+                procDef.setFormId(sysForm.getFormId());
             }
-            // 流程定义时间
-            reProcDef.setDeploymentTime(deployment.getDeploymentTime());
-            dataList.add(reProcDef);
         }
-        page.setRecords(dataList);
-        return page;
-    }
-
-
-    public Page<FlowProcDefDto> listPro(Integer pageNum, Integer pageSize) {
-        Page<FlowProcDefDto> page = new Page<>();
-        // 流程定义列表数据查询
-        ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery()
-//                .latestVersion()
-                .orderByProcessDefinitionKey().asc();
-        page.setTotal(processDefinitionQuery.count());
-        List<ProcessDefinition> processDefinitionList = processDefinitionQuery.listPage(pageNum - 1, pageSize);
-
-        List<FlowProcDefDto> dataList = new ArrayList<>();
-        for (ProcessDefinition processDefinition : processDefinitionList) {
-            String deploymentId = processDefinition.getDeploymentId();
-            Deployment deployment = repositoryService.createDeploymentQuery().deploymentId(deploymentId).singleResult();
-            FlowProcDefDto reProcDef = new FlowProcDefDto();
-            BeanUtils.copyProperties(processDefinition, reProcDef);
-            SysForm sysForm = sysDeployFormService.selectSysDeployFormByDeployId(deploymentId);
-            if (Objects.nonNull(sysForm)) {
-                reProcDef.setFormName(sysForm.getFormName());
-                reProcDef.setFormId(sysForm.getFormId());
-            }
-            // 流程定义时间
-            reProcDef.setDeploymentTime(deployment.getDeploymentTime());
-
-            if(reProcDef.getFormId()!=null)
-            {
-                dataList.add(reProcDef);
-            }
-
-        }
+        page.setTotal(new PageInfo(dataList).getTotal());
         page.setRecords(dataList);
         return page;
     }
@@ -210,7 +196,6 @@ public class FlowDefinitionServiceImpl extends FlowServiceFactory implements IFl
 //           variables.put("skip", true);
 //           variables.put(ProcessConstants.FLOWABLE_SKIP_EXPRESSION_ENABLED, true);
             // 设置流程发起人Id到流程中
-
             SysUser sysUser = SecurityUtils.getLoginUser().getUser();
             identityService.setAuthenticatedUserId(sysUser.getUserId().toString());
             variables.put(ProcessConstants.PROCESS_INITIATOR, "");

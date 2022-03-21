@@ -4,11 +4,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.flowable.common.constant.ProcessConstants;
+import com.ruoyi.flowable.common.enums.FlowComment;
 import com.ruoyi.flowable.domain.dto.FlowTaskDto;
 import com.ruoyi.flowable.factory.FlowServiceFactory;
 import com.ruoyi.project.domain.FlowTask;
 import com.ruoyi.project.domain.FlowTaskName;
+import com.ruoyi.project.domain.ProjectUserList;
 import com.ruoyi.project.mapper.ProjectFlowMapper;
+import com.ruoyi.project.mapper.ProjectUserMapper;
 import com.ruoyi.project.service.IFlowProcessService;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.service.ISysUserService;
@@ -16,6 +20,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
@@ -28,8 +33,6 @@ import java.util.*;
 @Service
 public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowProcessService {
 
-    @Autowired
-    private TokenService tokenService;
 
     @Resource
     private ISysUserService sysUserService;
@@ -37,10 +40,9 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
     @Autowired
     private ProjectFlowMapper flowMapper;
 
-    @Override
-    public AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables) {
-        return null;
-    }
+    @Autowired
+    private ProjectUserMapper userMapper;
+
 
     @Override
     public AjaxResult processList(Integer pageNum, Integer pageSize) {
@@ -137,6 +139,40 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         page.setRecords(flowList);
         return AjaxResult.success(page);
     }
+
+    @Override
+    public AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables) {
+        try {
+            ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(procDefId)
+                    .latestVersion().singleResult();
+            if (Objects.nonNull(processDefinition) && processDefinition.isSuspended()) {
+                return AjaxResult.error("流程已被挂起,请先激活流程");
+            }
+//           variables.put("skip", true);
+//           variables.put(ProcessConstants.FLOWABLE_SKIP_EXPRESSION_ENABLED, true);
+            // 设置流程发起人Id到流程中
+
+            long money = (long)variables.get("money");
+
+            SysUser sysUser = SecurityUtils.getLoginUser().getUser();
+            identityService.setAuthenticatedUserId(sysUser.getUserId().toString());
+            variables.put(ProcessConstants.PROCESS_INITIATOR, "");
+            ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId, variables);
+            // 给第一步申请人节点设置任务执行人和意见 todo:第一个节点不设置为申请人节点有点问题？
+            Task task = taskService.createTaskQuery().processInstanceId(processInstance.getProcessInstanceId()).singleResult();
+            if (Objects.nonNull(task)) {
+                taskService.addComment(task.getId(), processInstance.getProcessInstanceId(), FlowComment.NORMAL.getType(), sysUser.getNickName() + "发起流程申请");
+//                taskService.setAssignee(task.getId(), sysUser.getUserId().toString());
+                taskService.complete(task.getId(), variables);
+            }
+            String processInstanceId = task.getProcessInstanceId();
+            return AjaxResult.success("流程启动成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error("流程启动错误");
+        }
+    }
+
 
     private String getDate(long ms) {
 

@@ -2,7 +2,7 @@ package com.ruoyi.flowable.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.flowable.domain.dto.FlowProcDefDto;
+import com.ruoyi.system.domain.FlowProcDefDto;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,9 +24,7 @@ public interface IFlowDefinitionService {
      * @param pageSize 每页条数
      * @return 流程定义分页列表数据
      */
-    Page<FlowProcDefDto> list(Integer pageNum, Integer pageSize);
-
-    public Page<FlowProcDefDto> listPro(Integer pageNum, Integer pageSize);
+    Page<FlowProcDefDto> list(String name,Integer pageNum, Integer pageSize);
 
     /**
      * 导入流程文件

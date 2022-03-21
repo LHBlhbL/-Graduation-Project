@@ -14,3 +14,11 @@ export function todoList(query){
     params:query
   })
 }
+
+export function definitionStart(procDefId,data,projectName) {
+  return request({
+    url: '/reim/definition/start/' + procDefId,
+    method: 'post',
+    data: {data,projectName}
+  })
+}

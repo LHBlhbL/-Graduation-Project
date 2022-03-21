@@ -14,6 +14,11 @@ public class ProcessConstants {
     public static final String DATA_TYPE = "dynamic";
 
     /**
+     * 固定任务接收
+     */
+    public static final String FIXED = "fixed";
+
+    /**
      * 单个审批人
      */
     public static final String USER_TYPE_ASSIGNEE = "assignee";
