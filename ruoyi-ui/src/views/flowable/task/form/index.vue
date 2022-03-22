@@ -231,9 +231,6 @@ export default {
     },
     /** 新增按钮操作 */
     handleAdd() {
-      // this.reset();
-      // this.open = true;
-      // this.title = "添加流程表单";
       this.$router.push({ path: '/tool/build/index', query: {formId: null }})
     },
     /** 修改按钮操作 */

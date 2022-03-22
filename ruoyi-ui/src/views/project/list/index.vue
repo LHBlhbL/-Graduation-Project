@@ -51,7 +51,14 @@
       <el-table-column label="项目负责人" align="center" prop="principal.principalName" />
       <el-table-column label="项目经费" align="center" prop="expensesTotal" />
       <el-table-column label="剩余经费" align="center" prop="expensesLeft" />
-      <el-table-column label="流程名称" align="center" prop="procName" />
+      <el-table-column label="流程名称" align="center"  >
+        <template slot-scope="scope">
+          <el-button v-if="scope.row.version" type="text" >
+            <span>{{ scope.row.procName }}</span>
+          </el-button>
+          <label v-else>未配置流程</label>
+        </template>
+      </el-table-column>
       <el-table-column label="流程版本" align="center" width="80px">
         <template slot-scope="scope">
           <el-tag size="medium" >v{{ scope.row.version }}</el-tag>
@@ -167,9 +174,8 @@
 </template>
 
 <script>
-import { listProject, changeProjectStatus,getProject, delProject, addProject, updateProject, exportProject,userTreeselect,addProjectPro } from "@/api/project/list";
+import { listProject,listDefinitionFlow, changeProjectStatus,getProject, delProject, addProject, updateProject, exportProject,userTreeselect,addProjectPro } from "@/api/project/list";
 import { treeselect } from "@/api/system/dept";
-import {listDefinitionPro} from "@/api/flowable/definition";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 export default {
@@ -369,7 +375,7 @@ export default {
       this.listDefinition();
     },
     listDefinition(){
-      listDefinitionPro(this.queryParamsCon).then(response => {
+      listDefinitionFlow(this.queryParamsCon).then(response => {
         this.definitionList = response.data.records;
         this.processTotal = response.data.total;
         this.processLoading = false;

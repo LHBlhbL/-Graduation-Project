@@ -2,11 +2,11 @@ package com.ruoyi.project.controller;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.flowable.domain.dto.FlowTaskDto;
 import com.ruoyi.project.domain.Project;
+import com.ruoyi.project.domain.ProjectUserList;
 import com.ruoyi.project.service.IFlowProcessService;
+import com.ruoyi.project.service.IProjectUserService;
 import com.ruoyi.project.service.IRemiService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -26,6 +26,9 @@ public class ReimController extends BaseController {
 
     @Autowired
     private IFlowProcessService processService;
+
+    @Autowired
+    private IProjectUserService service;
 
 
     @GetMapping("/list")
@@ -48,14 +51,18 @@ public class ReimController extends BaseController {
     }
 
     @ApiOperation(value = "根据流程定义id启动流程实例")
-    @PostMapping("/definition/start/{procDefId}")
+    @PostMapping("/definition/start/{procDefId}/{projectId}")
     public AjaxResult start(@ApiParam(value = "流程定义id") @PathVariable(value = "procDefId") String procDefId,
-                            @ApiParam(value = "变量集合,json对象") @RequestBody Map<String, Object> variables,
-                            @RequestBody String projectName) {
-        System.out.println(projectName+"}}}");
+                            @PathVariable(value = "projectId") Long projectId,
+                            @ApiParam(value = "变量集合,json对象") @RequestBody Map<String,Object> variables) {
+        return processService.startProcessInstanceById(procDefId, variables,projectId);
 
-        return processService.startProcessInstanceById(procDefId, variables);
+    }
 
+    @PutMapping("/process/start")
+    public AjaxResult startProcess(@RequestBody ProjectUserList list)
+    {
+        return AjaxResult.success(service.insertProjectUser(list));
     }
 
 }

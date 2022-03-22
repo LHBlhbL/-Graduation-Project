@@ -100,10 +100,11 @@ export function getProcess(projectId)
 }
 
 // 查询流程定义列表
-export function listDefinitionPro(query) {
+export function listDefinitionFlow(query) {
   return request({
     url: '/project/definition/list',
     method: 'get',
     params: query
   })
 }
+

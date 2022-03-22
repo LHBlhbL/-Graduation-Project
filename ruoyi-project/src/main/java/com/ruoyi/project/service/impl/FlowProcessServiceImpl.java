@@ -8,10 +8,9 @@ import com.ruoyi.flowable.common.constant.ProcessConstants;
 import com.ruoyi.flowable.common.enums.FlowComment;
 import com.ruoyi.flowable.domain.dto.FlowTaskDto;
 import com.ruoyi.flowable.factory.FlowServiceFactory;
-import com.ruoyi.project.domain.FlowTask;
-import com.ruoyi.project.domain.FlowTaskName;
-import com.ruoyi.project.domain.ProjectUserList;
+import com.ruoyi.project.domain.*;
 import com.ruoyi.project.mapper.ProjectFlowMapper;
+import com.ruoyi.project.mapper.ProjectMapper;
 import com.ruoyi.project.mapper.ProjectUserMapper;
 import com.ruoyi.project.service.IFlowProcessService;
 import com.ruoyi.framework.web.service.TokenService;
@@ -41,7 +40,10 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
     private ProjectFlowMapper flowMapper;
 
     @Autowired
-    private ProjectUserMapper userMapper;
+    private ProjectMapper projectMapper;
+
+    @Autowired
+    private ProjectUserMapper projectUserMapper;
 
 
     @Override
@@ -141,8 +143,17 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
     }
 
     @Override
-    public AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables) {
+    public AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables,Long projectId) {
         try {
+
+            Project project = projectMapper.selectProjectById(projectId);
+            ProjectUserList projectUserList = new ProjectUserList();
+            projectUserList.setProjectId(projectId);
+            if(projectUserMapper.selectProjectUserList(projectUserList)!=null)
+                throw new Exception();
+
+
+
             ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(procDefId)
                     .latestVersion().singleResult();
             if (Objects.nonNull(processDefinition) && processDefinition.isSuspended()) {
@@ -152,7 +163,6 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
 //           variables.put(ProcessConstants.FLOWABLE_SKIP_EXPRESSION_ENABLED, true);
             // 设置流程发起人Id到流程中
 
-            long money = (long)variables.get("money");
 
             SysUser sysUser = SecurityUtils.getLoginUser().getUser();
             identityService.setAuthenticatedUserId(sysUser.getUserId().toString());
@@ -162,11 +172,16 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             Task task = taskService.createTaskQuery().processInstanceId(processInstance.getProcessInstanceId()).singleResult();
             if (Objects.nonNull(task)) {
                 taskService.addComment(task.getId(), processInstance.getProcessInstanceId(), FlowComment.NORMAL.getType(), sysUser.getNickName() + "发起流程申请");
-//                taskService.setAssignee(task.getId(), sysUser.getUserId().toString());
                 taskService.complete(task.getId(), variables);
             }
-            String processInstanceId = task.getProcessInstanceId();
-            return AjaxResult.success("流程启动成功");
+
+            ProjectUserList userList = new ProjectUserList();
+            userList.setUserId(sysUser.getUserId());
+            userList.setProjectId(projectId);
+            userList.setProcInsId(task.getProcessInstanceId());
+            userList.setProjectName(project.getProjectName());
+            projectUserMapper.insertProjectUser(userList);
+            return AjaxResult.success("报销启动成功");
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.error("流程启动错误");

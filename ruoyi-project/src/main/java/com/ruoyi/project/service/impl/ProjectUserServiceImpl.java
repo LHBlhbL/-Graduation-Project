@@ -2,6 +2,8 @@ package com.ruoyi.project.service.impl;
 
 import java.util.List;
 
+import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.project.domain.ProjectUserList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,8 @@ public class ProjectUserServiceImpl implements IProjectUserService
     @Override
     public int insertProjectUser(ProjectUserList projectUser)
     {
+        SysUser sysUser = SecurityUtils.getLoginUser().getUser();
+        projectUser.setUserId(sysUser.getUserId());
         return projectUserMapper.insertProjectUser(projectUser);
     }
 

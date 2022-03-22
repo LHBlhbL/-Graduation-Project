@@ -6,7 +6,7 @@ import java.util.Map;
 
 public interface IFlowProcessService {
 
-     AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables);
+     AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables,Long proojectId);
 
      AjaxResult processList(Integer pageNum, Integer pageSize);
 

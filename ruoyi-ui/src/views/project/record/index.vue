@@ -125,7 +125,7 @@ import {treeselect} from "@/api/system/dept";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import Treeselect from "@riophae/vue-treeselect";
 import {listUser} from "@/api/system/user";
-import {definitionStart} from "@/api/project/reimbursement"
+import {definitionStart,startProcess} from "@/api/project/reimbursement"
 
 export default {
   name: "Record",
@@ -216,7 +216,6 @@ export default {
     }
     this.getFlowRecordList( this.taskForm.procInsId, this.taskForm.deployId);
     this.finished =  this.$route.query && this.$route.query.finished
-    alert(this.projectName);
   },
   mounted() {
     // // 表单数据回填，模拟异步请求场景
@@ -438,7 +437,7 @@ export default {
         if (this.taskForm.procDefId) {
           variables.variables = formData;
            // 启动流程并将表单数据加入流程变量
-          definitionStart(this.taskForm.procDefId, JSON.stringify(variables),this.projectName).then(res => {
+          definitionStart( this.taskForm.procDefId,JSON.stringify(variables),this.projectId).then(res => {
             this.msgSuccess(res.msg);
             this.goBack();
           })
