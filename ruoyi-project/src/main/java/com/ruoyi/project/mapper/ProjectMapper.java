@@ -2,6 +2,7 @@ package com.ruoyi.project.mapper;
 
 import java.util.List;
 import com.ruoyi.project.domain.Project;
+import com.ruoyi.project.domain.ProjectDeptUser;
 
 /**
  * 【请填写功能名称】Mapper接口
@@ -60,4 +61,6 @@ public interface ProjectMapper
     public int deleteProjectByIds(Long[] projectIds);
 
     public List<Project> selectRemiList();
+
+    public List<ProjectDeptUser> selectUserName(Long deptId);
 }

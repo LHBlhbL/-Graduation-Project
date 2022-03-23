@@ -63,6 +63,8 @@ public interface ProjectFlowMapper
      */
     public int deleteProjectFlowByIds(Long[] ids);
 
+    public int deleteProjectFlowByProjectId(Long id);
+
     public ProjectFlow selectProjectFlowByPId(Long ProjectId);
 
 

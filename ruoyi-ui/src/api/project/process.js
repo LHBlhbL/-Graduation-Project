@@ -7,3 +7,11 @@ export function processList(query) {
     params: query
   })
 }
+
+export function complete(data,projectId) {
+  return request({
+    url: '/reim/task/complete/'+projectId,
+    method: 'post',
+    data: data
+  })
+}

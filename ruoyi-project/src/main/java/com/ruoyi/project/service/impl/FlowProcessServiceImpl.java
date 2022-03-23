@@ -7,6 +7,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.flowable.common.constant.ProcessConstants;
 import com.ruoyi.flowable.common.enums.FlowComment;
 import com.ruoyi.flowable.domain.dto.FlowTaskDto;
+import com.ruoyi.flowable.domain.vo.FlowTaskVo;
 import com.ruoyi.flowable.factory.FlowServiceFactory;
 import com.ruoyi.project.domain.*;
 import com.ruoyi.project.mapper.ProjectFlowMapper;
@@ -20,11 +21,13 @@ import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.task.api.DelegationState;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -119,6 +122,7 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         for (Task task : taskList) {
             FlowTask flowTask = new FlowTask();
             // 流程定义信息
+            flowTask.setTaskId(task.getId());
             ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
                     .processDefinitionId(task.getProcessDefinitionId())
                     .singleResult();
@@ -127,19 +131,63 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             flowTask.setProcDefVersion(pd.getVersion());
             flowTask.setProcInsId(task.getProcessInstanceId());
 
+            ProjectUserList userList = new ProjectUserList();
+            userList.setProcInsId(task.getProcessInstanceId());
+
+            List<ProjectUserList> lists = projectUserMapper.selectProjectUserList(userList);
+
+            flowTask.setProjectName(lists.get(0).getProjectName());
+            flowTask.setProjectId(lists.get(0).getProjectId());
+
             // 流程发起人信息
             HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
                     .processInstanceId(task.getProcessInstanceId())
                     .singleResult();
 
             SysUser startUser = sysUserService.selectUserById(Long.parseLong(historicProcessInstance.getStartUserId()));
-            flowTask.setStartUserId(startUser.getNickName());
             flowTask.setStartUserName(startUser.getNickName());
-            flowTask.setStartDeptName(startUser.getDept().getDeptName());
             flowList.add(flowTask);
         }
         page.setRecords(flowList);
         return AjaxResult.success(page);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public AjaxResult complete(FlowTaskVo taskVo,Long projectId) {
+        Task task = taskService.createTaskQuery().taskId(taskVo.getTaskId()).singleResult();
+        if (Objects.isNull(task)) {
+            return AjaxResult.error("任务不存在");
+        }
+        if (DelegationState.PENDING.equals(task.getDelegationState())) {
+            taskService.addComment(taskVo.getTaskId(), taskVo.getInstanceId(), FlowComment.DELEGATE.getType(), taskVo.getComment());
+            taskService.resolveTask(taskVo.getTaskId(), taskVo.getValues());
+        } else {
+            taskService.addComment(taskVo.getTaskId(), taskVo.getInstanceId(), FlowComment.NORMAL.getType(), taskVo.getComment());
+            Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
+            taskService.setAssignee(taskVo.getTaskId(), userId.toString());
+            taskService.complete(taskVo.getTaskId(), taskVo.getValues());
+            HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskVo.getTaskId()).singleResult();
+            if (Objects.nonNull(historicTaskInstance)) {
+                Map<String, Object> processVariables = historicTaskInstance.getProcessVariables();
+                Object time = processVariables.get("time");
+                Project project = projectMapper.selectProjectById(projectId);
+                project.setExpensesLeft(project.getExpensesLeft()-(Long) time);
+                projectMapper.updateProject(project);
+            }
+        }
+        return AjaxResult.success();
+    }
+
+    public AjaxResult processVariables(String taskId) {
+        // 流程变量
+        HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskId).singleResult();
+        if (Objects.nonNull(historicTaskInstance)) {
+            return AjaxResult.success(historicTaskInstance.getProcessVariables());
+        } else {
+            Map<String, Object> variables = taskService.getVariables(taskId);
+            return AjaxResult.success(variables);
+        }
     }
 
     @Override
@@ -149,7 +197,8 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             Project project = projectMapper.selectProjectById(projectId);
             ProjectUserList projectUserList = new ProjectUserList();
             projectUserList.setProjectId(projectId);
-            if(projectUserMapper.selectProjectUserList(projectUserList)!=null)
+            List<ProjectUserList> projectUserLists = projectUserMapper.selectProjectUserList(projectUserList);
+            if(projectUserLists.size()!=0)
                 throw new Exception();
 
 

@@ -34,9 +34,8 @@
       <div v-if="!status">
         <el-table-column type="selection" width="55" align="center"/>
         <el-table-column label="项目编号" align="center" prop="projectId"/>
-        <el-table-column label="项目部门" align="center" prop="dept.deptName"/>
-        <el-table-column label="项目名称" align="center" prop="startDeptName"/>
-        <el-table-column label="项目发起人" align="center" prop="startUserName"/>
+        <el-table-column label="项目名称" align="center" prop="projectName"/>
+        <el-table-column label="报销发起人" align="center" prop="startUserName"/>
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button
@@ -86,7 +85,7 @@ export default {
       multiple: true,
       // 显示搜索条件
       showSearch: true,
-      todoList:[],
+      todoList: [],
       // 总条数
       total: 0,
       // 【请填写功能名称】表格数据
@@ -144,18 +143,16 @@ export default {
       this.getList();
     },
     startProcess(row) {
-      getProcess(row.projectId).then(response => {
-        this.$router.push({
-          path: '/project/record/index',
-          query: {
-            deployId: response.data.deployId,
-            procDefId: response.data.procDefId,
-            projectId: row.projectId,
-            projectName:row.projectName,
-            finished: true
-          }
-        })
-      });
+      this.$router.push({
+        path: '/project/record/index',
+        query: {
+          procInsId: row.procInsId,
+          deployId: row.deployId,
+          taskId: row.taskId,
+          projectId:row.projectId,
+          finished: true
+        }
+      })
 
     },
     /** 重置按钮操作 */
@@ -163,7 +160,6 @@ export default {
       this.resetForm("queryForm");
       this.handleQuery();
     },
-
 
 
   }

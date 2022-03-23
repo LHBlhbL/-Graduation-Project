@@ -16,6 +16,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select id, user_id, project_id, project_name, proc_ins_id from project_user
     </sql>
 
+
     <select id="selectProjectUserList" parameterType="ProjectUserList" resultMap="ProjectUserResult">
         <include refid="selectProjectUserVo"/>
         <where>  

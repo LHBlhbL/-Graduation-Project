@@ -94,9 +94,13 @@ public class ProjectController extends BaseController {
      * 删除【请填写功能名称】
      */
     @Log(title = "【请填写功能名称】", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{projectIds}")
-    public AjaxResult remove(@PathVariable Long[] projectIds) {
-        return toAjax(projectService.deleteProjectByIds(projectIds));
+    @DeleteMapping("/{projectId}")
+    public AjaxResult remove(@PathVariable Long projectId) {
+        int result = projectService.deleteProjectById(projectId);
+        if(result==0)
+            return AjaxResult.error("删除失败,存在未完成报销");
+        else
+            return AjaxResult.success("删除成功");
     }
 
     @GetMapping(value = "/userTreeselect/{deptId}")

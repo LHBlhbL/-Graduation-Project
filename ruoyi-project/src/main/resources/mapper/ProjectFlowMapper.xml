@@ -77,6 +77,12 @@
         where id = #{id}
     </delete>
 
+    <delete id="deleteProjectFlowByProjectId" parameterType="Long">
+        delete
+        from project_flow
+        where project_id = #{id}
+    </delete>
+
     <delete id="deleteProjectFlowByIds" parameterType="String">
         delete from project_flow where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">

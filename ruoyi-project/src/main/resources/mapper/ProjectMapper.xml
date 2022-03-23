@@ -17,6 +17,12 @@
         <association property="flow" column="project_id" javaType="ProjectFlow" resultMap="ProjectFlowResult"/>
     </resultMap>
 
+
+    <resultMap id="DeptName" type="ProjectDeptUser">
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="nick_name"/>
+    </resultMap>
+
     <resultMap type="ProjectFlow" id="ProjectFlowResult">
         <result property="id" column="id"/>
         <result property="projectId" column="project_id"/>
@@ -43,6 +49,13 @@
         select project_id, dept_id, project_name, principal_id, expenses_total, expenses_left, status
         from project
     </sql>
+
+    <select id="selectUserName" parameterType="long" resultMap="DeptName">
+        select user_id,nick_name from sys_user
+        <where>
+            dept_id=#{deptId}
+        </where>
+    </select>
 
     <select id="selectProjectList" parameterType="Project" resultMap="ProjectResult">
         select p.project_id, p.dept_id, p.project_name, p.principal_id, p.expenses_total, p.expenses_left, p.status,

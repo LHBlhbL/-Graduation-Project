@@ -4,7 +4,10 @@ import java.util.List;
 
 import com.ruoyi.common.core.domain.TreeSelect;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.project.core.NameSelect;
 import com.ruoyi.project.domain.Project;
+
+import javax.naming.Name;
 
 /**
  * 【请填写功能名称】Service接口
@@ -62,7 +65,7 @@ public interface IProjectService
      */
     public int deleteProjectById(Long projectId);
 
-    public List<TreeSelect> buildUserTree(Long deptId);
+    public List<NameSelect> buildUserTree(Long deptId);
 
     public int updateProjectStatus(Project project);
 }

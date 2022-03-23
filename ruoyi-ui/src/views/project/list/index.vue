@@ -356,16 +356,16 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const projectIds = row.projectId || this.ids;
+      const projectIds = row.projectId;
       this.$confirm('是否确认删除【请填写功能名称】编号为"' + projectIds + '"的数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
         }).then(function() {
           return delProject(projectIds);
-        }).then(() => {
+        }).then((res) => {
           this.getList();
-          this.msgSuccess("删除成功");
+          this.msg(res.msg);
         })
     },
     handleConfigure(row){

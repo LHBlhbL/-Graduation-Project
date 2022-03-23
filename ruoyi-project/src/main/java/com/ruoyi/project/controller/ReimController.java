@@ -3,6 +3,7 @@ package com.ruoyi.project.controller;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.flowable.domain.vo.FlowTaskVo;
 import com.ruoyi.project.domain.Project;
 import com.ruoyi.project.domain.ProjectUserList;
 import com.ruoyi.project.service.IFlowProcessService;
@@ -63,6 +64,12 @@ public class ReimController extends BaseController {
     public AjaxResult startProcess(@RequestBody ProjectUserList list)
     {
         return AjaxResult.success(service.insertProjectUser(list));
+    }
+
+    @ApiOperation(value = "审批任务")
+    @PostMapping(value = "/task/complete/{projectId}")
+    public AjaxResult complete(@RequestBody FlowTaskVo flowTaskVo,@PathVariable(value = "projectId")Long projectId) {
+        return processService.complete(flowTaskVo,projectId);
     }
 
 }

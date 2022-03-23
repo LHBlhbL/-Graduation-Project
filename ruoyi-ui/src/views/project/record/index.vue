@@ -71,7 +71,7 @@
 
     <!--审批正常流程-->
     <el-dialog :title="completeTitle" :visible.sync="completeOpen" width="60%" append-to-body>
-      <span slot="footer" class="dialog-footer">
+      <span>
         <el-input style="width: 50%;margin-right: 34%" type="textarea" v-model="taskForm.comment" placeholder="请输入处理意见"/>
         <el-button @click="completeOpen = false">取 消</el-button>
         <el-button type="primary" @click="taskComplete">确 定</el-button>
@@ -119,13 +119,14 @@
 import {flowRecord} from "@/api/flowable/finished";
 import Parser from '@/components/parser/Parser'
 import { getProcessVariables, readXml, getFlowViewer} from "@/api/flowable/definition";
-import {complete, rejectTask, returnList, returnTask, getNextFlowNode, delegate} from "@/api/flowable/todo";
+import { rejectTask, returnList, returnTask, getNextFlowNode, delegate} from "@/api/flowable/todo";
 import flow from '@/views/flowable/task/record/flow'
 import {treeselect} from "@/api/system/dept";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import Treeselect from "@riophae/vue-treeselect";
 import {listUser} from "@/api/system/user";
 import {definitionStart,startProcess} from "@/api/project/reimbursement"
+import {complete} from "@/api/project/process"
 
 export default {
   name: "Record",
@@ -374,7 +375,6 @@ export default {
     handleComplete() {
       this.completeOpen = true;
       this.completeTitle = "审批流程";
-      this.getTreeselect();
     },
     /** 审批任务 */
     taskComplete() {
@@ -386,7 +386,7 @@ export default {
         this.msgError("请输入审批意见");
         return;
       }
-      complete(this.taskForm).then(response => {
+      complete(this.taskForm,this.projectId).then(response => {
         this.msgSuccess(response.msg);
         this.goBack();
       });
