@@ -59,4 +59,6 @@ public interface ProjectUserMapper
      * @return 结果
      */
     public int deleteProjectUserByIds(Long[] ids);
+
+    public int deleteProjectUser(Long projectId,Long userId);
 }

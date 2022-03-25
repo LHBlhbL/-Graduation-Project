@@ -47,7 +47,7 @@
               <el-dropdown-item icon="el-icon-tickets" @click.native="handleFlowRecord(scope.row)">
                 详情
               </el-dropdown-item>
-              <el-dropdown-item icon="el-icon-circle-close" @click.native="handleStop(scope.row)">
+              <el-dropdown-item v-if="scope.row.finishTime == null" icon="el-icon-circle-close" @click.native="handleStop(scope.row)">
                 取消申请
               </el-dropdown-item>
             </el-dropdown-menu>

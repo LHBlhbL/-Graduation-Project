@@ -11,6 +11,7 @@ import com.ruoyi.flowable.domain.vo.FlowTaskVo;
 import com.ruoyi.flowable.factory.FlowServiceFactory;
 import com.ruoyi.project.domain.*;
 import com.ruoyi.project.mapper.ProjectFlowMapper;
+import com.ruoyi.project.mapper.ProjectHistoryMapper;
 import com.ruoyi.project.mapper.ProjectMapper;
 import com.ruoyi.project.mapper.ProjectUserMapper;
 import com.ruoyi.project.service.IFlowProcessService;
@@ -47,6 +48,9 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
 
     @Autowired
     private ProjectUserMapper projectUserMapper;
+
+    @Autowired
+    private ProjectHistoryMapper projectHistoryMapper;
 
 
     @Override
@@ -134,10 +138,14 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             ProjectUserList userList = new ProjectUserList();
             userList.setProcInsId(task.getProcessInstanceId());
 
-            List<ProjectUserList> lists = projectUserMapper.selectProjectUserList(userList);
 
-            flowTask.setProjectName(lists.get(0).getProjectName());
-            flowTask.setProjectId(lists.get(0).getProjectId());
+            List<ProjectUserList> lists = projectUserMapper.selectProjectUserList(userList);
+            if(lists.size()!=0)
+            {
+                flowTask.setProjectName(lists.get(0).getProjectName());
+                flowTask.setProjectId(lists.get(0).getProjectId());
+            }
+
 
             // 流程发起人信息
             HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
@@ -170,10 +178,17 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskVo.getTaskId()).singleResult();
             if (Objects.nonNull(historicTaskInstance)) {
                 Map<String, Object> processVariables = historicTaskInstance.getProcessVariables();
-                Object time = processVariables.get("time");
+                ProjectHistory projectHistory = new ProjectHistory();
+                String time = (String) processVariables.get("time");
                 Project project = projectMapper.selectProjectById(projectId);
-                project.setExpensesLeft(project.getExpensesLeft()-(Long) time);
+                project.setExpensesLeft(project.getExpensesLeft()- Long.parseLong(time));
                 projectMapper.updateProject(project);
+                projectUserMapper.deleteProjectUser(projectId,userId);
+                projectHistory.setProjectId(projectId);
+                projectHistory.setHisTaskId(historicTaskInstance.getId());
+                projectHistory.setMoney(Long.parseLong(time));
+                projectHistory.setUserId(userId);
+                projectHistoryMapper.insertProjectHistory(projectHistory);
             }
         }
         return AjaxResult.success();
@@ -193,13 +208,14 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
     @Override
     public AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables,Long projectId) {
         try {
-
+            SysUser sysUser = SecurityUtils.getLoginUser().getUser();
             Project project = projectMapper.selectProjectById(projectId);
             ProjectUserList projectUserList = new ProjectUserList();
             projectUserList.setProjectId(projectId);
+            projectUserList.setUserId(sysUser.getUserId());
             List<ProjectUserList> projectUserLists = projectUserMapper.selectProjectUserList(projectUserList);
             if(projectUserLists.size()!=0)
-                throw new Exception();
+                throw new NullPointerException();
 
 
 
@@ -213,7 +229,6 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             // 设置流程发起人Id到流程中
 
 
-            SysUser sysUser = SecurityUtils.getLoginUser().getUser();
             identityService.setAuthenticatedUserId(sysUser.getUserId().toString());
             variables.put(ProcessConstants.PROCESS_INITIATOR, "");
             ProcessInstance processInstance = runtimeService.startProcessInstanceById(procDefId, variables);
@@ -231,7 +246,13 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             userList.setProjectName(project.getProjectName());
             projectUserMapper.insertProjectUser(userList);
             return AjaxResult.success("报销启动成功");
-        } catch (Exception e) {
+        }
+        catch (NullPointerException exception)
+        {
+            exception.printStackTrace();
+            return AjaxResult.error("报销流程进行中");
+        }
+        catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.error("流程启动错误");
         }

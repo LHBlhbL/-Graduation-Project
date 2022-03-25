@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.mapper.ProjectHistoryMapper">
+    
+    <resultMap type="ProjectHistory" id="ProjectHistoryResult">
+        <result property="id"    column="id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="money"    column="money"    />
+        <result property="hisTaskId"    column="his_task_id"    />
+        <result property="userId"    column="user_id"    />
+    </resultMap>
+
+    <sql id="selectProjectHistoryVo">
+        select id, project_id, money, his_task_id, user_id from project_history
+    </sql>
+
+    <select id="selectProjectHistoryList" parameterType="ProjectHistory" resultMap="ProjectHistoryResult">
+        <include refid="selectProjectHistoryVo"/>
+        <where>  
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="money != null "> and money = #{money}</if>
+            <if test="hisTaskId != null  and hisTaskId != ''"> and his_task_id = #{hisTaskId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+        </where>
+    </select>
+    
+    <select id="selectProjectHistoryById" parameterType="Long" resultMap="ProjectHistoryResult">
+        <include refid="selectProjectHistoryVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertProjectHistory" parameterType="ProjectHistory">
+        insert into project_history
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="money != null">money,</if>
+            <if test="hisTaskId != null">his_task_id,</if>
+            <if test="userId != null">user_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="money != null">#{money},</if>
+            <if test="hisTaskId != null">#{hisTaskId},</if>
+            <if test="userId != null">#{userId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateProjectHistory" parameterType="ProjectHistory">
+        update project_history
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="money != null">money = #{money},</if>
+            <if test="hisTaskId != null">his_task_id = #{hisTaskId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteProjectHistoryById" parameterType="Long">
+        delete from project_history where id = #{id}
+    </delete>
+
+    <delete id="deleteProjectHistoryByIds" parameterType="String">
+        delete from project_history where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

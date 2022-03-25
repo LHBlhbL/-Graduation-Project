@@ -63,6 +63,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         delete from project_user where id = #{id}
     </delete>
 
+    <delete id="deleteProjectUser" parameterType="Long">
+        delete from project_user where project_id = #{param1} and user_id=#{param2}
+    </delete>
+
     <delete id="deleteProjectUserByIds" parameterType="String">
         delete from project_user where id in 
         <foreach item="id" collection="array" open="(" separator="," close=")">

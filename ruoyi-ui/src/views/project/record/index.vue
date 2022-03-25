@@ -5,6 +5,7 @@
           <span class="el-icon-document">{{projectName}}</span>
           <span>基础信息</span>
           <el-button style="float: right;" type="primary" @click="goBack">返回</el-button>
+          <el-button style="float: right" type="primary" >打印</el-button>
         </div>
 
       <!--流程处理表单模块-->
@@ -72,7 +73,7 @@
     <!--审批正常流程-->
     <el-dialog :title="completeTitle" :visible.sync="completeOpen" width="60%" append-to-body>
       <span>
-        <el-input style="width: 50%;margin-right: 34%" type="textarea" v-model="taskForm.comment" placeholder="请输入处理意见"/>
+        <el-input style="width: 50%" type="textarea" v-model="taskForm.comment" placeholder="请输入处理意见"/>
         <el-button @click="completeOpen = false">取 消</el-button>
         <el-button type="primary" @click="taskComplete">确 定</el-button>
       </span>
