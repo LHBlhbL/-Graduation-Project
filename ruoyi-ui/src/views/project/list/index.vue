@@ -172,7 +172,12 @@
     </el-dialog>
   </div>
 </template>
-
+<style lang="scss" scoped>
+//去掉表头多选框
+::v-deep .el-table .el-checkbox {
+  display: none;
+}
+</style>
 <script>
 import { listProject,listDefinitionFlow, changeProjectStatus,getProject, delProject, addProject, updateProject, exportProject,userTreeselect,addProjectPro } from "@/api/project/list";
 import { treeselect } from "@/api/system/dept";

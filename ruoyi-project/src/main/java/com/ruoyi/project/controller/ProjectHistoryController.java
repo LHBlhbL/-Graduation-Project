@@ -36,7 +36,6 @@ public class ProjectHistoryController extends BaseController
     /**
      * 查询【请填写功能名称】列表
      */
-    @PreAuthorize("@ss.hasPermi('project:history:list')")
     @GetMapping("/list")
     public TableDataInfo list(ProjectHistory projectHistory)
     {

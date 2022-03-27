@@ -114,14 +114,29 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
     @Override
     public AjaxResult todoList(Integer pageNum, Integer pageSize) {
         Page<FlowTask> page = new Page<>();
-        Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
+        SysUser user = SecurityUtils.getLoginUser().getUser();
         TaskQuery taskQuery = taskService.createTaskQuery()
                 .active()
                 .includeProcessVariables()
-              .taskAssignee(userId.toString())
+                .taskCandidateOrAssigned(user.getUserId().toString())
+ //             .taskAssignee(userId.toString())
+ //               .taskCandidateGroup(user.getDeptId().toString())
                 .orderByTaskCreateTime().desc();
-        page.setTotal(taskQuery.count());
+        Long[] roleIds = user.getRoleIds();
+        List<Task> tasks = new ArrayList<>();
+        if(roleIds!=null)
+        {
+            TaskQuery desc = taskService.createTaskQuery()
+                    .active()
+                    .includeProcessVariables()
+                    .taskCandidateGroup(roleIds[0].toString())
+                    .orderByTaskCreateTime().desc();
+             tasks = desc.listPage(pageNum - 1, pageSize);
+        }
         List<Task> taskList = taskQuery.listPage(pageNum - 1, pageSize);
+        if(tasks.size()>0)
+            taskList.addAll(tasks);
+        page.setTotal(taskList.size());
         List<FlowTask> flowList = new ArrayList<>();
         for (Task task : taskList) {
             FlowTask flowTask = new FlowTask();
@@ -160,7 +175,6 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         return AjaxResult.success(page);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public AjaxResult complete(FlowTaskVo taskVo,Long projectId) {
         Task task = taskService.createTaskQuery().taskId(taskVo.getTaskId()).singleResult();
@@ -177,17 +191,20 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             taskService.complete(taskVo.getTaskId(), taskVo.getValues());
             HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskVo.getTaskId()).singleResult();
             if (Objects.nonNull(historicTaskInstance)) {
+                HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
+                        .processInstanceId(task.getProcessInstanceId())
+                        .singleResult();
                 Map<String, Object> processVariables = historicTaskInstance.getProcessVariables();
                 ProjectHistory projectHistory = new ProjectHistory();
                 String time = (String) processVariables.get("time");
                 Project project = projectMapper.selectProjectById(projectId);
                 project.setExpensesLeft(project.getExpensesLeft()- Long.parseLong(time));
                 projectMapper.updateProject(project);
-                projectUserMapper.deleteProjectUser(projectId,userId);
+                projectUserMapper.deleteProjectUser(projectId,Long.parseLong( historicProcessInstance.getStartUserId()));
                 projectHistory.setProjectId(projectId);
-                projectHistory.setHisTaskId(historicTaskInstance.getId());
+                projectHistory.setHisTaskId(historicTaskInstance.getProcessInstanceId());
                 projectHistory.setMoney(Long.parseLong(time));
-                projectHistory.setUserId(userId);
+                projectHistory.setUserId(Long.parseLong( historicProcessInstance.getStartUserId()));
                 projectHistoryMapper.insertProjectHistory(projectHistory);
             }
         }

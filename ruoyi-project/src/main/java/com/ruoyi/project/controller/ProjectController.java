@@ -111,12 +111,18 @@ public class ProjectController extends BaseController {
     @Log(title = "状态转换", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
     public AjaxResult changeStatus(@RequestBody Project project) {
+        if(projectService.check(project)==0)
+            return AjaxResult.error("存在未完成报销");
         return AjaxResult.success(projectService.updateProjectStatus(project));
     }
 
     @Log(title = "流程配置", businessType = BusinessType.INSERT)
     @PutMapping("/flow/add")
     public AjaxResult addFlow(@RequestBody ProjectFlow projectFlow) {
+        Project project = new Project();
+        project.setProjectId(projectFlow.getProjectId());
+        if(projectService.check(project)==0)
+            return AjaxResult.error("存在未完成报销");
         return AjaxResult.success(flowService.insertProjectFlow(projectFlow));
     }
 

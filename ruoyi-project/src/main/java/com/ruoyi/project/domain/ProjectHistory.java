@@ -34,7 +34,17 @@ public class ProjectHistory extends BaseEntity
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Long userId;
 
-    public void setId(Long id) 
+    private FlowTask flowTask;
+
+    public FlowTask getFlowTask() {
+        return flowTask;
+    }
+
+    public void setFlowTask(FlowTask flowTask) {
+        this.flowTask = flowTask;
+    }
+
+    public void setId(Long id)
     {
         this.id = id;
     }
@@ -79,6 +89,8 @@ public class ProjectHistory extends BaseEntity
     {
         return userId;
     }
+
+
 
     @Override
     public String toString() {

@@ -115,7 +115,12 @@
     </el-dialog>
   </div>
 </template>
-
+<style lang="scss" scoped>
+//去掉表头多选框
+::v-deep .el-table .el-checkbox {
+  display: none;
+}
+</style>
 <script>
 import {flowRecord} from "@/api/flowable/finished";
 import Parser from '@/components/parser/Parser'

@@ -25,7 +25,7 @@
     </el-form>
 
 
-    <el-table v-loading="loading" :data="myProcessList" border @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="myProcessList"  @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="报销项目" align="center" prop="projectName" :show-overflow-tooltip="true"/>
       <el-table-column label="提交时间" align="center" prop="createTime" width="180"/>
@@ -96,7 +96,12 @@
 
   </div>
 </template>
-
+<style lang="scss" scoped>
+//去掉表头多选框
+::v-deep .el-table .el-checkbox {
+  display: none;
+}
+</style>
 <script>
 import {
   getDeployment,

@@ -68,4 +68,6 @@ public interface IProjectService
     public List<NameSelect> buildUserTree(Long deptId);
 
     public int updateProjectStatus(Project project);
+
+    public int check(Project project);
 }

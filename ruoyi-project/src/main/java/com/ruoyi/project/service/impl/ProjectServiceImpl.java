@@ -152,4 +152,15 @@ public class ProjectServiceImpl extends FlowServiceFactory implements IProjectSe
     public int updateProjectStatus(Project project) {
         return projectMapper.updateProject(project);
     }
+
+    @Override
+    public int check(Project project)
+    {
+        ProjectUserList list = new ProjectUserList();
+        list.setProjectId(project.getProjectId());
+        List<ProjectUserList> projectUserLists = projectUserMapper.selectProjectUserList(list);
+        if(projectUserLists.size()>0)
+            return 0;
+        return 1;
+    }
 }

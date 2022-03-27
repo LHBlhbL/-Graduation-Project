@@ -7,6 +7,16 @@ public class FlowTask extends FlowTaskDto {
 
     private Long projectId;
 
+    private String userName;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public Long getProjectId() {
         return projectId;
     }

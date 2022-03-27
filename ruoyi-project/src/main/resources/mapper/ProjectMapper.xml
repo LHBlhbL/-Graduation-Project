@@ -51,9 +51,10 @@
     </sql>
 
     <select id="selectUserName" parameterType="long" resultMap="DeptName">
-        select user_id,nick_name from sys_user
+        select u.user_id,u.nick_name from sys_user u
+        left join sys_dept d on u.dept_id = d.dept_id
         <where>
-            dept_id=#{deptId}
+            (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId}, ancestors) ))
         </where>
     </select>
 
