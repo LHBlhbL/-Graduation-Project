@@ -21,7 +21,7 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="queryList">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
@@ -34,8 +34,8 @@
       <div v-if="!status">
         <el-table-column type="selection" width="55" align="center"/>
         <el-table-column label="项目编号" align="center" prop="projectId"/>
-        <el-table-column label="项目部门" align="center" prop="dept.deptName"/>
         <el-table-column label="项目名称" align="center" prop="projectName"/>
+        <el-table-column label="项目部门" align="center" prop="dept.deptName"/>
         <el-table-column label="项目负责人" align="center" prop="principal.principalName"/>
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template slot-scope="scope">
@@ -71,7 +71,7 @@
 <script>
 import {listProject, getProject, addProject, updateProject, userTreeselect, getProcess} from "@/api/project/list";
 import {treeselect} from "@/api/system/dept";
-import {remiList} from "@/api/project/reimbursement"
+import {remiList,queList} from "@/api/project/reimbursement"
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 
@@ -152,6 +152,16 @@ export default {
         status: "0",
       };
       this.resetForm("form");
+    },
+    queryList(){
+      this.loading = true;
+      queList(this.queryParams).then(
+        response => {
+          this.projectList = response.rows;
+          this.total = response.total;
+          this.loading = false;
+        }
+      );
     },
     /** 搜索按钮操作 */
     handleQuery() {

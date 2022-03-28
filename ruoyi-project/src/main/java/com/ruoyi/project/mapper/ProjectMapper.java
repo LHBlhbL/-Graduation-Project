@@ -63,4 +63,6 @@ public interface ProjectMapper
     public List<Project> selectRemiList();
 
     public List<ProjectDeptUser> selectUserName(Long deptId);
+
+    public List<Project> selectRemiQueryList(Project project);
 }

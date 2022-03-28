@@ -58,4 +58,6 @@ public interface ProjectHistoryMapper
      * @return 结果
      */
     public int deleteProjectHistoryByIds(Long[] ids);
+
+    public int deleteProjectHistoryByHis(ProjectHistory projectHistory);
 }

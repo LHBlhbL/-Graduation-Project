@@ -31,6 +31,12 @@
             icon="el-icon-tickets"
             @click="handleFlowRecord(scope.row)"
           >详情</el-button>
+          <el-button
+            type="text"
+            icon="el-icon-delete"
+            size="mini"
+            @click="handleDelete(scope.row)"
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -181,13 +187,13 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$confirm('是否确认删除【请填写功能名称】编号为"' + ids + '"的数据项?', "警告", {
+      const id = row.hisTaskId;
+      this.$confirm('是否确认删除【请填写功能名称】编号为"' + id + '"的数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
         }).then(function() {
-          return delHistory(ids);
+          return delHistory(id);
         }).then(() => {
           this.getList();
           this.msgSuccess("删除成功");

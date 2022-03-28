@@ -553,6 +553,14 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         return AjaxResult.success();
     }
 
+
+    @Override
+    public AjaxResult deleteProcess(String id)
+    {
+        historyService.deleteHistoricProcessInstance(id);
+        return AjaxResult.success();
+    }
+
     /**
      * 代办任务列表
      *

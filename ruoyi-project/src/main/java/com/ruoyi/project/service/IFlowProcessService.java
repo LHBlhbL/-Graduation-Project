@@ -13,7 +13,7 @@ public interface IFlowProcessService {
 
      AjaxResult todoList(Integer pageNum,Integer pageSize);
 
-     AjaxResult complete(FlowTaskVo taskVo,Long projectId);
+     AjaxResult complete(FlowTaskVo taskVo,Long projectId,String procInsId);
 
 
 }

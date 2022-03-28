@@ -156,7 +156,7 @@ import {
   exportDeployment,
   flowRecord
 } from "@/api/flowable/finished";
-import { myProcessList,stopProcess } from "@/api/flowable/process";
+import { myProcessList,stopProcess,delProcess } from "@/api/flowable/process";
 import {listDefinition} from "@/api/flowable/definition";
 import {delProcinst,exportProcinst} from "@/api/system/procinst";
 export default {
@@ -339,7 +339,7 @@ export default {
         cancelButtonText: "取消",
         type: "warning"
       }).then(function() {
-        return delProcinst(ids);
+        return delProcess(ids);
       }).then(() => {
         this.getList();
         this.msgSuccess("删除成功");

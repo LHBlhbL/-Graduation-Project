@@ -28,6 +28,14 @@ export function stopProcess(data) {
   })
 }
 
+export function delProcess(id)
+{
+  return request({
+    url:'/flowable/task/deleteProcess/'+id,
+    method:'get'
+  })
+}
+
 // 驳回任务
 export function rejectTask(data) {
   return request({

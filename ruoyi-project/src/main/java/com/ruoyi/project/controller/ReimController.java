@@ -67,9 +67,17 @@ public class ReimController extends BaseController {
     }
 
     @ApiOperation(value = "审批任务")
-    @PostMapping(value = "/task/complete/{projectId}")
-    public AjaxResult complete(@RequestBody FlowTaskVo flowTaskVo,@PathVariable(value = "projectId")Long projectId) {
-        return processService.complete(flowTaskVo,projectId);
+    @PostMapping(value = "/task/complete/{projectId}/{procInsId}")
+    public AjaxResult complete(@RequestBody FlowTaskVo flowTaskVo,@PathVariable(value = "projectId")Long projectId,@PathVariable(value = "procInsId")String procInsId) {
+        return processService.complete(flowTaskVo,projectId,procInsId);
+    }
+
+    @PostMapping("/queryList")
+    public TableDataInfo queryList(@RequestBody Project project)
+    {
+        startPage();
+        List<Project> list = remiService.queryList(project);
+        return getDataTable(list);
     }
 
 }

@@ -441,10 +441,12 @@ export default {
         formData.disabled = true;
         formData.formBtns = false;
         if (this.taskForm.procDefId) {
+          this.loading=true;
           variables.variables = formData;
            // 启动流程并将表单数据加入流程变量
           definitionStart( this.taskForm.procDefId,JSON.stringify(variables),this.projectId).then(res => {
             this.msgSuccess(res.msg);
+            this.loading=false;
             this.goBack();
           })
         }

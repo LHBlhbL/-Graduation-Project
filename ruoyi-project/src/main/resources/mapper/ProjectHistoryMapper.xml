@@ -70,4 +70,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <delete id="deleteProjectHistoryByHis" parameterType="ProjectHistory">
+        delete from project_history where
+            his_task_id = #{hisTaskId}
+    </delete>
 </mapper>

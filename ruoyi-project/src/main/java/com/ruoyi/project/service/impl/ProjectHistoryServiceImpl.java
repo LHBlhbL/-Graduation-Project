@@ -145,6 +145,14 @@ public class ProjectHistoryServiceImpl extends FlowServiceFactory implements IPr
         return projectHistoryMapper.deleteProjectHistoryById(id);
     }
 
+    public int deleteProjectHistoryByProc(String id)
+    {
+        historyService.deleteHistoricProcessInstance(id);
+        ProjectHistory projectHistory = new ProjectHistory();
+        projectHistory.setHisTaskId(id);
+        return projectHistoryMapper.deleteProjectHistoryByHis(projectHistory);
+    }
+
     private String getDate(long ms) {
 
         long day = ms / (24 * 60 * 60 * 1000);

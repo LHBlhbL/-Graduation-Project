@@ -46,6 +46,12 @@ public class FlowTaskController {
         return flowTaskService.stopProcess(flowTaskVo);
     }
 
+    @GetMapping("/deleteProcess/{id}")
+    public AjaxResult deleteProcess(@PathVariable String id)
+    {
+        return flowTaskService.deleteProcess(id);
+    }
+
     @ApiOperation(value = "撤回流程", response = FlowTaskDto.class)
     @PostMapping(value = "/revokeProcess")
     public AjaxResult revokeProcess(@RequestBody FlowTaskVo flowTaskVo) {

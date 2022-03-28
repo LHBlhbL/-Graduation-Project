@@ -40,6 +40,14 @@
         </where>
     </select>
 
+    <select id="selectProjectFlow" parameterType="ProjectFlow" resultMap="ProjectFlowResult">
+        <include refid="selectProjectFlowVo"/>
+        <where>
+            <if test="projectId != null ">and project_id = #{projectId}</if>
+            <if test="deployId != null">and deploy_id = #{deployId}</if>
+            <if test="procDefId != null">and proc_def_id = #{procDefId}</if>
+        </where>
+    </select>
     <select id="selectProjectFlowById" parameterType="Long" resultMap="ProjectFlowResult">
         <include refid="selectProjectFlowVo"/>
         where id = #{id}

@@ -115,15 +115,13 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
     public AjaxResult todoList(Integer pageNum, Integer pageSize) {
         Page<FlowTask> page = new Page<>();
         SysUser user = SecurityUtils.getLoginUser().getUser();
-        TaskQuery taskQuery = taskService.createTaskQuery()
+        List<Task> page1 = taskService.createTaskQuery()
                 .active()
                 .includeProcessVariables()
                 .taskCandidateOrAssigned(user.getUserId().toString())
- //             .taskAssignee(userId.toString())
- //               .taskCandidateGroup(user.getDeptId().toString())
-                .orderByTaskCreateTime().desc();
+                .orderByTaskCreateTime().desc().listPage(pageNum - 1, pageSize);
         Long[] roleIds = user.getRoleIds();
-        List<Task> tasks = new ArrayList<>();
+        List<Task> task1 = new ArrayList<>();
         if(roleIds!=null)
         {
             TaskQuery desc = taskService.createTaskQuery()
@@ -131,14 +129,36 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
                     .includeProcessVariables()
                     .taskCandidateGroup(roleIds[0].toString())
                     .orderByTaskCreateTime().desc();
-             tasks = desc.listPage(pageNum - 1, pageSize);
+             task1 = desc.listPage(pageNum - 1, pageSize);
         }
-        List<Task> taskList = taskQuery.listPage(pageNum - 1, pageSize);
-        if(tasks.size()>0)
-            taskList.addAll(tasks);
+
+
+        List<Task>task2 = taskService.createTaskQuery()
+                .active()
+                .includeProcessVariables()
+                .orderByTaskCreateTime().desc().listPage(pageNum-1,pageSize);
+        ProjectFlow flow = new ProjectFlow();
+        for(Task task:task2)
+        {
+            if(task.getAssignee()!=null)
+                continue;
+            flow.setProcDefId(task.getProcessDefinitionId());
+            ProjectFlow flow1 = flowMapper.selectProjectFlow(flow);
+            Project project = projectMapper.selectProjectById(flow1.getProjectId());
+            if(project.getPrincipalId()== user.getUserId())
+                task1.add(task);
+        }
+        List<Task> taskList = new ArrayList<>();
+        if(page1!=null)
+        {
+            taskList.addAll(page1);
+        }
+        if(task1.size()>0)
+            taskList.addAll(task1);
         page.setTotal(taskList.size());
         List<FlowTask> flowList = new ArrayList<>();
         for (Task task : taskList) {
+
             FlowTask flowTask = new FlowTask();
             // 流程定义信息
             flowTask.setTaskId(task.getId());
@@ -175,12 +195,14 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         return AjaxResult.success(page);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public AjaxResult complete(FlowTaskVo taskVo,Long projectId) {
+    public AjaxResult complete(FlowTaskVo taskVo,Long projectId,String procInsId) {
         Task task = taskService.createTaskQuery().taskId(taskVo.getTaskId()).singleResult();
         if (Objects.isNull(task)) {
             return AjaxResult.error("任务不存在");
         }
+        Map<String, Object> processVariables = task.getProcessVariables();
         if (DelegationState.PENDING.equals(task.getDelegationState())) {
             taskService.addComment(taskVo.getTaskId(), taskVo.getInstanceId(), FlowComment.DELEGATE.getType(), taskVo.getComment());
             taskService.resolveTask(taskVo.getTaskId(), taskVo.getValues());
@@ -189,24 +211,33 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
             taskService.setAssignee(taskVo.getTaskId(), userId.toString());
             taskService.complete(taskVo.getTaskId(), taskVo.getValues());
-            HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskVo.getTaskId()).singleResult();
-            if (Objects.nonNull(historicTaskInstance)) {
-                HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                        .processInstanceId(task.getProcessInstanceId())
-                        .singleResult();
-                Map<String, Object> processVariables = historicTaskInstance.getProcessVariables();
+            List<Task> taskList = taskService.createTaskQuery().processInstanceId(procInsId).list();
+            if (CollectionUtils.isEmpty(taskList)) {
+                HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(procInsId).singleResult();
                 ProjectHistory projectHistory = new ProjectHistory();
-                String time = (String) processVariables.get("time");
-                Project project = projectMapper.selectProjectById(projectId);
-                project.setExpensesLeft(project.getExpensesLeft()- Long.parseLong(time));
-                projectMapper.updateProject(project);
-                projectUserMapper.deleteProjectUser(projectId,Long.parseLong( historicProcessInstance.getStartUserId()));
                 projectHistory.setProjectId(projectId);
-                projectHistory.setHisTaskId(historicTaskInstance.getProcessInstanceId());
-                projectHistory.setMoney(Long.parseLong(time));
-                projectHistory.setUserId(Long.parseLong( historicProcessInstance.getStartUserId()));
                 projectHistoryMapper.insertProjectHistory(projectHistory);
+
             }
+
+//            HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskVo.getTaskId()).singleResult();
+//            if (Objects.nonNull(historicTaskInstance)) {
+//                HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
+//                        .processInstanceId(task.getProcessInstanceId())
+//                        .singleResult();
+//                Map<String, Object> processVariables = historicTaskInstance.getProcessVariables();
+//                ProjectHistory projectHistory = new ProjectHistory();
+//                String time = (String) processVariables.get("money");
+//                Project project = projectMapper.selectProjectById(projectId);
+//                project.setExpensesLeft(project.getExpensesLeft()- Long.parseLong(time));
+//                projectMapper.updateProject(project);
+//                projectUserMapper.deleteProjectUser(projectId,Long.parseLong( historicProcessInstance.getStartUserId()));
+//                projectHistory.setProjectId(projectId);
+//                projectHistory.setHisTaskId(historicTaskInstance.getProcessInstanceId());
+//                projectHistory.setMoney(Long.parseLong(time));
+//                projectHistory.setUserId(Long.parseLong( historicProcessInstance.getStartUserId()));
+//                projectHistoryMapper.insertProjectHistory(projectHistory);
+//            }
         }
         return AjaxResult.success();
     }

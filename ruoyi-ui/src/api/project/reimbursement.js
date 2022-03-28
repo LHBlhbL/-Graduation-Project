@@ -34,3 +34,14 @@ export function startProcess(data){
   )
 
 }
+
+export function queList(data)
+{
+  return request(
+    {
+      url:'reim/queryList',
+      method:"post",
+      data:data
+    }
+  )
+}

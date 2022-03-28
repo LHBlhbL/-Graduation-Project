@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface IRemiService {
     public List<Project> listRemi();
+    public List<Project> queryList(Project project);
 }

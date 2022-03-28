@@ -10,7 +10,7 @@ export function processList(query) {
 
 export function complete(data,projectId) {
   return request({
-    url: '/reim/task/complete/'+projectId,
+    url: '/reim/task/complete/'+projectId+'/'+data.procInsId,
     method: 'post',
     data: data
   })

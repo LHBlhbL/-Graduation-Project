@@ -30,7 +30,7 @@ public interface ProjectFlowMapper
      * @return 【请填写功能名称】集合
      */
     public List<ProjectFlow> selectProjectFlowList(ProjectFlow projectFlow);
-
+    public ProjectFlow selectProjectFlow(ProjectFlow projectFlow);
     /**
      * 新增【请填写功能名称】
      * 

@@ -20,6 +20,8 @@ public interface IFlowTaskService {
      */
     AjaxResult complete(FlowTaskVo task);
 
+    AjaxResult deleteProcess(String id);
+
     /**
      * 驳回任务
      *
@@ -81,6 +83,7 @@ public interface IFlowTaskService {
 
     /**
      * 我发起的流程
+     *
      * @param pageNum
      * @param pageSize
      * @return
@@ -89,6 +92,7 @@ public interface IFlowTaskService {
 
     /**
      * 取消申请
+     *
      * @param flowTaskVo
      * @return
      */
@@ -96,6 +100,7 @@ public interface IFlowTaskService {
 
     /**
      * 撤回流程
+     *
      * @param flowTaskVo
      * @return
      */
@@ -127,7 +132,7 @@ public interface IFlowTaskService {
      * @param procInsId 流程实例Id
      * @return
      */
-    AjaxResult flowRecord(String procInsId,String deployId);
+    AjaxResult flowRecord(String procInsId, String deployId);
 
     /**
      * 根据任务ID查询挂载的表单信息
@@ -139,6 +144,7 @@ public interface IFlowTaskService {
 
     /**
      * 获取流程过程图
+     *
      * @param processId
      * @return
      */
@@ -146,6 +152,7 @@ public interface IFlowTaskService {
 
     /**
      * 获取流程执行过程
+     *
      * @param procInsId
      * @return
      */
@@ -153,6 +160,7 @@ public interface IFlowTaskService {
 
     /**
      * 获取流程变量
+     *
      * @param taskId
      * @return
      */
@@ -160,6 +168,7 @@ public interface IFlowTaskService {
 
     /**
      * 获取下一节点
+     *
      * @param flowTaskVo 任务
      * @return
      */

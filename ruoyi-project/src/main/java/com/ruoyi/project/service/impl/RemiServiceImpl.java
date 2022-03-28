@@ -34,4 +34,22 @@ public class RemiServiceImpl implements IRemiService {
         }
         return returnList;
     }
+
+    @Override
+    public List<Project> queryList(Project project) {
+        List<Project> projects = mapper.selectRemiQueryList(project);
+
+        List<Project> returnList = new ArrayList<>();
+        for(Project project1:projects)
+        {
+            ProjectFlow projectFlow = projectFlowMapper.selectProjectFlowByPId(project1.getProjectId());
+            if(projectFlow!=null)
+            {
+                returnList.add(project1);
+            }
+        }
+        return returnList;
+    }
+
+
 }
