@@ -95,8 +95,8 @@ public class ProjectHistoryController extends BaseController
     @PreAuthorize("@ss.hasPermi('project:history:remove')")
     @Log(title = "【请填写功能名称】", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{id}")
-    public AjaxResult remove(@PathVariable Long id)
+    public AjaxResult remove(@PathVariable String id)
     {
-        return toAjax(projectHistoryService.deleteProjectHistoryById(id));
+        return toAjax(projectHistoryService.deleteProjectHistoryByProc(id));
     }
 }

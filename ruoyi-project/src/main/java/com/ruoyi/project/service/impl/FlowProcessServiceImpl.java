@@ -216,8 +216,10 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
                 HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(procInsId).singleResult();
                 ProjectHistory projectHistory = new ProjectHistory();
                 projectHistory.setProjectId(projectId);
+                projectHistory.setHisTaskId(procInsId);
+                projectHistory.setUserId(Long.parseLong(historicProcessInstance.getStartUserId()));
+                projectUserMapper.deleteProjectUser(projectId,Long.parseLong( historicProcessInstance.getStartUserId()));
                 projectHistoryMapper.insertProjectHistory(projectHistory);
-
             }
 
 //            HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskVo.getTaskId()).singleResult();

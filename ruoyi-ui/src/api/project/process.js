@@ -15,3 +15,12 @@ export function complete(data,projectId) {
     data: data
   })
 }
+
+export function  stopProcess(procInsId){
+  return request(
+    {
+      url:'/reim/process/stop/'+procInsId,
+      method:'get',
+    }
+  )
+}

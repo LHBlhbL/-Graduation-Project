@@ -58,4 +58,8 @@ public interface IProjectHistoryService
      * @return 结果
      */
     public int deleteProjectHistoryById(Long id);
+
+
+
+    public int deleteProjectHistoryByProc(String id);
 }

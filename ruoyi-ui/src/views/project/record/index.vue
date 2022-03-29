@@ -435,13 +435,13 @@ export default {
     },
     /** 申请流程表单数据提交 */
     submitForm(data) {
+      this.loading = true;
       if (data) {
         const variables = data.valData;
         const formData = data.formData;
         formData.disabled = true;
         formData.formBtns = false;
         if (this.taskForm.procDefId) {
-          this.loading=true;
           variables.variables = formData;
            // 启动流程并将表单数据加入流程变量
           definitionStart( this.taskForm.procDefId,JSON.stringify(variables),this.projectId).then(res => {

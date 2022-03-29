@@ -61,4 +61,6 @@ public interface ProjectUserMapper
     public int deleteProjectUserByIds(Long[] ids);
 
     public int deleteProjectUser(Long projectId,Long userId);
+
+    public int deleteProjectUserByProc(String procInsId);
 }

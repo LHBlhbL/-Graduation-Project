@@ -73,4 +73,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <delete id="deleteProjectUserByProc" parameterType="string">
+        delete from project_user where proc_ins_id = #{procInsId}
+    </delete>
 </mapper>

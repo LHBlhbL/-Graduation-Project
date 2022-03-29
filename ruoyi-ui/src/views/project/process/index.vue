@@ -10,19 +10,15 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="开始时间" prop="deployTime">
-        <el-date-picker clearable size="small"
-                        v-model="queryParams.deployTime"
-                        type="date"
-                        value-format="yyyy-MM-dd"
-                        placeholder="选择时间">
-        </el-date-picker>
-      </el-form-item>
+
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
+    <el-row :gutter="10" class="mb8">
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+    </el-row>
 
 
     <el-table v-loading="loading" :data="myProcessList"  @selection-change="handleSelectionChange">
@@ -64,35 +60,7 @@
       @pagination="getList"
     />
 
-    <!-- 发起流程 -->
-    <el-dialog :title="title" :visible.sync="open" width="60%" append-to-body>
-      <el-table v-loading="processLoading" fit :data="definitionList" border >
-        <el-table-column label="流程名称" align="center" prop="name" />
-        <el-table-column label="流程版本" align="center">
-          <template slot-scope="scope">
-            <el-tag size="medium" >v{{ scope.row.version }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="流程分类" align="center" prop="category" />
-        <el-table-column label="操作" align="center" width="300" class-name="small-padding fixed-width">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              type="text"
-              icon="el-icon-edit-outline"
-              @click="handleStartProcess(scope.row)"
-            >发起流程</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <pagination
-        v-show="processTotal>0"
-        :total="processTotal"
-        :page.sync="queryParams.pageNum"
-        :limit.sync="queryParams.pageSize"
-        @pagination="listDefinition"
-      />
-    </el-dialog>
+
 
   </div>
 </template>
@@ -109,10 +77,9 @@ import {
   updateDeployment,
 
 } from "@/api/flowable/finished";
-import { myProcessList,stopProcess } from "@/api/flowable/process";
 import {listDefinition} from "@/api/flowable/definition";
 import {delProcinst,exportProcinst} from "@/api/system/procinst";
-import {processList} from "@/api/project/process"
+import {processList,stopProcess} from "@/api/project/process"
 export default {
   name: "Deploy",
   components: {
@@ -237,13 +204,12 @@ export default {
     },
     /**  取消流程申请 */
     handleStop(row){
-      const params = {
-        instanceId: row.procInsId
-      }
-      stopProcess(params).then( res => {
+      this.loading = true;
+      stopProcess(row.procInsId).then( res => {
         this.msgSuccess(res.msg);
         this.getList();
       });
+      this.loading = false;
     },
     /** 流程流转记录 */
     handleFlowRecord(row){

@@ -80,4 +80,9 @@ public class ReimController extends BaseController {
         return getDataTable(list);
     }
 
+    @GetMapping("/process/stop/{procInsId}")
+    public AjaxResult stopProcess(@PathVariable("procInsId") String procInsId){
+        return remiService.stopProcess(procInsId);
+    }
+
 }

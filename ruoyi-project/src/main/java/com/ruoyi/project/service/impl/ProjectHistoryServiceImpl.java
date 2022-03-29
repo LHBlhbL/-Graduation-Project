@@ -145,6 +145,7 @@ public class ProjectHistoryServiceImpl extends FlowServiceFactory implements IPr
         return projectHistoryMapper.deleteProjectHistoryById(id);
     }
 
+    @Override
     public int deleteProjectHistoryByProc(String id)
     {
         historyService.deleteHistoricProcessInstance(id);
