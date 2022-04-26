@@ -1,47 +1,11 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入名称"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="开始时间" prop="deployTime">
-        <el-date-picker clearable size="small"
-                        v-model="queryParams.deployTime"
-                        type="date"
-                        value-format="yyyy-MM-dd"
-                        placeholder="选择时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索123</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
-
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:deployment:remove']"
-        >删除</el-button>
-      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
-
-    <el-table v-loading="loading" :data="finishedList" border @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="finishedList"  @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="任务编号" align="center" prop="taskId" :show-overflow-tooltip="true"/>
+      <el-table-column label="任务编号" align="center" prop="projectName" :show-overflow-tooltip="true"/>
       <el-table-column label="流程名称" align="center" prop="procDefName" :show-overflow-tooltip="true"/>
       <el-table-column label="任务节点" align="center" prop="taskName" />
       <el-table-column label="流程发起人" align="center">
@@ -80,10 +44,15 @@
     />
   </div>
 </template>
-
+<style lang="scss" scoped>
+//去掉表头多选框
+::v-deep .el-table .el-checkbox {
+  display: none;
+}
+</style>
 <script>
-import { finishedList, getDeployment, delDeployment, addDeployment, updateDeployment, exportDeployment, revokeProcess } from "@/api/flowable/finished";
-
+import { getDeployment, delDeployment, addDeployment, updateDeployment, exportDeployment, revokeProcess } from "@/api/flowable/finished";
+import {finishedList} from "@/api/project/history"
 export default {
   name: "Deploy",
   components: {
@@ -190,12 +159,7 @@ export default {
       this.resetForm("queryForm");
       this.handleQuery();
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
-    },
+
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
@@ -210,7 +174,7 @@ export default {
           deployId: row.deployId,
           taskId: row.taskId,
           finished: false
-      }})
+        }})
     },
     /** 撤回任务 */
     handleRevoke(row){

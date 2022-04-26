@@ -54,7 +54,8 @@
         select u.user_id,u.nick_name from sys_user u
         left join sys_dept d on u.dept_id = d.dept_id
         <where>
-            (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId}, ancestors) ))
+            (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId},
+            ancestors) ))
         </where>
     </select>
 
@@ -66,6 +67,7 @@
         left join project_flow f on p.project_id = f.project_id
         <where>
             <if test="deptId != null ">and dept_id = #{deptId}</if>
+            <if test="projectId != null">and p.project_id = #{projectId}</if>
             <if test="projectName != null  and projectName != ''">and project_name like concat('%', #{projectName},
                 '%')
             </if>
@@ -148,6 +150,16 @@
             <if test="projectName != null">
                 ANd project_name like concat('%', #{projectName}, '%')
             </if>
+        </where>
+    </select>
+
+    <select id="selectProjectByProcInsId" resultMap="ProjectResult" parameterType="string">
+        select p.project_id, p.dept_id, d.dept_name,p.project_name
+        from project_history h
+        left join project p on p.project_id = h.project_id
+        left join sys_dept d on p.dept_id = d.dept_id
+        <where>
+            h.his_task_id = #{procInsId}
         </where>
     </select>
 </mapper>

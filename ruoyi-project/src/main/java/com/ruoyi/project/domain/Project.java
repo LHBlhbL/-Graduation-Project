@@ -40,7 +40,7 @@ public class Project extends BaseEntity {
      * $column.columnComment
      */
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
-    private Long expensesTotal;
+    private Double expensesTotal;
 
     private int version;
 
@@ -66,7 +66,7 @@ public class Project extends BaseEntity {
      * $column.columnComment
      */
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
-    private Long expensesLeft;
+    private Double expensesLeft;
 
     private ProjectDept dept;
 
@@ -133,19 +133,19 @@ public class Project extends BaseEntity {
     }
 
 
-    public void setExpensesTotal(Long expensesTotal) {
+    public void setExpensesTotal(Double expensesTotal) {
         this.expensesTotal = expensesTotal;
     }
 
-    public Long getExpensesTotal() {
+    public Double getExpensesTotal() {
         return expensesTotal;
     }
 
-    public void setExpensesLeft(Long expensesLeft) {
+    public void setExpensesLeft(Double expensesLeft) {
         this.expensesLeft = expensesLeft;
     }
 
-    public Long getExpensesLeft() {
+    public Double getExpensesLeft() {
         return expensesLeft;
     }
 

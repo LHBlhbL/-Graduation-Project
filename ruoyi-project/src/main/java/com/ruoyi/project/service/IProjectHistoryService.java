@@ -1,6 +1,8 @@
 package com.ruoyi.project.service;
 
 import java.util.List;
+
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.project.domain.ProjectHistory;
 
 /**
@@ -62,4 +64,6 @@ public interface IProjectHistoryService
 
 
     public int deleteProjectHistoryByProc(String id);
+
+    public AjaxResult finishedList(Integer pageNum, Integer pageSize);
 }

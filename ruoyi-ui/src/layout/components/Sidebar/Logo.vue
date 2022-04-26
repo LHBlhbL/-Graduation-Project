@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import logoImg from '@/assets/logo/logo.png'
+//import logoImg from '@/assets/logo/logo.png'
 import variables from '@/assets/styles/variables.scss'
 
 export default {
@@ -36,7 +36,7 @@ export default {
   data() {
     return {
       title: 'flowable报销系统',
-      logo: logoImg
+     // logo: logoImg
     }
   }
 }

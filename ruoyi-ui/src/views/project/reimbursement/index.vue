@@ -107,6 +107,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         deptId: null,
+        projectId:null,
         projectName: null,
         principalId: null,
         expensesTotal: null,

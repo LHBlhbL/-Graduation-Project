@@ -26,6 +26,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="procInsId != null  and procInsId != ''"> and proc_ins_id = #{procInsId}</if>
         </where>
     </select>
+
+    <select id="selectProjectUserListByProcId" parameterType="ProjectUserList" resultMap="ProjectUserResult">
+        <include refid="selectProjectUserVo"/>
+        <where>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
+            <if test="procInsId != null  and procInsId != ''"> and proc_ins_id = #{procInsId}</if>
+        </where>
+    </select>
     
     <select id="selectProjectUserById" parameterType="Long" resultMap="ProjectUserResult">
         <include refid="selectProjectUserVo"/>

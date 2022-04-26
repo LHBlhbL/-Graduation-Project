@@ -46,8 +46,8 @@
     <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="项目编号" align="center" prop="projectId" />
-      <el-table-column label="项目部门" align="center" prop="dept.deptName" />
       <el-table-column label="项目名称" align="center" prop="projectName" />
+      <el-table-column label="项目部门" align="center" prop="dept.deptName" />
       <el-table-column label="项目负责人" align="center" prop="principal.principalName" />
       <el-table-column label="项目经费" align="center" prop="expensesTotal" />
       <el-table-column label="剩余经费" align="center" prop="expensesLeft" />
@@ -113,7 +113,7 @@
           <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" @input="updatePrincipals" placeholder="请选择所属部门" />
         </el-form-item>
         <el-form-item label="项目名称" prop="projectName">
-          <el-input v-model="form.projectName" placeholder="请输入项目名称" />
+          <el-input v-model="form.projectName" placeholder="请输入项目名称" aria-required="true" />
         </el-form-item>
         <el-form-item label="负责人" prop="principalID">
           <treeselect v-model="form.principalId" :options="principalOptions"  :show-count="true" placeholder="请输入项目负责人"/>
@@ -217,6 +217,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         deptId: null,
+        projectId: null,
         projectName: null,
         principalId: null,
         expensesTotal: null,
@@ -336,7 +337,7 @@ export default {
         this.open = true;
         this.getTreeselect();
         this.getPrincipals();
-        this.title = "修改【请填写功能名称】";
+        this.title = "修改"+row.projectName+"表";
       });
     },
     /** 提交按钮 */
@@ -362,7 +363,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const projectIds = row.projectId;
-      this.$confirm('是否确认删除【请填写功能名称】编号为"' + projectIds + '"的数据项?', "警告", {
+      this.$confirm('是否确认删除编号为"' + projectIds + '"的数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"

@@ -192,16 +192,16 @@ export default {
       selectComponents,
       layoutComponents,
       labelWidth: 100,
-      drawingList: drawingDefalut,
+      drawingList: null,
       drawingData: {},
-      activeId: drawingDefalut[0].formId,
+      activeId: null,
       drawerVisible: false,
       formData: {},
       dialogVisible: false,
       jsonDrawerVisible: false,
       generateConf: null,
       showFileName: false,
-      activeData: drawingDefalut[0],
+      activeData: null,
       saveDrawingListDebounce: debounce(340, saveDrawingList),
       saveIdGlobalDebounce: debounce(340, saveIdGlobal),
       leftComponents: [
@@ -287,7 +287,7 @@ export default {
       })
     }else {
       if (formConfInDB) {
-        that.formConf = formConfInDB
+        that.formConf = formConfInDB;
       }
     }
     loadBeautifier(btf => {

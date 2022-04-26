@@ -25,15 +25,15 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-upload"
-          size="mini"
-          @click="handleImport"
-        >导入</el-button>
-      </el-col>
+<!--      <el-col :span="1.5">-->
+<!--        <el-button-->
+<!--          type="primary"-->
+<!--          plain-->
+<!--          icon="el-icon-upload"-->
+<!--          size="mini"-->
+<!--          @click="handleImport"-->
+<!--        >导入</el-button>-->
+<!--      </el-col>-->
       <el-col :span="1.5">
         <el-button
           type="success"
@@ -43,35 +43,34 @@
           @click="handleLoadXml"
         >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:deployment:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:deployment:export']"
-        >导出</el-button>
-      </el-col>
+<!--      <el-col :span="1.5">-->
+<!--        <el-button-->
+<!--          type="danger"-->
+<!--          plain-->
+<!--          icon="el-icon-delete"-->
+<!--          size="mini"-->
+<!--          :disabled="multiple"-->
+<!--          @click="handleDelete"-->
+<!--          v-hasPermi="['system:deployment:remove']"-->
+<!--        >删除</el-button>-->
+<!--      </el-col>-->
+<!--      <el-col :span="1.5">-->
+<!--        <el-button-->
+<!--          type="warning"-->
+<!--          plain-->
+<!--          icon="el-icon-download"-->
+<!--          size="mini"-->
+<!--          @click="handleExport"-->
+<!--          v-hasPermi="['system:deployment:export']"-->
+<!--        >导出</el-button>-->
+<!--      </el-col>-->
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" fit :data="definitionList" border   @selection-change="handleSelectionChange">
+    <el-table v-loading="loading"  :data="definitionList"    @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="流程编号" align="center" prop="deploymentId" :show-overflow-tooltip="true"/>
-      <el-table-column label="流程标识" align="center" prop="key" :show-overflow-tooltip="true" />
-      <el-table-column label="流程分类" align="center" prop="category" />
+
       <el-table-column label="流程名称" align="center" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           <el-button type="text" @click="handleReadImage(scope.row.deploymentId)">
@@ -232,7 +231,12 @@
     </el-dialog>
   </div>
 </template>
-
+<style lang="scss" scoped>
+//去掉表头多选框
+::v-deep .el-table .el-checkbox {
+  display: none;
+}
+</style>
 <script>
 import { listDefinition, updateState, delDeployment, addDeployment, updateDeployment, exportDeployment, definitionStart, readXml} from "@/api/flowable/definition";
 import { getToken } from "@/utils/auth";

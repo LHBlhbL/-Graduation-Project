@@ -24,7 +24,7 @@ public class ProjectHistory extends BaseEntity
 
     /** $column.columnComment */
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
-    private Long money;
+    private Double money;
 
     /** $column.columnComment */
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
@@ -62,12 +62,12 @@ public class ProjectHistory extends BaseEntity
     {
         return projectId;
     }
-    public void setMoney(Long money) 
+    public void setMoney(Double money)
     {
         this.money = money;
     }
 
-    public Long getMoney() 
+    public Double getMoney()
     {
         return money;
     }

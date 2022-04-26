@@ -1,16 +1,11 @@
 package com.ruoyi.project.controller;
 
 import java.util.List;
+
+import io.swagger.annotations.ApiParam;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -98,5 +93,11 @@ public class ProjectHistoryController extends BaseController
     public AjaxResult remove(@PathVariable String id)
     {
         return toAjax(projectHistoryService.deleteProjectHistoryByProc(id));
+    }
+
+    @GetMapping(value = "/finishedList")
+    public AjaxResult finishedList(@ApiParam(value = "当前页码", required = true) @RequestParam Integer pageNum,
+                                   @ApiParam(value = "每页条数", required = true) @RequestParam Integer pageSize) {
+        return projectHistoryService.finishedList(pageNum, pageSize);
     }
 }

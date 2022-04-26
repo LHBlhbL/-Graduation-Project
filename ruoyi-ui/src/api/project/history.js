@@ -51,3 +51,11 @@ export function exportHistory(query) {
     params: query
   })
 }
+
+export function finishedList(query) {
+  return request({
+    url: '/project/history/finishedList',
+    method: 'get',
+    params: query
+  })
+}

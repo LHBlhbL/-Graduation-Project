@@ -133,7 +133,8 @@ public class ProjectServiceImpl extends FlowServiceFactory implements IProjectSe
     public int deleteProjectById(Long projectId) {
         ProjectUserList projectUserList = new ProjectUserList();
         projectUserList.setProjectId(projectId);
-        if(projectUserMapper.selectProjectUserList(projectUserList)!=null)
+        List<ProjectUserList> projectUserLists = projectUserMapper.selectProjectUserList(projectUserList);
+        if(projectUserLists.size()>0)
         {
             return 0;
         }

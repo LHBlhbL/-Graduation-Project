@@ -66,9 +66,9 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         List<FlowTask> flowList = new ArrayList<>();
       List<FlowTaskName> names = flowMapper.selectProjectName();
       Map<String,String> getName = new HashMap<>();
-      for(FlowTaskName name:names)
+      for(FlowTaskName uname:names)
       {
-          getName.put(name.getDeployId(),name.getProjectName());
+          getName.put(uname.getDeployId(),uname.getProjectName());
       }
         for (HistoricProcessInstance hisIns : historicProcessInstances) {
             FlowTask flowTask = new FlowTask();
@@ -104,6 +104,7 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             {
                 flowTask.setProjectName(getName.get(flowTask.getDeployId()));
             }
+
             flowList.add(flowTask);
         }
         page.setRecords(flowList);
@@ -202,7 +203,6 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         if (Objects.isNull(task)) {
             return AjaxResult.error("任务不存在");
         }
-        Map<String, Object> processVariables = task.getProcessVariables();
         if (DelegationState.PENDING.equals(task.getDelegationState())) {
             taskService.addComment(taskVo.getTaskId(), taskVo.getInstanceId(), FlowComment.DELEGATE.getType(), taskVo.getComment());
             taskService.resolveTask(taskVo.getTaskId(), taskVo.getValues());
@@ -213,11 +213,18 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             taskService.complete(taskVo.getTaskId(), taskVo.getValues());
             List<Task> taskList = taskService.createTaskQuery().processInstanceId(procInsId).list();
             if (CollectionUtils.isEmpty(taskList)) {
+                HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskVo.getTaskId()).singleResult();
+                Project project = projectMapper.selectProjectById(projectId);
                 HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(procInsId).singleResult();
                 ProjectHistory projectHistory = new ProjectHistory();
                 projectHistory.setProjectId(projectId);
                 projectHistory.setHisTaskId(procInsId);
                 projectHistory.setUserId(Long.parseLong(historicProcessInstance.getStartUserId()));
+                String money = (String) historicTaskInstance.getProcessVariables().get("money");
+                Double mon =Double.parseDouble(money);
+                projectHistory.setMoney(mon);
+                project.setExpensesLeft(project.getExpensesLeft()-mon);
+                projectMapper.updateProject(project);
                 projectUserMapper.deleteProjectUser(projectId,Long.parseLong( historicProcessInstance.getStartUserId()));
                 projectHistoryMapper.insertProjectHistory(projectHistory);
             }
@@ -260,6 +267,17 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         try {
             SysUser sysUser = SecurityUtils.getLoginUser().getUser();
             Project project = projectMapper.selectProjectById(projectId);
+            Object money = variables.get("money");
+            if(money!=null)
+            {
+                Double expensesLeft = project.getExpensesLeft();
+                Double now = Double.parseDouble((String) money);
+                if(expensesLeft<now)
+                {
+                    return AjaxResult.error("项目经费不足");
+                }
+
+            }
             ProjectUserList projectUserList = new ProjectUserList();
             projectUserList.setProjectId(projectId);
             projectUserList.setUserId(sysUser.getUserId());

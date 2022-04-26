@@ -28,6 +28,8 @@ public interface ProjectUserMapper
      */
     public List<ProjectUserList> selectProjectUserList(ProjectUserList projectUser);
 
+    public ProjectUserList selectProjectUserListByProcId(ProjectUserList userList);
+
     /**
      * 新增【请填写功能名称】
      * 
