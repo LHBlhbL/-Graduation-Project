@@ -44,9 +44,9 @@
         <el-button icon="el-icon-plus" type="text" @click="handleForm">
           保存
         </el-button>
-        <el-button icon="el-icon-video-play" type="text" @click="run">
-          运行
-        </el-button>
+<!--        <el-button icon="el-icon-video-play" type="text" @click="run">-->
+<!--          运行-->
+<!--        </el-button>-->
         <el-button icon="el-icon-view" type="text" @click="showJson">
           查看json
         </el-button>
@@ -56,9 +56,9 @@
         <el-button class="copy-btn-main" icon="el-icon-document-copy" type="text" @click="copy">
           复制代码
         </el-button>
-        <el-button class="delete-btn" icon="el-icon-delete" type="text" @click="empty">
-          清空
-        </el-button>
+<!--        <el-button class="delete-btn" icon="el-icon-delete" type="text" @click="empty">-->
+<!--          清空-->
+<!--        </el-button>-->
       </div>
       <el-scrollbar class="center-scrollbar">
         <el-row class="center-board-row" :gutter="formConf.gutter">
@@ -192,16 +192,16 @@ export default {
       selectComponents,
       layoutComponents,
       labelWidth: 100,
-      drawingList: null,
+      drawingList: drawingDefalut,
       drawingData: {},
-      activeId: null,
+      activeId: drawingDefalut[0].formId,
       drawerVisible: false,
       formData: {},
       dialogVisible: false,
       jsonDrawerVisible: false,
       generateConf: null,
       showFileName: false,
-      activeData: null,
+      activeData: drawingDefalut[0],
       saveDrawingListDebounce: debounce(340, saveDrawingList),
       saveIdGlobalDebounce: debounce(340, saveIdGlobal),
       leftComponents: [
@@ -287,7 +287,7 @@ export default {
       })
     }else {
       if (formConfInDB) {
-        that.formConf = formConfInDB;
+        that.formConf = formConfInDB
       }
     }
     loadBeautifier(btf => {
