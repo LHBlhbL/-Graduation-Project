@@ -4,12 +4,20 @@
     <div class="background">
 <img src="../assets/images/back.jpg" width="100%" height="560px">
     </div>
+    <file-up></file-up>
   </div>
+
 </template>
 
+
 <script>
+import fileUp from "@/components/ImageUpload/index"
+import Treeselect from "@riophae/vue-treeselect";
 export default {
   name: "index",
+  components: {
+    fileUp
+  },
   data() {
     return {
       // 版本号

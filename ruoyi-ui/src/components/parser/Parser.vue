@@ -70,12 +70,13 @@ function renderFrom(h) {
 }
 
 function formBtns(h) {
-  return <el-col>
-    <el-form-item size="large">
-      <el-button type="primary" onClick={this.submitForm}>提交</el-button>
-      <el-button onClick={this.resetForm}>重置</el-button>
-    </el-form-item>
-  </el-col>
+  return <el-col></el-col>
+
+  //   <el-form-item size="large">
+  //     <el-button type="primary" onClick={this.submitForm}>提交</el-button>
+  //     <el-button onClick={this.resetForm}>重置</el-button>
+  //   </el-form-item>
+  // </el-col>
 }
 
 function renderFormItem(h, elementList) {

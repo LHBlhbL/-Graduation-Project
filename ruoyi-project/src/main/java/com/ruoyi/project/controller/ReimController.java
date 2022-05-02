@@ -1,9 +1,12 @@
 package com.ruoyi.project.controller;
 
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.flowable.domain.vo.FlowTaskVo;
+import com.ruoyi.framework.config.ServerConfig;
 import com.ruoyi.project.domain.Project;
 import com.ruoyi.project.domain.ProjectUserList;
 import com.ruoyi.project.service.IFlowProcessService;
@@ -13,6 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -30,6 +34,9 @@ public class ReimController extends BaseController {
 
     @Autowired
     private IProjectUserService service;
+
+    @Autowired
+    private ServerConfig serverConfig;
 
 
     @GetMapping("/list")
@@ -83,6 +90,27 @@ public class ReimController extends BaseController {
     @GetMapping("/process/stop/{procInsId}")
     public AjaxResult stopProcess(@PathVariable("procInsId") String procInsId){
         return remiService.stopProcess(procInsId);
+    }
+
+    @PostMapping("/common/upload")
+    public AjaxResult uploadFile(MultipartFile file) throws Exception
+    {
+        try
+        {
+            // 上传文件路径
+            String filePath = RuoYiConfig.getUploadPath();
+            // 上传并返回新文件名称
+            String fileName = FileUploadUtils.upload(filePath, file);
+            String url = serverConfig.getUrl() + fileName;
+            AjaxResult ajax = AjaxResult.success();
+            ajax.put("fileName", fileName);
+            ajax.put("url", url);
+            return ajax;
+        }
+        catch (Exception e)
+        {
+            return AjaxResult.error(e.getMessage());
+        }
     }
 
 }

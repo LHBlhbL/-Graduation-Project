@@ -33,12 +33,14 @@
             type="text"
             icon="el-icon-tickets"
             @click="handleFlowRecord(scope.row)"
+            v-hasPermi="['project:history:detail']"
           >详情</el-button>
           <el-button
             type="text"
             icon="el-icon-delete"
             size="mini"
             @click="handleDelete(scope.row)"
+            v-hasPermi="['project:history:delete']"
           >删除</el-button>
         </template>
       </el-table-column>

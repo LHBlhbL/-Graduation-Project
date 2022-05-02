@@ -1,6 +1,7 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px"
+             v-hasPermi="['project:list:query']">
       <el-form-item label="项目编号" prop="projectId">
         <el-input
           v-model="queryParams.projectId"
@@ -34,9 +35,10 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['system:project:add']"
+          v-hasPermi="['project:list:add']"
         >新增</el-button>
       </el-col>
+
 
 
 
@@ -81,18 +83,21 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
+            v-hasPermi="['project:list:update']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
+            v-hasPermi="['project:list:delete']"
           >删除</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-share"
             @click="handleConfigure(scope.row)"
+            v-hasPermi="['project:list:config']"
           >配置</el-button>
         </template>
       </el-table-column>

@@ -35,19 +35,33 @@
       <el-table-column label="当前节点" align="center" prop="taskName"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-dropdown>
-            <span class="el-dropdown-link">
-              更多操作<i class="el-icon-arrow-down el-icon--right"></i>
-            </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item icon="el-icon-tickets" @click.native="handleFlowRecord(scope.row)">
-                详情
-              </el-dropdown-item>
-              <el-dropdown-item v-if="scope.row.finishTime == null" icon="el-icon-circle-close" @click.native="handleStop(scope.row)">
-                取消申请
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
+<!--          <el-dropdown>-->
+<!--         -->
+<!--            <el-dropdown-menu slot="dropdown">-->
+<!--              <el-dropdown-item icon="el-icon-tickets" @click.native="handleFlowRecord(scope.row)">-->
+<!--                详情-->
+<!--              </el-dropdown-item>-->
+<!--              <el-dropdown-item v-if="scope.row.finishTime == null" icon="el-icon-circle-close" @click.native="handleStop(scope.row)">-->
+<!--                取消申请-->
+<!--              </el-dropdown-item>-->
+<!--            </el-dropdown-menu>-->
+<!--          </el-dropdown>-->
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-tickets"
+            @click="handleFlowRecord(scope.row)"
+            v-hasPermi="['project:process:detail']"
+          >详情</el-button>
+          <el-button
+            v-if="!scope.row.finishTime"
+            size="mini"
+            type="text"
+            icon="el-icon-circle-close"
+            @click.native="handleStop(scope.row)"
+            v-hasPermi="['project:process:stop']"
+          >取消申请
+          </el-button>
         </template>
       </el-table-column>
     </el-table>

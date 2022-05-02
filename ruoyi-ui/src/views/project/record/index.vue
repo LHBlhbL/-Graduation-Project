@@ -11,7 +11,16 @@
       <el-col :span="16" :offset="6" v-if="variableOpen">
           <div>
             <parser :key="new Date().getTime()" :form-conf="variablesData" />
+            <el-button
+              type="text"
+              icon="el-icon-edit"
+              @click="handleDownload(scope.row)"
+            >发票</el-button>
           </div>
+        <el-upload
+          >
+          <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+        </el-upload>
           <div style="margin-left:10%;margin-bottom: 20px;font-size: 14px;" v-if="finished === 'true'">
             <el-button  icon="el-icon-edit-outline" type="success" size="mini" @click="handleComplete">审批</el-button>
             <el-button  icon="el-icon-refresh-left" type="warning" size="mini" @click="handleReturn">退回</el-button>
@@ -26,7 +35,6 @@
         </div>
       </el-col>
     </el-card>
-
 
 
     <!--流程流转记录-->
@@ -132,13 +140,14 @@ import Treeselect from "@riophae/vue-treeselect";
 import {listUser} from "@/api/system/user";
 import {definitionStart,startProcess} from "@/api/project/reimbursement"
 import {complete} from "@/api/project/process"
-
+import fileUp from "@/components/ImageUpload/index"
 export default {
   name: "Record",
   components: {
     Parser,
     flow,
-    Treeselect
+    Treeselect,
+    fileUp
   },
   props: {},
   data() {
@@ -242,6 +251,9 @@ export default {
       treeselect().then(response => {
         this.deptOptions = response.data;
       });
+    },
+    show1(){
+      alert(1)
     },
     /** 查询用户列表 */
     getList() {
@@ -434,7 +446,6 @@ export default {
     },
     /** 申请流程表单数据提交 */
     submitForm(data) {
-      this.loading = true;
       if (data) {
         const variables = data.valData;
         const formData = data.formData;
@@ -442,6 +453,7 @@ export default {
         formData.formBtns = false;
         if (this.taskForm.procDefId) {
           variables.variables = formData;
+          this.loading=true;
            // 启动流程并将表单数据加入流程变量
           definitionStart( this.taskForm.procDefId,JSON.stringify(variables),this.projectId).then(res => {
             this.msgSuccess(res.msg);
