@@ -10,6 +10,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="projectId"    column="project_id"    />
         <result property="projectName"    column="project_name"    />
         <result property="procInsId"    column="proc_ins_id"    />
+        <result property="money"    column="money"    />
     </resultMap>
 
     <sql id="selectProjectUserVo">

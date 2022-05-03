@@ -52,6 +52,17 @@ public class ReimController extends BaseController {
         return processService.processList(pageNum, pageSize);
     }
 
+    @GetMapping("process/finishedList")
+    public AjaxResult finishedList(@RequestParam Integer pageNum,@RequestParam Integer pageSize)
+    {
+        return processService.finishedList(pageNum,pageSize);
+    }
+
+    @GetMapping("process/onDoingList")
+    public AjaxResult onDoingList(@RequestParam Integer pageNum,@RequestParam Integer pageSize)
+    {
+        return processService.onDoingList(pageNum,pageSize);
+    }
     @GetMapping(value = "/todoList")
     public AjaxResult todoList(@ApiParam(value = "当前页码", required = true) @RequestParam Integer pageNum,
                                @ApiParam(value = "每页条数", required = true) @RequestParam Integer pageSize) {
@@ -59,11 +70,10 @@ public class ReimController extends BaseController {
     }
 
     @ApiOperation(value = "根据流程定义id启动流程实例")
-    @PostMapping("/definition/start/{procDefId}/{projectId}")
-    public AjaxResult start(@ApiParam(value = "流程定义id") @PathVariable(value = "procDefId") String procDefId,
-                            @PathVariable(value = "projectId") Long projectId,
-                            @ApiParam(value = "变量集合,json对象") @RequestBody Map<String,Object> variables) {
-        return processService.startProcessInstanceById(procDefId, variables,projectId);
+    @PostMapping("/definition/start")
+    public AjaxResult start(@ApiParam(value = "变量集合,json对象") @RequestBody Map<String,Object> variables) {
+        return null;
+//        return processService.startProcessInstanceById(procDefId, variables,projectId);
 
     }
 

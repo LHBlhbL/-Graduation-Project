@@ -15,9 +15,9 @@ export function todoList(query){
   })
 }
 
-export function definitionStart(procDefId,data,projectId) {
+export function definitionStart(data) {
   return request({
-    url: '/reim/definition/start/' + procDefId+"/"+projectId,
+    url: '/reim/definition/start/' ,
     method: 'post',
     data:data
   })

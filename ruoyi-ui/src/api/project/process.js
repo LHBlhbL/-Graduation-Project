@@ -8,6 +8,22 @@ export function processList(query) {
   })
 }
 
+export function processFinishedList(query) {
+  return request({
+    url: '/reim/process/finishedList',
+    method: 'get',
+    params: query
+  })
+}
+
+export function onDoingList(query) {
+  return request({
+    url: '/reim/process/onDoingList',
+    method: 'get',
+    params: query
+  })
+}
+
 export function complete(data,projectId) {
   return request({
     url: '/reim/task/complete/'+projectId+'/'+data.procInsId,

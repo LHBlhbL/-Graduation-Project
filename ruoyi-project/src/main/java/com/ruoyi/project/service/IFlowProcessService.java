@@ -15,5 +15,9 @@ public interface IFlowProcessService {
 
      AjaxResult complete(FlowTaskVo taskVo,Long projectId,String procInsId);
 
+     AjaxResult finishedList(Integer pageNum, Integer pageSize);
+
+     AjaxResult onDoingList(Integer pageNum,Integer pageSize);
+
 
 }

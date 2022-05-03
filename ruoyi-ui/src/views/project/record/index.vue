@@ -33,7 +33,25 @@
         <div class="test-form">
           <parser :key="new Date().getTime()"  :form-conf="formConf" @submit="submitForm" ref="parser" @getData="getData" />
         </div>
+        <el-form ref="elForm" :model="formData" :rules="rules" size="medium" label-width="130px">
+          <el-form-item label="报销金额" prop="money">
+            <el-input v-model="formData.money" placeholder="请输入报销金额" clearable :style="{width: '96%'}">
+            </el-input>
+          </el-form-item>
+          <el-form-item label="发票单据">
+            <el-upload  :auto-upload="false" multiple :limit="1"
+                        :file-list="diaLogForm.imgBroadcastList"
+                        list-type="picture-card" :on-change="imgBroadcastChange" :on-remove="imgBroadcastRemove"
+                       accept="image/jpg,image/png,image/jpeg"
+                       action="">
+              <i class="el-icon-plus"></i>
+              <div slot="tip" class="el-upload__tip">无图案</div>
+            </el-upload>
+          </el-form-item>
+        </el-form>
+        <el-button  icon="el-icon-edit-outline" type="success" size="mini" @click="tijiao()">提交</el-button>
       </el-col>
+
     </el-card>
 
 
@@ -167,6 +185,20 @@ export default {
         children: "children",
         label: "label"
       },
+      formData: {
+        money: undefined,
+      },
+      rules: {
+        money: [{
+          required: true,
+          message: '请输入报销金额',
+          trigger: 'blur'
+        }],
+      },
+      diaLogForm: {
+        imgBroadcastList: [], // 储存选中的图片列表
+        imgsStr: '' // 后端需要的多张图base64字符串,分割
+      },
       // 查询参数
       queryParams: {
         deptId: undefined
@@ -176,7 +208,6 @@ export default {
       flowRecordList: [], // 流程流转数据
       formConfCopy: {},
       src: null,
-      rules: {}, // 表单校验
       variablesForm: {}, // 流程变量数据
       taskForm:{
         returnTaskShow: false, // 是否展示回退表单
@@ -251,9 +282,6 @@ export default {
       treeselect().then(response => {
         this.deptOptions = response.data;
       });
-    },
-    show1(){
-      alert(1)
     },
     /** 查询用户列表 */
     getList() {
@@ -361,6 +389,22 @@ export default {
         });
       }
     },
+    //移除成功
+    imgBroadcastRemove(file, fileList) {
+      this.diaLogForm.imgBroadcastList = fileList
+      this.$message.success('移除成功')
+    },
+    //图片更改
+    imgBroadcastChange(file, fileList) {
+      const isLt2M = file.size / 1024 / 1024 < 2 // 上传头像图片大小不能超过 2MB
+      if (!isLt2M) {
+        this.diaLogForm.imgBroadcastList = fileList.filter(v => v.uid !== file.uid)
+        this.$message.error('图片选择失败，每张图片大小不能超过 2MB,请重新选择!')
+      } else {
+        this.diaLogForm.imgBroadcastList.push(file)
+        this.$message.success('上传成功')
+      }
+    },
     /** 根据当前任务或者流程设计配置的下一步节点 */
     getNextFlowNode(taskId) {
       // 根据当前任务或者流程设计配置的下一步节点 todo 暂时未涉及到考虑网关、表达式和多节点情况
@@ -455,13 +499,18 @@ export default {
           variables.variables = formData;
           this.loading=true;
            // 启动流程并将表单数据加入流程变量
-          definitionStart( this.taskForm.procDefId,JSON.stringify(variables),this.projectId).then(res => {
+          variables["projectId"] = this.projectId;
+          variables["procDefId"] = this.taskForm.procDefId;
+          definitionStart( JSON.stringify(variables)).then(res => {
             this.msgSuccess(res.msg);
             this.loading=false;
             this.goBack();
           })
         }
       }
+    },
+    tijiao(){
+      this.$refs.parser.submitForm()
     },
     /** 驳回任务 */
     handleReject() {

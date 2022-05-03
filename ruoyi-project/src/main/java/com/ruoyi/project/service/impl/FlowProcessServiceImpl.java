@@ -251,6 +251,108 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         return AjaxResult.success();
     }
 
+    @Override
+    public AjaxResult finishedList(Integer pageNum, Integer pageSize) {
+        Page<FlowTask> page = new Page<>();
+        Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery()
+                .startedBy(userId.toString())
+                .orderByProcessInstanceStartTime()
+                .desc();
+        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.finished().listPage(pageNum - 1, pageSize);
+        page.setTotal(historicProcessInstanceQuery.count());
+        List<FlowTask> flowList = new ArrayList<>();
+        List<FlowTaskName> names = flowMapper.selectProjectName();
+        Map<String,String> getName = new HashMap<>();
+        for(FlowTaskName uname:names)
+        {
+            getName.put(uname.getDeployId(),uname.getProjectName());
+        }
+        for (HistoricProcessInstance hisIns : historicProcessInstances) {
+            FlowTask flowTask = new FlowTask();
+            flowTask.setCreateTime(hisIns.getStartTime());
+            flowTask.setFinishTime(hisIns.getEndTime());
+            flowTask.setProcInsId(hisIns.getId());
+
+            // 计算耗时
+            long time = hisIns.getEndTime().getTime() - hisIns.getStartTime().getTime();
+            flowTask.setDuration(getDate(time));
+
+            // 流程定义信息
+            ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
+                    .processDefinitionId(hisIns.getProcessDefinitionId())
+                    .singleResult();
+            flowTask.setDeployId(pd.getDeploymentId());
+            flowTask.setCategory(pd.getCategory());
+
+            // 设置taskId
+            List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
+            flowTask.setTaskId(historicTaskInstance.get(0).getId());
+            if(getName.containsKey(flowTask.getDeployId()))
+            {
+                flowTask.setProjectName(getName.get(flowTask.getDeployId()));
+            }
+
+            flowList.add(flowTask);
+        }
+        page.setRecords(flowList);
+
+        return AjaxResult.success(page);
+    }
+
+    @Override
+    public AjaxResult onDoingList(Integer pageNum, Integer pageSize) {
+        Page<FlowTask> page = new Page<>();
+        Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery()
+                .startedBy(userId.toString())
+                .orderByProcessInstanceStartTime()
+                .desc();
+        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.listPage(pageNum - 1, pageSize);
+        page.setTotal(historicProcessInstanceQuery.count());
+        List<FlowTask> flowList = new ArrayList<>();
+        List<FlowTaskName> names = flowMapper.selectProjectName();
+        Map<String,String> getName = new HashMap<>();
+        for(FlowTaskName uname:names)
+        {
+            getName.put(uname.getDeployId(),uname.getProjectName());
+        }
+        for (HistoricProcessInstance hisIns : historicProcessInstances) {
+            List<Task> taskList = taskService.createTaskQuery().processInstanceId(hisIns.getId()).list();
+            if (CollectionUtils.isEmpty(taskList))
+                continue;
+
+
+            FlowTask flowTask = new FlowTask();
+            flowTask.setCreateTime(hisIns.getStartTime());
+            flowTask.setFinishTime(hisIns.getEndTime());
+            flowTask.setProcInsId(hisIns.getId());
+
+            // 计算耗时
+                long time = System.currentTimeMillis() - hisIns.getStartTime().getTime();
+                flowTask.setDuration(getDate(time));
+            // 流程定义信息
+            ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
+                    .processDefinitionId(hisIns.getProcessDefinitionId())
+                    .singleResult();
+            flowTask.setDeployId(pd.getDeploymentId());
+            flowTask.setCategory(pd.getCategory());
+
+            // 当前所处流程 todo: 本地启动放开以下注释
+            flowTask.setTaskId(taskList.get(0).getId());
+            flowTask.setTaskName(taskList.get(0).getName());
+            if(getName.containsKey(flowTask.getDeployId()))
+            {
+                flowTask.setProjectName(getName.get(flowTask.getDeployId()));
+            }
+
+            flowList.add(flowTask);
+        }
+        page.setRecords(flowList);
+
+        return AjaxResult.success(page);
+    }
+
     public AjaxResult processVariables(String taskId) {
         // 流程变量
         HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskId).singleResult();
