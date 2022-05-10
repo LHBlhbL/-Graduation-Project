@@ -98,7 +98,7 @@
             icon="el-icon-share"
             @click="handleConfigure(scope.row)"
             v-hasPermi="['project:list:config']"
-          >配置</el-button>
+          >配置流程</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -155,7 +155,6 @@
             <el-tag size="medium" >v{{ scope.row.version }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="流程分类" align="center" prop="category" />
         <el-table-column label="操作" align="center" width="300" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button

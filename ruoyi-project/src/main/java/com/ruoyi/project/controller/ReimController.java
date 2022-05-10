@@ -71,8 +71,8 @@ public class ReimController extends BaseController {
 
     @ApiOperation(value = "根据流程定义id启动流程实例")
     @PostMapping("/definition/start")
-    public AjaxResult start(@ApiParam(value = "变量集合,json对象") @RequestBody Map<String,Object> variables) {
-        return null;
+    public AjaxResult start(@ApiParam(value = "变量集合,json对象") @RequestBody Map<String,Object> map) {
+        return processService.startProcessInstanceById(map);
 //        return processService.startProcessInstanceById(procDefId, variables,projectId);
 
     }

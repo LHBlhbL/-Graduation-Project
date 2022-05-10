@@ -58,7 +58,6 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         Page<FlowTask> page = new Page<>();
         Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
         HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery()
-                .startedBy(userId.toString())
                 .orderByProcessInstanceStartTime()
                 .desc();
         List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.listPage(pageNum - 1, pageSize);
@@ -365,21 +364,24 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
     }
 
     @Override
-    public AjaxResult startProcessInstanceById(String procDefId, Map<String, Object> variables,Long projectId) {
+    public AjaxResult startProcessInstanceById( Map<String, Object> variables) {
+        byte[] image = variables.get("image").toString().getBytes();
+        String procDefId =(String) variables.get("procDefId");
+        Long projectId = Long.parseLong(variables.get("projectId").toString());
         try {
             SysUser sysUser = SecurityUtils.getLoginUser().getUser();
             Project project = projectMapper.selectProjectById(projectId);
-            Object money = variables.get("money");
-            if(money!=null)
-            {
-                Double expensesLeft = project.getExpensesLeft();
-                Double now = Double.parseDouble((String) money);
-                if(expensesLeft<now)
-                {
-                    return AjaxResult.error("项目经费不足");
-                }
-
-            }
+          //  Object money = variables.get("money");
+//            if(money!=null)
+//            {
+//                Double expensesLeft = project.getExpensesLeft();
+//                Double now = Double.parseDouble((String) money);
+//                if(expensesLeft<now)
+//                {
+//                    return AjaxResult.error("项目经费不足");
+//                }
+//
+//            }
             ProjectUserList projectUserList = new ProjectUserList();
             projectUserList.setProjectId(projectId);
             projectUserList.setUserId(sysUser.getUserId());
@@ -410,6 +412,7 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             }
 
             ProjectUserList userList = new ProjectUserList();
+            userList.setImage(image);
             userList.setUserId(sysUser.getUserId());
             userList.setProjectId(projectId);
             userList.setProcInsId(task.getProcessInstanceId());

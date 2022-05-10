@@ -9,18 +9,13 @@
 
       <!--流程处理表单模块-->
       <el-col :span="16" :offset="6" v-if="variableOpen">
-          <div>
             <parser :key="new Date().getTime()" :form-conf="variablesData" />
-            <el-button
-              type="text"
-              icon="el-icon-edit"
-              @click="handleDownload(scope.row)"
-            >发票</el-button>
-          </div>
-        <el-upload
-          >
-          <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-        </el-upload>
+        <el-form ref="elForm" :model="formShow" :rules="rules" size="medium" label-width="130px" >
+          <el-form-item label="报销金额" prop="money">
+            <el-input v-model="formShow.money" placeholder="请输入报销金额" clearable :style="{width: '96%'}" disabled>
+            </el-input>
+          </el-form-item>
+        </el-form>
           <div style="margin-left:10%;margin-bottom: 20px;font-size: 14px;" v-if="finished === 'true'">
             <el-button  icon="el-icon-edit-outline" type="success" size="mini" @click="handleComplete">审批</el-button>
             <el-button  icon="el-icon-refresh-left" type="warning" size="mini" @click="handleReturn">退回</el-button>
@@ -29,13 +24,13 @@
      </el-col>
 
       <!--初始化流程加载表单信息-->
-      <el-col :span="16" :offset="4" v-if="formConfOpen">
-        <div class="test-form">
+      <el-col :span="16" :offset="4" v-if="formConfOpen" >
+        <div class="test-form" >
           <parser :key="new Date().getTime()"  :form-conf="formConf" @submit="submitForm" ref="parser" @getData="getData" />
         </div>
-        <el-form ref="elForm" :model="formData" :rules="rules" size="medium" label-width="130px">
+        <el-form ref="elForm" :model="formDataM" :rules="rules" size="medium" label-width="130px" >
           <el-form-item label="报销金额" prop="money">
-            <el-input v-model="formData.money" placeholder="请输入报销金额" clearable :style="{width: '96%'}">
+            <el-input v-model="formDataM.money" placeholder="请输入报销金额" clearable :style="{width: '96%'}">
             </el-input>
           </el-form-item>
           <el-form-item label="发票单据">
@@ -47,6 +42,10 @@
               <i class="el-icon-plus"></i>
               <div slot="tip" class="el-upload__tip">无图案</div>
             </el-upload>
+          </el-form-item>
+          <el-form-item size="large">
+            <el-button type="primary" @click="tijiao()">提交</el-button>
+            <el-button @click="resetForm">重置</el-button>
           </el-form-item>
         </el-form>
         <el-button  icon="el-icon-edit-outline" type="success" size="mini" @click="tijiao()">提交</el-button>
@@ -158,14 +157,13 @@ import Treeselect from "@riophae/vue-treeselect";
 import {listUser} from "@/api/system/user";
 import {definitionStart,startProcess} from "@/api/project/reimbursement"
 import {complete} from "@/api/project/process"
-import fileUp from "@/components/ImageUpload/index"
+import {uploadImgToBase64} from "@/utils/uploadImg"
 export default {
   name: "Record",
   components: {
     Parser,
     flow,
     Treeselect,
-    fileUp
   },
   props: {},
   data() {
@@ -179,15 +177,20 @@ export default {
       deptOptions: undefined,
       projectName:undefined,
       projectId:undefined,
+      image:undefined,
       // 用户表格数据
       userList: null,
       defaultProps: {
         children: "children",
         label: "label"
       },
-      formData: {
+      formDataM: {
         money: undefined,
       },
+      formShow:{
+        money:undefined,
+      }
+      ,
       rules: {
         money: [{
           required: true,
@@ -405,6 +408,19 @@ export default {
         this.$message.success('上传成功')
       }
     },
+    //图片上传
+       imageUpload() {
+        const imgBroadcastListBase64 = []
+        const filePromises = this.diaLogForm.imgBroadcastList.map(async file => {
+          const response = await uploadImgToBase64(file.raw)
+          return response.result.replace(/.*;base64,/, '') // 去掉data:image/jpeg;base64,
+        })
+        for (const textPromise of filePromises) {
+          imgBroadcastListBase64.push( textPromise)
+        }
+        this.image = imgBroadcastListBase64.join();
+        alert(111)
+      },
     /** 根据当前任务或者流程设计配置的下一步节点 */
     getNextFlowNode(taskId) {
       // 根据当前任务或者流程设计配置的下一步节点 todo 暂时未涉及到考虑网关、表达式和多节点情况
@@ -497,13 +513,15 @@ export default {
         formData.formBtns = false;
         if (this.taskForm.procDefId) {
           variables.variables = formData;
-          this.loading=true;
            // 启动流程并将表单数据加入流程变量
           variables["projectId"] = this.projectId;
           variables["procDefId"] = this.taskForm.procDefId;
-          definitionStart( JSON.stringify(variables)).then(res => {
+          this.imageUpload()
+          alert(this.image)
+          variables["image"] = this.image
+          variables["money"] = formData
+          definitionStart(JSON.stringify(variables)).then(res => {
             this.msgSuccess(res.msg);
-            this.loading=false;
             this.goBack();
           })
         }

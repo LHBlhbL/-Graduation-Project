@@ -23,7 +23,7 @@
             type="text"
             icon="el-icon-tickets"
             @click="handleFlowRecord(scope.row)"
-            v-hasPermi="['project:process:detail']"
+            v-hasPermi="['project:onDoing:detail']"
           >详情</el-button>
           <el-button
             v-if="!scope.row.finishTime"
@@ -31,7 +31,7 @@
             type="text"
             icon="el-icon-circle-close"
             @click.native="handleStop(scope.row)"
-            v-hasPermi="['project:process:stop']"
+            v-hasPermi="['project:onDoing:stop']"
           >取消申请
           </el-button>
         </template>
@@ -66,7 +66,7 @@ import {
 } from "@/api/flowable/finished";
 import {listDefinition} from "@/api/flowable/definition";
 import {delProcinst,exportProcinst} from "@/api/system/procinst";
-import {onDoingList} from "@/api/project/process"
+import {onDoingList,stopProcess} from "@/api/project/process"
 export default {
   name: "Deploy",
   components: {
@@ -178,6 +178,14 @@ export default {
         this.processTotal = response.data.total;
         this.processLoading = false;
       });
+    },
+    handleStop(row){
+      this.loading = true;
+      stopProcess(row.procInsId).then( res => {
+        this.msgSuccess(res.msg);
+        this.getList();
+      });
+      this.loading = false;
     },
     /** 流程流转记录 */
     handleFlowRecord(row){

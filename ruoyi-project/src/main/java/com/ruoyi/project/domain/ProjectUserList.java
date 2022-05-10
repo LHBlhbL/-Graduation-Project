@@ -33,6 +33,16 @@ public class ProjectUserList extends BaseEntity
 
     private Double money;
 
+    private byte[] image;
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
     public Double getMoney() {
         return money;
     }

@@ -11,10 +11,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="projectName"    column="project_name"    />
         <result property="procInsId"    column="proc_ins_id"    />
         <result property="money"    column="money"    />
+        <result property="image" column="image"/>
     </resultMap>
 
     <sql id="selectProjectUserVo">
-        select id, user_id, project_id, project_name, proc_ins_id from project_user
+        select id, user_id, project_id, project_name, proc_ins_id,image from project_user
     </sql>
 
 
@@ -50,13 +51,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="projectId != null">project_id,</if>
             <if test="projectName != null">project_name,</if>
             <if test="procInsId != null">proc_ins_id,</if>
+            <if test="image != null ">image</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="userId != null">#{userId},</if>
             <if test="projectId != null">#{projectId},</if>
             <if test="projectName != null">#{projectName},</if>
             <if test="procInsId != null">#{procInsId},</if>
-         </trim>
+            <if test="image != null">#{image},</if>
+        </trim>
     </insert>
 
     <update id="updateProjectUser" parameterType="ProjectUserList">

@@ -233,6 +233,12 @@ public class ProjectHistoryServiceImpl extends FlowServiceFactory implements IPr
         return AjaxResult.success(page);
     }
 
+    public AjaxResult processVariablesOn(String taskId) {
+        // 流程变量
+            Map<String, Object> variables = taskService.getVariables(taskId);
+            return AjaxResult.success(variables);
+    }
+
     private String getDate(long ms) {
 
         long day = ms / (24 * 60 * 60 * 1000);

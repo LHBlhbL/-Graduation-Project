@@ -24,17 +24,17 @@
             type="text"
             icon="el-icon-tickets"
             @click="handleFlowRecord(scope.row)"
-            v-hasPermi="['project:process:detail']"
+            v-hasPermi="['project:finished:detail']"
           >详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-
+<!--
     <el-row>
       <el-col>
         <p>总计</p>
       </el-col>
-    </el-row>
+    </el-row>-->
 
     <pagination
       v-show="total>0"

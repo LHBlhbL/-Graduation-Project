@@ -53,15 +53,7 @@
             @click="handleFlowRecord(scope.row)"
             v-hasPermi="['project:process:detail']"
           >详情</el-button>
-          <el-button
-            v-if="!scope.row.finishTime"
-            size="mini"
-            type="text"
-            icon="el-icon-circle-close"
-            @click.native="handleStop(scope.row)"
-            v-hasPermi="['project:process:stop']"
-          >取消申请
-          </el-button>
+
         </template>
       </el-table-column>
     </el-table>
