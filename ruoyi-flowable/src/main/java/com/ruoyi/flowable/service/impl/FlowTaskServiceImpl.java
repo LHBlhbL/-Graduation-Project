@@ -855,6 +855,7 @@ public class FlowTaskServiceImpl extends FlowServiceFactory implements IFlowTask
         // 流程变量
         HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskId).singleResult();
         if (Objects.nonNull(historicTaskInstance)) {
+            Map<String, Object> processVariables = historicTaskInstance.getProcessVariables();
             return AjaxResult.success(historicTaskInstance.getProcessVariables());
         } else {
             Map<String, Object> variables = taskService.getVariables(taskId);

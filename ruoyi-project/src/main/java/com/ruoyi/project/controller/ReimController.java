@@ -3,7 +3,9 @@ package com.ruoyi.project.controller;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.flowable.domain.vo.FlowTaskVo;
 import com.ruoyi.framework.config.ServerConfig;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -121,6 +124,19 @@ public class ReimController extends BaseController {
         {
             return AjaxResult.error(e.getMessage());
         }
+    }
+    @PostMapping("/img")
+    public AjaxResult avatar(@RequestParam("imgfile") MultipartFile file) throws IOException
+    {
+        if (!file.isEmpty())
+        {
+            String imgUrl = FileUploadUtils.upload(RuoYiConfig.getUploadPath(), file);
+                AjaxResult ajax = AjaxResult.success();
+                ajax.put("imgUrl", imgUrl);
+                // 更新缓存用户头像
+                return ajax;
+        }
+        return AjaxResult.error("上传图片异常，请联系管理员");
     }
 
 }

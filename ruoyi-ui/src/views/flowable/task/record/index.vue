@@ -26,10 +26,17 @@
         <div class="test-form">
           <parser :key="new Date().getTime()"  :form-conf="formConf" @submit="submitForm" ref="parser" @getData="getData" />
         </div>
+        <el-image style="width: 200px; height: 200px" :src="'data:image/jpg;base64,'+imageShow" fit="fill">
+        </el-image>
+<p>123456</p>
       </el-col>
     </el-card>
 
-
+    <el-col v-show="variableOpen ">
+    <el-image style="width: 200px; height: 200px" :src="'data:image/jpg;base64,'+imageShow" fit="fill">
+    </el-image>
+    <p>123456</p>
+    </el-col>
 
     <!--流程流转记录-->
     <el-card class="box-card" v-if="flowRecordList">
@@ -160,6 +167,7 @@ export default {
       flowRecordList: [], // 流程流转数据
       formConfCopy: {},
       src: null,
+      imageShow:undefined,
       rules: {}, // 表单校验
       variablesForm: {}, // 流程变量数据
       taskForm:{
@@ -337,6 +345,8 @@ export default {
         getProcessVariables(taskId).then(res => {
           // this.variables = res.data.variables;
           this.variablesData = res.data.variables;
+          this.imageShow = res.data.image;
+          console.log(res.data)
           this.variableOpen = true
         });
       }

@@ -60,15 +60,14 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery()
                 .orderByProcessInstanceStartTime()
                 .desc();
-        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.listPage(pageNum - 1, pageSize);
+        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.listPage(pageSize * (pageNum - 1), pageSize);
         page.setTotal(historicProcessInstanceQuery.count());
         List<FlowTask> flowList = new ArrayList<>();
-      List<FlowTaskName> names = flowMapper.selectProjectName();
-      Map<String,String> getName = new HashMap<>();
-      for(FlowTaskName uname:names)
-      {
-          getName.put(uname.getDeployId(),uname.getProjectName());
-      }
+        List<FlowTaskName> names = flowMapper.selectProjectName();
+        Map<String, String> getName = new HashMap<>();
+        for (FlowTaskName uname : names) {
+            getName.put(uname.getDeployId(), uname.getProjectName());
+        }
         for (HistoricProcessInstance hisIns : historicProcessInstances) {
             FlowTask flowTask = new FlowTask();
             flowTask.setCreateTime(hisIns.getStartTime());
@@ -99,8 +98,7 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
                 List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
                 flowTask.setTaskId(historicTaskInstance.get(0).getId());
             }
-            if(getName.containsKey(flowTask.getDeployId()))
-            {
+            if (getName.containsKey(flowTask.getDeployId())) {
                 flowTask.setProjectName(getName.get(flowTask.getDeployId()));
             }
 
@@ -122,38 +120,35 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
                 .orderByTaskCreateTime().desc().listPage(pageNum - 1, pageSize);
         Long[] roleIds = user.getRoleIds();
         List<Task> task1 = new ArrayList<>();
-        if(roleIds!=null)
-        {
+        if (roleIds != null) {
             TaskQuery desc = taskService.createTaskQuery()
                     .active()
                     .includeProcessVariables()
                     .taskCandidateGroup(roleIds[0].toString())
                     .orderByTaskCreateTime().desc();
-             task1 = desc.listPage(pageNum - 1, pageSize);
+            task1 = desc.listPage(pageNum - 1, pageSize);
         }
 
 
-        List<Task>task2 = taskService.createTaskQuery()
+        List<Task> task2 = taskService.createTaskQuery()
                 .active()
                 .includeProcessVariables()
-                .orderByTaskCreateTime().desc().listPage(pageNum-1,pageSize);
+                .orderByTaskCreateTime().desc().listPage(pageNum - 1, pageSize);
         ProjectFlow flow = new ProjectFlow();
-        for(Task task:task2)
-        {
-            if(task.getAssignee()!=null)
+        for (Task task : task2) {
+            if (task.getAssignee() != null)
                 continue;
             flow.setProcDefId(task.getProcessDefinitionId());
             ProjectFlow flow1 = flowMapper.selectProjectFlow(flow);
             Project project = projectMapper.selectProjectById(flow1.getProjectId());
-            if(project.getPrincipalId()== user.getUserId())
+            if (project.getPrincipalId() == user.getUserId())
                 task1.add(task);
         }
         List<Task> taskList = new ArrayList<>();
-        if(page1!=null)
-        {
+        if (page1 != null) {
             taskList.addAll(page1);
         }
-        if(task1.size()>0)
+        if (task1.size() > 0)
             taskList.addAll(task1);
         page.setTotal(taskList.size());
         List<FlowTask> flowList = new ArrayList<>();
@@ -175,8 +170,7 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
 
 
             List<ProjectUserList> lists = projectUserMapper.selectProjectUserList(userList);
-            if(lists.size()!=0)
-            {
+            if (lists.size() != 0) {
                 flowTask.setProjectName(lists.get(0).getProjectName());
                 flowTask.setProjectId(lists.get(0).getProjectId());
             }
@@ -197,7 +191,7 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public AjaxResult complete(FlowTaskVo taskVo,Long projectId,String procInsId) {
+    public AjaxResult complete(FlowTaskVo taskVo, Long projectId, String procInsId) {
         Task task = taskService.createTaskQuery().taskId(taskVo.getTaskId()).singleResult();
         if (Objects.isNull(task)) {
             return AjaxResult.error("任务不存在");
@@ -220,11 +214,11 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
                 projectHistory.setHisTaskId(procInsId);
                 projectHistory.setUserId(Long.parseLong(historicProcessInstance.getStartUserId()));
                 String money = (String) historicTaskInstance.getProcessVariables().get("money");
-                Double mon =Double.parseDouble(money);
+                Double mon = Double.parseDouble(money);
                 projectHistory.setMoney(mon);
-                project.setExpensesLeft(project.getExpensesLeft()-mon);
+                project.setExpensesLeft(project.getExpensesLeft() - mon);
                 projectMapper.updateProject(project);
-                projectUserMapper.deleteProjectUser(projectId,Long.parseLong( historicProcessInstance.getStartUserId()));
+                projectUserMapper.deleteProjectUser(projectId, Long.parseLong(historicProcessInstance.getStartUserId()));
                 projectHistoryMapper.insertProjectHistory(projectHistory);
             }
 
@@ -258,14 +252,13 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
                 .startedBy(userId.toString())
                 .orderByProcessInstanceStartTime()
                 .desc();
-        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.finished().listPage(pageNum - 1, pageSize);
+        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.finished().listPage(pageSize * (pageNum - 1), pageSize);
         page.setTotal(historicProcessInstanceQuery.count());
         List<FlowTask> flowList = new ArrayList<>();
         List<FlowTaskName> names = flowMapper.selectProjectName();
-        Map<String,String> getName = new HashMap<>();
-        for(FlowTaskName uname:names)
-        {
-            getName.put(uname.getDeployId(),uname.getProjectName());
+        Map<String, String> getName = new HashMap<>();
+        for (FlowTaskName uname : names) {
+            getName.put(uname.getDeployId(), uname.getProjectName());
         }
         for (HistoricProcessInstance hisIns : historicProcessInstances) {
             FlowTask flowTask = new FlowTask();
@@ -287,8 +280,7 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             // 设置taskId
             List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
             flowTask.setTaskId(historicTaskInstance.get(0).getId());
-            if(getName.containsKey(flowTask.getDeployId()))
-            {
+            if (getName.containsKey(flowTask.getDeployId())) {
                 flowTask.setProjectName(getName.get(flowTask.getDeployId()));
             }
 
@@ -307,14 +299,13 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
                 .startedBy(userId.toString())
                 .orderByProcessInstanceStartTime()
                 .desc();
-        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.listPage(pageNum - 1, pageSize);
+        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.listPage(pageSize * (pageNum - 1), pageSize);
         page.setTotal(historicProcessInstanceQuery.count());
         List<FlowTask> flowList = new ArrayList<>();
         List<FlowTaskName> names = flowMapper.selectProjectName();
-        Map<String,String> getName = new HashMap<>();
-        for(FlowTaskName uname:names)
-        {
-            getName.put(uname.getDeployId(),uname.getProjectName());
+        Map<String, String> getName = new HashMap<>();
+        for (FlowTaskName uname : names) {
+            getName.put(uname.getDeployId(), uname.getProjectName());
         }
         for (HistoricProcessInstance hisIns : historicProcessInstances) {
             List<Task> taskList = taskService.createTaskQuery().processInstanceId(hisIns.getId()).list();
@@ -328,8 +319,8 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             flowTask.setProcInsId(hisIns.getId());
 
             // 计算耗时
-                long time = System.currentTimeMillis() - hisIns.getStartTime().getTime();
-                flowTask.setDuration(getDate(time));
+            long time = System.currentTimeMillis() - hisIns.getStartTime().getTime();
+            flowTask.setDuration(getDate(time));
             // 流程定义信息
             ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
                     .processDefinitionId(hisIns.getProcessDefinitionId())
@@ -340,8 +331,7 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             // 当前所处流程 todo: 本地启动放开以下注释
             flowTask.setTaskId(taskList.get(0).getId());
             flowTask.setTaskName(taskList.get(0).getName());
-            if(getName.containsKey(flowTask.getDeployId()))
-            {
+            if (getName.containsKey(flowTask.getDeployId())) {
                 flowTask.setProjectName(getName.get(flowTask.getDeployId()));
             }
 
@@ -364,14 +354,14 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
     }
 
     @Override
-    public AjaxResult startProcessInstanceById( Map<String, Object> variables) {
+    public AjaxResult startProcessInstanceById(Map<String, Object> variables) {
         byte[] image = variables.get("image").toString().getBytes();
-        String procDefId =(String) variables.get("procDefId");
+        String procDefId = (String) variables.get("procDefId");
         Long projectId = Long.parseLong(variables.get("projectId").toString());
         try {
             SysUser sysUser = SecurityUtils.getLoginUser().getUser();
             Project project = projectMapper.selectProjectById(projectId);
-          //  Object money = variables.get("money");
+            //  Object money = variables.get("money");
 //            if(money!=null)
 //            {
 //                Double expensesLeft = project.getExpensesLeft();
@@ -386,9 +376,8 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             projectUserList.setProjectId(projectId);
             projectUserList.setUserId(sysUser.getUserId());
             List<ProjectUserList> projectUserLists = projectUserMapper.selectProjectUserList(projectUserList);
-            if(projectUserLists.size()!=0)
+            if (projectUserLists.size() != 0)
                 throw new NullPointerException();
-
 
 
             ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(procDefId)
@@ -419,13 +408,10 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             userList.setProjectName(project.getProjectName());
             projectUserMapper.insertProjectUser(userList);
             return AjaxResult.success("报销启动成功");
-        }
-        catch (NullPointerException exception)
-        {
+        } catch (NullPointerException exception) {
             exception.printStackTrace();
             return AjaxResult.error("报销流程进行中");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.error("流程启动错误");
         }

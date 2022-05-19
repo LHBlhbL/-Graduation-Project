@@ -23,6 +23,15 @@ export function definitionStart(data) {
   })
 }
 
+// 用户图片上传
+export function uploadImage(data) {
+  return request({
+    url: '/reim/img',
+    method: 'post',
+    data: data
+  })
+}
+
 export function startProcess(data){
   return request(
     {

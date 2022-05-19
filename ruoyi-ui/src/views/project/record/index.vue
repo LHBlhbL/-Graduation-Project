@@ -12,8 +12,6 @@
             <parser :key="new Date().getTime()" :form-conf="variablesData" />
         <el-form ref="elForm" :model="formShow" :rules="rules" size="medium" label-width="130px" >
           <el-form-item label="报销金额" prop="money">
-            <el-input v-model="formShow.money" placeholder="请输入报销金额" clearable :style="{width: '96%'}" disabled>
-            </el-input>
           </el-form-item>
         </el-form>
           <div style="margin-left:10%;margin-bottom: 20px;font-size: 14px;" v-if="finished === 'true'">
@@ -33,22 +31,14 @@
             <el-input v-model="formDataM.money" placeholder="请输入报销金额" clearable :style="{width: '96%'}">
             </el-input>
           </el-form-item>
-          <el-form-item label="发票单据">
-            <el-upload  :auto-upload="false" multiple :limit="1"
-                        :file-list="diaLogForm.imgBroadcastList"
-                        list-type="picture-card" :on-change="imgBroadcastChange" :on-remove="imgBroadcastRemove"
-                       accept="image/jpg,image/png,image/jpeg"
-                       action="">
-              <i class="el-icon-plus"></i>
-              <div slot="tip" class="el-upload__tip">无图案</div>
-            </el-upload>
+          <el-form-item label="发票" prop="money">
+            <img-upload></img-upload>
           </el-form-item>
           <el-form-item size="large">
             <el-button type="primary" @click="tijiao()">提交</el-button>
             <el-button @click="resetForm">重置</el-button>
           </el-form-item>
         </el-form>
-        <el-button  icon="el-icon-edit-outline" type="success" size="mini" @click="tijiao()">提交</el-button>
       </el-col>
 
     </el-card>
@@ -158,12 +148,14 @@ import {listUser} from "@/api/system/user";
 import {definitionStart,startProcess} from "@/api/project/reimbursement"
 import {complete} from "@/api/project/process"
 import {uploadImgToBase64} from "@/utils/uploadImg"
+import imgUpload from "./imgUpload";
 export default {
   name: "Record",
   components: {
     Parser,
     flow,
     Treeselect,
+    imgUpload,
   },
   props: {},
   data() {
@@ -208,6 +200,7 @@ export default {
       },
       // 遮罩层
       loading: true,
+      imageUploadShow:false,
       flowRecordList: [], // 流程流转数据
       formConfCopy: {},
       src: null,
