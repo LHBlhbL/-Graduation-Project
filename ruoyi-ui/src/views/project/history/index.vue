@@ -146,7 +146,7 @@ export default {
     },
     /** 流程流转记录 */
     handleFlowRecord(row){
-      this.$router.push({ path: '/flowable/task/record/index',
+      this.$router.push({ path: '/project/record/index',
         query: {
           procInsId: row.hisTaskId,
           deployId: row.flowTask.deployId,
@@ -158,7 +158,7 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加【请填写功能名称】";
+      this.title = "添加";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -167,7 +167,7 @@ export default {
       getHistory(id).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改【请填写功能名称】";
+        this.title = "修改";
       });
     },
     /** 提交按钮 */
@@ -193,7 +193,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const id = row.hisTaskId;
-      this.$confirm('是否确认删除【请填写功能名称】编号为"' + id + '"的数据项?', "警告", {
+      this.$confirm('是否确认删除编号为"' + id + '"的数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
@@ -207,7 +207,7 @@ export default {
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$confirm('是否确认导出所有【请填写功能名称】数据项?', "警告", {
+      this.$confirm('是否确认导出所有数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"

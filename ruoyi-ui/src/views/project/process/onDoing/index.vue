@@ -189,7 +189,7 @@ export default {
     },
     /** 流程流转记录 */
     handleFlowRecord(row){
-      this.$router.push({ path: '/flowable/task/record/index',
+      this.$router.push({ path: '/project/record/index',
         query: {
           procInsId: row.procInsId,
           deployId: row.deployId,

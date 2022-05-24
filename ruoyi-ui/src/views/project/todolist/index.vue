@@ -155,6 +155,8 @@ export default {
           deployId: row.deployId,
           taskId: row.taskId,
           projectId:row.projectId,
+          startName:row.startUserName,
+          projectName:row.projectName,
           finished: true
         }
       })

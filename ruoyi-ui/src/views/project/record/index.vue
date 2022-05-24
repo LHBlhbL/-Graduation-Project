@@ -2,18 +2,40 @@
   <div class="app-container">
     <el-card class="box-card" >
         <div slot="header" class="clearfix">
-          <span class="el-icon-document">{{projectName}}</span>
-          <span>基础信息</span>
+          <span class="el-icon-document" v-if="startName">{{startName}}填报</span>
+          <span >{{projectName}}基础信息</span>
+          <span v-if="!startName">填写</span>
           <el-button style="float: right;" type="primary" @click="goBack">返回</el-button>
         </div>
 
       <!--流程处理表单模块-->
       <el-col :span="16" :offset="6" v-if="variableOpen">
-            <parser :key="new Date().getTime()" :form-conf="variablesData" />
         <el-form ref="elForm" :model="formShow" :rules="rules" size="medium" label-width="130px" >
-          <el-form-item label="报销金额" prop="money">
+          <el-form-item label="报销金额" prop="field101">
+            <el-input v-model="formShow.money" placeholder="请输入报销金额" readonly clearable
+                      :style="{width: '100%'}"></el-input>
+          </el-form-item>
+          <el-form-item label="发票图片">
+            <img
+              :src="dialogImageUrl"
+              @click="pictureCardPreview"
+              style="display: block; width: 300px;height: 200px;"
+            />
           </el-form-item>
         </el-form>
+            <parser :key="new Date().getTime()" :form-conf="variablesData" />
+
+        <el-dialog
+          :visible.sync="picDialogVisible"
+          title="图片预览"
+          width="800"
+          append-to-body
+        >
+          <img
+            :src="dialogImageUrl"
+            style="display: block; max-width: 100%; margin: 0 auto"
+          />
+        </el-dialog>
           <div style="margin-left:10%;margin-bottom: 20px;font-size: 14px;" v-if="finished === 'true'">
             <el-button  icon="el-icon-edit-outline" type="success" size="mini" @click="handleComplete">审批</el-button>
             <el-button  icon="el-icon-refresh-left" type="warning" size="mini" @click="handleReturn">退回</el-button>
@@ -32,13 +54,18 @@
             </el-input>
           </el-form-item>
           <el-form-item label="发票" prop="money">
-            <img-upload></img-upload>
+            <img-upload ref="imgUpload"></img-upload>
           </el-form-item>
+
+        <div class="test-form" >
+          <parser :key="new Date().getTime()"  :form-conf="formConf" @submit="submitForm" ref="parser" @getData="getData" />
+        </div>
           <el-form-item size="large">
             <el-button type="primary" @click="tijiao()">提交</el-button>
             <el-button @click="resetForm">重置</el-button>
           </el-form-item>
         </el-form>
+
       </el-col>
 
     </el-card>
@@ -79,7 +106,7 @@
       </el-card>
     <el-card class="box-card">
         <div slot="header" class="clearfix">
-          <span class="el-icon-picture-outline">流程图</span>
+          <span class="el-icon-picture-outline">{{projectName}}报销流程图</span>
         </div>
         <flow :xmlData="xmlData" :taskData="taskList"></flow>
     </el-card>
@@ -87,7 +114,7 @@
     <!--审批正常流程-->
     <el-dialog :title="completeTitle" :visible.sync="completeOpen" width="60%" append-to-body>
       <span>
-        <el-input style="width: 50%" type="textarea" v-model="taskForm.comment" placeholder="请输入处理意见"/>
+        <el-input style="width: 70%;" type="textarea" v-model="taskForm.comment" placeholder="请输入处理意见"/>
         <el-button @click="completeOpen = false">取 消</el-button>
         <el-button type="primary" @click="taskComplete">确 定</el-button>
       </span>
@@ -180,7 +207,7 @@ export default {
         money: undefined,
       },
       formShow:{
-        money:undefined,
+        money:"9818.80",
       }
       ,
       rules: {
@@ -226,6 +253,8 @@ export default {
       formConfOpen: false, // 是否加载默认表单数据
       variables: [], // 流程变量数据
       variablesData: {}, // 流程变量数据
+      recordMoney: "",
+      dialogImageUrl:"",
       variableOpen: false, // 是否加载流程变量数据
       returnTaskList: [],  // 回退列表数据
       finished: 'false',
@@ -235,6 +264,8 @@ export default {
       returnOpen: false,
       rejectOpen: false,
       rejectTitle: null,
+      startName:"",
+      picDialogVisible:false,
       userData:[],
     };
   },
@@ -257,6 +288,7 @@ export default {
       this.taskForm.deployId = null
     }
     this.getFlowRecordList( this.taskForm.procInsId, this.taskForm.deployId);
+    this.startName = this.$route.query.startName
     this.finished =  this.$route.query && this.$route.query.finished
   },
   mounted() {
@@ -286,6 +318,9 @@ export default {
           this.total = response.total;
         }
       );
+    },
+    pictureCardPreview(){
+      this.picDialogVisible = true;
     },
     // 筛选节点
     filterNode(value, data) {
@@ -381,39 +416,15 @@ export default {
         // 提交流程申请时填写的表单存入了流程变量中后续任务处理时需要展示
         getProcessVariables(taskId).then(res => {
           this.variablesData = res.data.variables;
+          this.dialogImageUrl = process.env.VUE_APP_BASE_API + res.data.imageUrl;
+          this.recordMoney = res.data.money;
           this.variableOpen = true
         });
       }
     },
-    //移除成功
-    imgBroadcastRemove(file, fileList) {
-      this.diaLogForm.imgBroadcastList = fileList
-      this.$message.success('移除成功')
-    },
-    //图片更改
-    imgBroadcastChange(file, fileList) {
-      const isLt2M = file.size / 1024 / 1024 < 2 // 上传头像图片大小不能超过 2MB
-      if (!isLt2M) {
-        this.diaLogForm.imgBroadcastList = fileList.filter(v => v.uid !== file.uid)
-        this.$message.error('图片选择失败，每张图片大小不能超过 2MB,请重新选择!')
-      } else {
-        this.diaLogForm.imgBroadcastList.push(file)
-        this.$message.success('上传成功')
-      }
-    },
-    //图片上传
-       imageUpload() {
-        const imgBroadcastListBase64 = []
-        const filePromises = this.diaLogForm.imgBroadcastList.map(async file => {
-          const response = await uploadImgToBase64(file.raw)
-          return response.result.replace(/.*;base64,/, '') // 去掉data:image/jpeg;base64,
-        })
-        for (const textPromise of filePromises) {
-          imgBroadcastListBase64.push( textPromise)
-        }
-        this.image = imgBroadcastListBase64.join();
-        alert(111)
-      },
+
+
+
     /** 根据当前任务或者流程设计配置的下一步节点 */
     getNextFlowNode(taskId) {
       // 根据当前任务或者流程设计配置的下一步节点 todo 暂时未涉及到考虑网关、表达式和多节点情况
@@ -508,11 +519,12 @@ export default {
           variables.variables = formData;
            // 启动流程并将表单数据加入流程变量
           variables["projectId"] = this.projectId;
+          variables["imageUrl"] = this.$refs.imgUpload.imageUrl;
           variables["procDefId"] = this.taskForm.procDefId;
-          this.imageUpload()
-          alert(this.image)
           variables["image"] = this.image
-          variables["money"] = formData
+          variables["money"] = this.formDataM.money
+          variables.variables["money"] = this.formDataM.money
+          console.log(formData)
           definitionStart(JSON.stringify(variables)).then(res => {
             this.msgSuccess(res.msg);
             this.goBack();

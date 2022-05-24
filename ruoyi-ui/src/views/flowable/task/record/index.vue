@@ -26,9 +26,6 @@
         <div class="test-form">
           <parser :key="new Date().getTime()"  :form-conf="formConf" @submit="submitForm" ref="parser" @getData="getData" />
         </div>
-        <el-image style="width: 200px; height: 200px" :src="'data:image/jpg;base64,'+imageShow" fit="fill">
-        </el-image>
-<p>123456</p>
       </el-col>
     </el-card>
 

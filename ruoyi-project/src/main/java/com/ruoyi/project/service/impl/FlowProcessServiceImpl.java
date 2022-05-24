@@ -355,7 +355,6 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
 
     @Override
     public AjaxResult startProcessInstanceById(Map<String, Object> variables) {
-        byte[] image = variables.get("image").toString().getBytes();
         String procDefId = (String) variables.get("procDefId");
         Long projectId = Long.parseLong(variables.get("projectId").toString());
         try {
@@ -401,7 +400,6 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             }
 
             ProjectUserList userList = new ProjectUserList();
-            userList.setImage(image);
             userList.setUserId(sysUser.getUserId());
             userList.setProjectId(projectId);
             userList.setProcInsId(task.getProcessInstanceId());

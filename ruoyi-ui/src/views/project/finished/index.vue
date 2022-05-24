@@ -5,8 +5,7 @@
     </el-row>
     <el-table v-loading="loading" :data="finishedList"  @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="任务编号" align="center" prop="projectName" :show-overflow-tooltip="true"/>
-      <el-table-column label="流程名称" align="center" prop="procDefName" :show-overflow-tooltip="true"/>
+      <el-table-column label="项目名称" align="center" prop="projectName" :show-overflow-tooltip="true"/>
       <el-table-column label="任务节点" align="center" prop="taskName" />
       <el-table-column label="流程发起人" align="center">
         <template slot-scope="scope">
@@ -24,13 +23,13 @@
             icon="el-icon-tickets"
             @click="handleFlowRecord(scope.row)"
           >流转记录</el-button>
-           <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-tickets"
-            @click="handleRevoke(scope.row)"
-          >撤回
-          </el-button>
+<!--           <el-button-->
+<!--            size="mini"-->
+<!--            type="text"-->
+<!--            icon="el-icon-tickets"-->
+<!--            @click="handleRevoke(scope.row)"-->
+<!--          >撤回-->
+<!--          </el-button>-->
         </template>
       </el-table-column>
     </el-table>
@@ -168,7 +167,7 @@ export default {
     },
     /** 流程流转记录 */
     handleFlowRecord(row){
-      this.$router.push({ path: '/flowable/task/record/index',
+      this.$router.push({ path: '/project/record/index',
         query: {
           procInsId: row.procInsId,
           deployId: row.deployId,
@@ -216,33 +215,7 @@ export default {
         }
       });
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$confirm('是否确认删除流程定义编号为"' + ids + '"的数据项?', "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(function() {
-        return delDeployment(ids);
-      }).then(() => {
-        this.getList();
-        this.msgSuccess("删除成功");
-      })
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      const queryParams = this.queryParams;
-      this.$confirm('是否确认导出所有流程定义数据项?', "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(function() {
-        return exportDeployment(queryParams);
-      }).then(response => {
-        this.download(response.msg);
-      })
-    }
+
   }
 };
 </script>

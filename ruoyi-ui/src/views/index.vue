@@ -1,10 +1,8 @@
 <template>
   <div class="app-container home">
-    <h>flowable报销管理系统</h>
     <div class="background">
 <img src="../assets/images/back.jpg" width="100%" height="560px">
     </div>
-    <file-up></file-up>
   </div>
 
 </template>
