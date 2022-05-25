@@ -8,6 +8,14 @@ export function processList(query) {
   })
 }
 
+export function processDownList(query) {
+  return request({
+    url: '/reim/process/downList',
+    method: 'get',
+    params: query
+  })
+}
+
 export function processFinishedList(query) {
   return request({
     url: '/reim/process/finishedList',
@@ -32,6 +40,13 @@ export function complete(data,projectId) {
   })
 }
 
+export function rejectProcess(data,projectId) {
+  return request({
+    url: '/reim/task/reject/'+projectId+'/'+data.procInsId,
+    method: 'post',
+    data: data
+  })
+}
 export function  stopProcess(procInsId){
   return request(
     {
@@ -40,3 +55,4 @@ export function  stopProcess(procInsId){
     }
   )
 }
+

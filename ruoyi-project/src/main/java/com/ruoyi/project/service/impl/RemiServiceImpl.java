@@ -98,7 +98,6 @@ public class RemiServiceImpl extends FlowServiceFactory implements IRemiService 
             }
         }
         projectUserMapper.deleteProjectUserByProc(procInsId);
-        historyService.deleteHistoricProcessInstance(procInsId);
         return AjaxResult.success();
     }
 

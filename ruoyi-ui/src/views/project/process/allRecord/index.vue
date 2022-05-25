@@ -1,47 +1,18 @@
 <template>
   <div class="app-container">
-<!--    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">-->
-<!--      <el-form-item label="名称" prop="name">-->
-<!--        <el-input-->
-<!--          v-model="queryParams.name"-->
-<!--          placeholder="请输入名称"-->
-<!--          clearable-->
-<!--          size="small"-->
-<!--          @keyup.enter.native="handleQuery"-->
-<!--        />-->
-<!--      </el-form-item>-->
-
-<!--      <el-form-item>-->
-<!--        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>-->
-<!--        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>-->
-<!--      </el-form-item>-->
-<!--    </el-form>-->
     <el-row :gutter="10" class="mb8">
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-
     <el-table v-loading="loading" :data="myProcessList"  @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="报销项目" align="center" prop="projectName" :show-overflow-tooltip="true"/>
-      <el-table-column label="申请人" align="center" prop=""/>
-      <el-table-column label="报销金额" align="center" prop=""/>
+      <el-table-column label="申请人" align="center" prop="userName"/>
+      <el-table-column label="报销金额" align="center" prop="taskName"/>
       <el-table-column label="提交时间" align="center" prop="createTime" width="180"/>
       <el-table-column label="耗时" align="center" prop="duration" width="180"/>
-      <el-table-column label="当前节点" align="center" prop="taskName"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-<!--          <el-dropdown>-->
-<!--         -->
-<!--            <el-dropdown-menu slot="dropdown">-->
-<!--              <el-dropdown-item icon="el-icon-tickets" @click.native="handleFlowRecord(scope.row)">-->
-<!--                详情-->
-<!--              </el-dropdown-item>-->
-<!--              <el-dropdown-item v-if="scope.row.finishTime == null" icon="el-icon-circle-close" @click.native="handleStop(scope.row)">-->
-<!--                取消申请-->
-<!--              </el-dropdown-item>-->
-<!--            </el-dropdown-menu>-->
-<!--          </el-dropdown>-->
           <el-button
             size="mini"
             type="text"
@@ -52,10 +23,10 @@
           <el-button
             size="mini"
             type="text"
-            icon="el-icon-circle-close"
-            @click="handleFlowRecord(scope.row)"
-            v-hasPermi="['project:process:stop']"
-          >取消申请</el-button>
+            icon="el-icon-tickets"
+            @click="handleDelete(scope.row)"
+            v-hasPermi="['project:process:detail']"
+          >删除记录</el-button>
 
         </template>
       </el-table-column>
@@ -87,8 +58,8 @@ import {
 
 } from "@/api/flowable/finished";
 import {listDefinition} from "@/api/flowable/definition";
-import {delProcinst,exportProcinst} from "@/api/system/procinst";
-import {processList,stopProcess,processDownList} from "@/api/project/process"
+import { delProcess } from "@/api/flowable/process";
+import {stopProcess,processDownList} from "@/api/project/process"
 export default {
   name: "Deploy",
   components: {
@@ -145,7 +116,7 @@ export default {
     /** 查询流程定义列表 */
     getList() {
       this.loading = true;
-      processList(this.queryParams).then(response => {
+      processDownList(this.queryParams).then(response => {
         this.myProcessList = response.data.records;
         this.total = response.data.total;
         this.loading = false;
@@ -213,18 +184,12 @@ export default {
     },
     /**  取消流程申请 */
     handleStop(row){
-      const id = row.procInsId ;
-      this.$confirm('是否取消编号为"' + id + '"的流程申请?', "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(function() {
-        this.loading = true;
-        return  stopProcess(row.procInsId);
-      }).then(() => {
-        this.loading = false;
-        this.msgSuccess("取消成功");
-      })
+      this.loading = true;
+      stopProcess(row.procInsId).then( res => {
+        this.msgSuccess(res.msg);
+        this.getList();
+      });
+      this.loading = false;
     },
     /** 流程流转记录 */
     handleFlowRecord(row){
@@ -268,31 +233,19 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const ids = row.procInsId ;
-      this.$confirm('是否确认删除编号为"' + ids + '"的数据项?', "警告", {
+      const id = row.procInsId ;
+      this.$confirm('是否确认删除编号为"' + id + '"的数据项?', "警告", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       }).then(function() {
-        return delProcinst(ids);
+        return delProcess(id);
       }).then(() => {
         this.getList();
         this.msgSuccess("删除成功");
       })
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      const queryParams = this.queryParams;
-      this.$confirm('是否确认导出数据项?', "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(function() {
-        return exportProcinst(queryParams);
-      }).then(response => {
-        this.download(response.msg);
-      })
-    }
+
   }
 };
 </script>

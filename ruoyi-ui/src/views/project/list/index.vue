@@ -55,9 +55,12 @@
       <el-table-column label="剩余经费" align="center" prop="expensesLeft" />
       <el-table-column label="流程名称" align="center"  >
         <template slot-scope="scope">
-          <el-button v-if="scope.row.version" type="text" >
+          <div v-if="scope.row.version">
             <span>{{ scope.row.procName }}</span>
-          </el-button>
+          </div>
+<!--          <el-button v-if="scope.row.version" type="text" >-->
+<!--            <span>{{ scope.row.procName }}</span>-->
+<!--          </el-button>-->
           <label v-else>未配置流程</label>
         </template>
       </el-table-column>

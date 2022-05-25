@@ -108,3 +108,9 @@ export function listDefinitionFlow(query) {
   })
 }
 
+export function mailtest() {
+  return request({
+    url: '/project/mail/test',
+    method: 'get',
+  })
+}

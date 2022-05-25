@@ -3,6 +3,7 @@ package com.ruoyi.project.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.exception.CustomException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.flowable.common.constant.ProcessConstants;
 import com.ruoyi.flowable.common.enums.FlowComment;
@@ -18,15 +19,22 @@ import com.ruoyi.project.service.IFlowProcessService;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.service.ISysUserService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.EndEvent;
+import org.flowable.bpmn.model.Process;
+import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.DelegationState;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,14 +57,14 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
     @Autowired
     private ProjectUserMapper projectUserMapper;
 
+
     @Autowired
-    private ProjectHistoryMapper projectHistoryMapper;
+    private JavaMailSender javaMailSender;
 
 
     @Override
     public AjaxResult processList(Integer pageNum, Integer pageSize) {
         Page<FlowTask> page = new Page<>();
-        Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
         HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery()
                 .orderByProcessInstanceStartTime()
                 .desc();
@@ -98,6 +106,104 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
                 List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
                 flowTask.setTaskId(historicTaskInstance.get(0).getId());
             }
+            if (getName.containsKey(flowTask.getDeployId())) {
+                flowTask.setProjectName(getName.get(flowTask.getDeployId()));
+            }
+
+            flowList.add(flowTask);
+        }
+        page.setRecords(flowList);
+
+        return AjaxResult.success(page);
+    }
+
+    @Override
+    public AjaxResult processListAllIn(Integer pageNum, Integer pageSize) {
+        Page<FlowTask> page = new Page<>();
+        Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery()
+                .orderByProcessInstanceStartTime()
+                .desc();
+        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.listPage(pageSize * (pageNum - 1), pageSize);
+        page.setTotal(historicProcessInstanceQuery.count());
+        List<FlowTask> flowList = new ArrayList<>();
+        List<FlowTaskName> names = flowMapper.selectProjectName();
+        Map<String, String> getName = new HashMap<>();
+        for (FlowTaskName uname : names) {
+            getName.put(uname.getDeployId(), uname.getProjectName());
+        }
+        for (HistoricProcessInstance hisIns : historicProcessInstances) {
+            List<Task> taskList = taskService.createTaskQuery().processInstanceId(hisIns.getId()).list();
+            if (CollectionUtils.isEmpty(taskList))
+                continue;
+
+
+            FlowTask flowTask = new FlowTask();
+            flowTask.setCreateTime(hisIns.getStartTime());
+            flowTask.setFinishTime(hisIns.getEndTime());
+            flowTask.setProcInsId(hisIns.getId());
+
+            // 计算耗时
+            long time = System.currentTimeMillis() - hisIns.getStartTime().getTime();
+            flowTask.setDuration(getDate(time));
+            // 流程定义信息
+            ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
+                    .processDefinitionId(hisIns.getProcessDefinitionId())
+                    .singleResult();
+            flowTask.setDeployId(pd.getDeploymentId());
+            flowTask.setCategory(pd.getCategory());
+
+            // 当前所处流程 todo: 本地启动放开以下注释
+            flowTask.setTaskId(taskList.get(0).getId());
+            flowTask.setTaskName(taskList.get(0).getName());
+            if (getName.containsKey(flowTask.getDeployId())) {
+                flowTask.setProjectName(getName.get(flowTask.getDeployId()));
+            }
+
+            flowList.add(flowTask);
+        }
+        page.setRecords(flowList);
+
+        return AjaxResult.success(page);
+    }
+
+    @Override
+    public AjaxResult processListAllDown(Integer pageNum, Integer pageSize) {
+        Page<FlowTask> page = new Page<>();
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery()
+                .orderByProcessInstanceStartTime()
+                .desc();
+        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.finished().listPage(pageSize * (pageNum - 1), pageSize);
+        page.setTotal(historicProcessInstanceQuery.count());
+        List<FlowTask> flowList = new ArrayList<>();
+        List<FlowTaskName> names = flowMapper.selectProjectName();
+        Map<String, String> getName = new HashMap<>();
+        for (FlowTaskName uname : names) {
+            getName.put(uname.getDeployId(), uname.getProjectName());
+        }
+        for (HistoricProcessInstance hisIns : historicProcessInstances) {
+            FlowTask flowTask = new FlowTask();
+            flowTask.setCreateTime(hisIns.getStartTime());
+            flowTask.setFinishTime(hisIns.getEndTime());
+            flowTask.setProcInsId(hisIns.getId());
+
+            SysUser user = sysUserService.selectUserById(Long.parseLong( hisIns.getStartUserId()));
+            flowTask.setUserName(user.getUserName());
+
+            // 计算耗时
+            long time = hisIns.getEndTime().getTime() - hisIns.getStartTime().getTime();
+            flowTask.setDuration(getDate(time));
+
+            // 流程定义信息
+            ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
+                    .processDefinitionId(hisIns.getProcessDefinitionId())
+                    .singleResult();
+            flowTask.setDeployId(pd.getDeploymentId());
+            flowTask.setCategory(pd.getCategory());
+
+            // 设置taskId
+            List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
+            flowTask.setTaskId(historicTaskInstance.get(0).getId());
             if (getName.containsKey(flowTask.getDeployId())) {
                 flowTask.setProjectName(getName.get(flowTask.getDeployId()));
             }
@@ -209,38 +315,52 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
                 HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskVo.getTaskId()).singleResult();
                 Project project = projectMapper.selectProjectById(projectId);
                 HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(procInsId).singleResult();
-                ProjectHistory projectHistory = new ProjectHistory();
-                projectHistory.setProjectId(projectId);
-                projectHistory.setHisTaskId(procInsId);
-                projectHistory.setUserId(Long.parseLong(historicProcessInstance.getStartUserId()));
                 String money = (String) historicTaskInstance.getProcessVariables().get("money");
                 Double mon = Double.parseDouble(money);
-                projectHistory.setMoney(mon);
                 project.setExpensesLeft(project.getExpensesLeft() - mon);
                 projectMapper.updateProject(project);
                 projectUserMapper.deleteProjectUser(projectId, Long.parseLong(historicProcessInstance.getStartUserId()));
-                projectHistoryMapper.insertProjectHistory(projectHistory);
+                String context = "您申请的"+project.getProjectName()+"报销申请审批完成";
+                sendMail("报销成功",historicProcessInstance.getStartUserId(),context);
             }
 
-//            HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskVo.getTaskId()).singleResult();
-//            if (Objects.nonNull(historicTaskInstance)) {
-//                HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-//                        .processInstanceId(task.getProcessInstanceId())
-//                        .singleResult();
-//                Map<String, Object> processVariables = historicTaskInstance.getProcessVariables();
-//                ProjectHistory projectHistory = new ProjectHistory();
-//                String time = (String) processVariables.get("money");
-//                Project project = projectMapper.selectProjectById(projectId);
-//                project.setExpensesLeft(project.getExpensesLeft()- Long.parseLong(time));
-//                projectMapper.updateProject(project);
-//                projectUserMapper.deleteProjectUser(projectId,Long.parseLong( historicProcessInstance.getStartUserId()));
-//                projectHistory.setProjectId(projectId);
-//                projectHistory.setHisTaskId(historicTaskInstance.getProcessInstanceId());
-//                projectHistory.setMoney(Long.parseLong(time));
-//                projectHistory.setUserId(Long.parseLong( historicProcessInstance.getStartUserId()));
-//                projectHistoryMapper.insertProjectHistory(projectHistory);
-//            }
+
         }
+        return AjaxResult.success();
+    }
+
+
+    @Override
+    public AjaxResult rejectProcess(FlowTaskVo taskVo, Long projectId, String procInsId) {
+        List<Task> task = taskService.createTaskQuery().processInstanceId(procInsId).list();
+        if (CollectionUtils.isEmpty(task)) {
+            throw new CustomException("流程未启动或已执行完成，取消申请失败");
+        }
+
+        SysUser loginUser = SecurityUtils.getLoginUser().getUser();
+        ProcessInstance processInstance =
+                runtimeService.createProcessInstanceQuery().processInstanceId(procInsId).singleResult();
+        String startUserId = processInstance.getStartUserId();
+        String commit = taskVo.getComment();
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processInstance.getProcessDefinitionId());
+        if (Objects.nonNull(bpmnModel)) {
+            Process process = bpmnModel.getMainProcess();
+            List<EndEvent> endNodes = process.findFlowElementsOfType(EndEvent.class, false);
+            if (CollectionUtils.isNotEmpty(endNodes)) {
+                Authentication.setAuthenticatedUserId(loginUser.getUserId().toString());
+                String endId = endNodes.get(0).getId();
+                List<Execution> executions =
+                        runtimeService.createExecutionQuery().parentId(processInstance.getProcessInstanceId()).list();
+                List<String> executionIds = new ArrayList<>();
+                executions.forEach(execution -> executionIds.add(execution.getId()));
+                runtimeService.createChangeActivityStateBuilder().moveExecutionsToSingleActivityId(executionIds,
+                        endId).changeState();
+            }
+        }
+        projectUserMapper.deleteProjectUserByProc(procInsId);
+        Project project = projectMapper.selectProjectById(projectId);
+        String context = "您申请的"+project.getProjectName()+"报销被驳回。原因为："+commit+"。";
+        sendMail("驳回",startUserId,context);
         return AjaxResult.success();
     }
 
@@ -340,6 +460,24 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         page.setRecords(flowList);
 
         return AjaxResult.success(page);
+    }
+
+    @Override
+    public void sendMail(String subject,String to, String context) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        String username = "2712544015@qq.com";
+        //邮件主题
+        message.setSubject("通知");
+        //发件人
+        message.setFrom(username);
+        SysUser user = sysUserService.selectUserById(Long.parseLong(to));
+        //收件人
+        message.setTo(user.getEmail());
+        //内容
+        message.setText(context);
+        message.setSentDate(new Date());
+        //执行发送
+        javaMailSender.send(message);
     }
 
     public AjaxResult processVariables(String taskId) {

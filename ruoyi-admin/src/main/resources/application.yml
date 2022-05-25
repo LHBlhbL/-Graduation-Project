@@ -38,6 +38,18 @@ logging:
 
 # Spring配置
 spring:
+  mail:
+    host: smtp.qq.com
+    username: 2712544015@qq.com
+    port: 465
+    password: wcjnhzqntfvtdfig
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
   # 资源信息
   messages:
     # 国际化资源文件路径
@@ -122,3 +134,5 @@ xss:
 
 flowable:
   database-schema-update: true
+
+

@@ -11,10 +11,7 @@
       <!--流程处理表单模块-->
       <el-col :span="16" :offset="6" v-if="variableOpen">
         <el-form ref="elForm" :model="formShow" :rules="rules" size="medium" label-width="130px" >
-          <el-form-item label="报销金额" prop="field101">
-            <el-input v-model="formShow.money" placeholder="请输入报销金额" readonly clearable
-                      :style="{width: '100%'}"></el-input>
-          </el-form-item>
+          <parser :key="new Date().getTime()" :form-conf="variablesData" />
           <el-form-item label="发票图片">
             <img
               :src="dialogImageUrl"
@@ -23,7 +20,7 @@
             />
           </el-form-item>
         </el-form>
-            <parser :key="new Date().getTime()" :form-conf="variablesData" />
+
 
         <el-dialog
           :visible.sync="picDialogVisible"
@@ -48,18 +45,11 @@
         <div class="test-form" >
           <parser :key="new Date().getTime()"  :form-conf="formConf" @submit="submitForm" ref="parser" @getData="getData" />
         </div>
-        <el-form ref="elForm" :model="formDataM" :rules="rules" size="medium" label-width="130px" >
-          <el-form-item label="报销金额" prop="money">
-            <el-input v-model="formDataM.money" placeholder="请输入报销金额" clearable :style="{width: '96%'}">
-            </el-input>
-          </el-form-item>
+        <el-form ref="elForm"  :rules="rules" size="medium" label-width="130px" >
           <el-form-item label="发票" prop="money">
             <img-upload ref="imgUpload"></img-upload>
           </el-form-item>
 
-        <div class="test-form" >
-          <parser :key="new Date().getTime()"  :form-conf="formConf" @submit="submitForm" ref="parser" @getData="getData" />
-        </div>
           <el-form-item size="large">
             <el-button type="primary" @click="tijiao()">提交</el-button>
             <el-button @click="resetForm">重置</el-button>
@@ -173,7 +163,7 @@ import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import Treeselect from "@riophae/vue-treeselect";
 import {listUser} from "@/api/system/user";
 import {definitionStart,startProcess} from "@/api/project/reimbursement"
-import {complete} from "@/api/project/process"
+import {complete,rejectProcess} from "@/api/project/process"
 import {uploadImgToBase64} from "@/utils/uploadImg"
 import imgUpload from "./imgUpload";
 export default {
@@ -521,9 +511,6 @@ export default {
           variables["projectId"] = this.projectId;
           variables["imageUrl"] = this.$refs.imgUpload.imageUrl;
           variables["procDefId"] = this.taskForm.procDefId;
-          variables["image"] = this.image
-          variables["money"] = this.formDataM.money
-          variables.variables["money"] = this.formDataM.money
           console.log(formData)
           definitionStart(JSON.stringify(variables)).then(res => {
             this.msgSuccess(res.msg);
@@ -544,12 +531,12 @@ export default {
     taskReject() {
       this.$refs["taskForm"].validate(valid => {
         if (valid) {
-          rejectTask(this.taskForm).then(res => {
+          rejectProcess(this.taskForm,this.projectId).then(res => {
             this.msgSuccess(res.msg);
             this.goBack();
           });
         }
-      });
+      })
     },
     /** 可退回任务列表 */
     handleReturn() {

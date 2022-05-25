@@ -52,7 +52,12 @@ public class ReimController extends BaseController {
 
     @GetMapping("process/list")
     public AjaxResult onGoingList(@RequestParam Integer pageNum,@RequestParam Integer pageSize){
-        return processService.processList(pageNum, pageSize);
+        return processService.processListAllIn(pageNum, pageSize);
+    }
+
+    @GetMapping("process/downList")
+    public AjaxResult downList(@RequestParam Integer pageNum,@RequestParam Integer pageSize){
+        return processService.processListAllDown(pageNum, pageSize);
     }
 
     @GetMapping("process/finishedList")
@@ -92,6 +97,10 @@ public class ReimController extends BaseController {
         return processService.complete(flowTaskVo,projectId,procInsId);
     }
 
+    @PostMapping(value = "/task/reject/{projectId}/{procInsId}")
+    public AjaxResult rejectProcess(@RequestBody FlowTaskVo flowTaskVo,@PathVariable(value = "projectId")Long projectId,@PathVariable(value = "procInsId")String procInsId) {
+        return processService.rejectProcess(flowTaskVo,projectId,procInsId);
+    }
     @PostMapping("/queryList")
     public TableDataInfo queryList(@RequestBody Project project)
     {
