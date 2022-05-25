@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.flowable.factory.FlowServiceFactory;
 import com.ruoyi.project.core.NameSelect;
 import com.ruoyi.project.domain.ProjectDeptUser;
@@ -86,6 +87,13 @@ public class ProjectServiceImpl extends FlowServiceFactory implements IProjectSe
                 list.setVersion(version.get(deploy));
             }
         }
+        return returnList;
+    }
+
+    @Override
+    public List<Project> selectProjectListPrincipal() {
+        Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
+        List<Project> returnList = projectMapper.selectProjectListByPrincipal(userId);
         return returnList;
     }
 

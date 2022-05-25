@@ -72,7 +72,6 @@ public class ProjectController extends BaseController {
     /**
      * 获取【请填写功能名称】详细信息
      */
-    @PreAuthorize("@ss.hasPermi('system:project:query')")
     @GetMapping(value = "/{projectId}")
     public AjaxResult getInfo(@PathVariable("projectId") Long projectId) {
         return AjaxResult.success(projectService.selectProjectById(projectId));

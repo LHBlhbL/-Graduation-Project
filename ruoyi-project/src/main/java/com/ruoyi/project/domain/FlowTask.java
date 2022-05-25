@@ -9,6 +9,16 @@ public class FlowTask extends FlowTaskDto {
 
     private String userName;
 
+    private String money;
+
+    public String getMoney() {
+        return money;
+    }
+
+    public void setMoney(String money) {
+        this.money = money;
+    }
+
     public String getUserName() {
         return userName;
     }

@@ -24,10 +24,8 @@
     <el-table v-loading="loading" :data="myProcessList"  @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="报销项目" align="center" prop="projectName" :show-overflow-tooltip="true"/>
-      <el-table-column label="申请人" align="center" prop=""/>
-      <el-table-column label="报销金额" align="center" prop=""/>
+      <el-table-column label="申请人" align="center" prop="userName"/>
       <el-table-column label="提交时间" align="center" prop="createTime" width="180"/>
-      <el-table-column label="耗时" align="center" prop="duration" width="180"/>
       <el-table-column label="当前节点" align="center" prop="taskName"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -47,14 +45,14 @@
             type="text"
             icon="el-icon-tickets"
             @click="handleFlowRecord(scope.row)"
-            v-hasPermi="['project:process:detail']"
+            v-hasPermi="['project:processAdmin:detail']"
           >详情</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-circle-close"
-            @click="handleFlowRecord(scope.row)"
-            v-hasPermi="['project:process:stop']"
+            @click="handleStop(scope.row)"
+            v-hasPermi="['project:processAdmin:stop']"
           >取消申请</el-button>
 
         </template>
@@ -219,10 +217,8 @@ export default {
         cancelButtonText: "取消",
         type: "warning"
       }).then(function() {
-        this.loading = true;
         return  stopProcess(row.procInsId);
       }).then(() => {
-        this.loading = false;
         this.msgSuccess("取消成功");
       })
     },

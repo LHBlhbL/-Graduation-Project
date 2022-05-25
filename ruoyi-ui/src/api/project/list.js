@@ -8,8 +8,12 @@ export function listProject(query) {
     params: query
   })
 }
-
-// 查询【请填写功能名称】详细
+export function listProjectPrincipal(){
+  return request({
+    url: '/Info/list',
+    method: 'get'
+  })
+}
 export function getProject(projectId) {
   return request({
     url: '/project/' + projectId,
@@ -114,3 +118,5 @@ export function mailtest() {
     method: 'get',
   })
 }
+
+

@@ -8,8 +8,9 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="报销项目" align="center" prop="projectName" :show-overflow-tooltip="true"/>
       <el-table-column label="申请人" align="center" prop="userName"/>
-      <el-table-column label="报销金额" align="center" prop="taskName"/>
+      <el-table-column label="报销金额" align="center" prop="money"/>
       <el-table-column label="提交时间" align="center" prop="createTime" width="180"/>
+      <el-table-column label="办结时间" align="center" prop="finishTime" width="180"/>
       <el-table-column label="耗时" align="center" prop="duration" width="180"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -18,14 +19,14 @@
             type="text"
             icon="el-icon-tickets"
             @click="handleFlowRecord(scope.row)"
-            v-hasPermi="['project:process:detail']"
+            v-hasPermi="['project:processHis:detail']"
           >详情</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-tickets"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['project:process:detail']"
+            v-hasPermi="['project:processHis:delete']"
           >删除记录</el-button>
 
         </template>

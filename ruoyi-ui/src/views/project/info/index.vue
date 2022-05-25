@@ -28,16 +28,6 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['project:list:add']"
-        >新增</el-button>
-      </el-col>
 
 
 
@@ -45,30 +35,13 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange" border>
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="项目编号" align="center" prop="projectId" />
       <el-table-column label="项目名称" align="center" prop="projectName" />
-      <el-table-column label="项目部门" align="center" prop="dept.deptName" />
-      <el-table-column label="项目负责人" align="center" prop="principal.principalName" />
       <el-table-column label="项目经费" align="center" prop="expensesTotal" />
       <el-table-column label="剩余经费" align="center" prop="expensesLeft" />
-      <el-table-column label="流程名称" align="center"  >
-        <template slot-scope="scope">
-          <div v-if="scope.row.version">
-            <span>{{ scope.row.procName }}</span>
-          </div>
-<!--          <el-button v-if="scope.row.version" type="text" >-->
-<!--            <span>{{ scope.row.procName }}</span>-->
-<!--          </el-button>-->
-          <label v-else>未配置流程</label>
-        </template>
-      </el-table-column>
-      <el-table-column label="流程版本" align="center" width="80px">
-        <template slot-scope="scope">
-          <el-tag size="medium" >v{{ scope.row.version }}</el-tag>
-        </template>
-      </el-table-column>
+      <el-table-column label="备注" align="center" prop="note" />
       <el-table-column label="状态" align="center" key="status" >
         <template slot-scope="scope">
           <el-switch
@@ -85,23 +58,9 @@
             size="mini"
             type="text"
             icon="el-icon-edit"
+            v-hasPermi="['project:info:edit']"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['project:list:update']"
           >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['project:list:delete']"
-          >删除</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-share"
-            @click="handleConfigure(scope.row)"
-            v-hasPermi="['project:list:config']"
-          >配置流程</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -117,17 +76,8 @@
     <!-- 添加或修改项目对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-        <el-form-item label="项目所属部门" prop="deptId">
-          <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" @input="updatePrincipals" placeholder="请选择所属部门" />
-        </el-form-item>
         <el-form-item label="项目名称" prop="projectName">
           <el-input v-model="form.projectName" placeholder="请输入项目名称" aria-required="true" />
-        </el-form-item>
-        <el-form-item label="负责人" prop="principalID">
-          <treeselect v-model="form.principalId" :options="principalOptions"  :show-count="true" placeholder="请输入项目负责人"/>
-        </el-form-item>
-        <el-form-item label="项目经费" prop="expensesTotal">
-          <el-input v-model="form.expensesTotal" placeholder="请输入项目经费" />
         </el-form-item>
         <el-form-item label="备注信息" prop="note">
           <el-input v-model="form.note" type="textarea" placeholder="请输入备注信息"
@@ -154,43 +104,10 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="title" :visible.sync="openConfigure" width="60%" append-to-body>
-      <el-table v-loading="processLoading" fit :data="definitionList" border >
-        <el-table-column label="流程名称" align="center" prop="name" />
-        <el-table-column label="流程版本" align="center">
-          <template slot-scope="scope">
-            <el-tag size="medium" >v{{ scope.row.version }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" width="300" class-name="small-padding fixed-width">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              type="text"
-              icon="el-icon-edit-outline"
-              @click="handleConfProcess(scope.row)"
-            >配置流程</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <pagination
-        v-show="processTotal>0"
-        :total="processTotal"
-        :page.sync="queryParams.pageNum"
-        :limit.sync="queryParams.pageSize"
-        @pagination="listDefinition"
-      />
-    </el-dialog>
   </div>
 </template>
-<style lang="scss" scoped>
-//去掉表头多选框
-::v-deep .el-table .el-checkbox {
-  display: none;
-}
-</style>
 <script>
-import { listProject,listDefinitionFlow, changeProjectStatus,getProject, delProject, addProject, updateProject, exportProject,userTreeselect,addProjectPro } from "@/api/project/list";
+import { listProjectPrincipal,listDefinitionFlow, changeProjectStatus,getProject, delProject, addProject, updateProject, exportProject,userTreeselect,addProjectPro } from "@/api/project/list";
 import { treeselect } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
@@ -261,7 +178,7 @@ export default {
     /** 查询【请填写功能名称】列表 */
     getList() {
       this.loading = true;
-      listProject(this.queryParams).then(response => {
+      listProjectPrincipal().then(response => {
         this.projectList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -339,6 +256,11 @@ export default {
       this.title = "添加项目";
       this.getTreeselect();
     },
+    asd(row){
+      this.reset();
+      const projectId = row.projectId
+      this.form.projectName = row.projectName
+    },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
@@ -371,20 +293,6 @@ export default {
         }
       });
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const projectIds = row.projectId;
-      this.$confirm('是否确认删除编号为"' + projectIds + '"的数据项?', "警告", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        }).then(function() {
-          return delProject(projectIds);
-        }).then((res) => {
-          this.getList();
-          this.msg(res.msg);
-        })
-    },
     handleConfigure(row){
       this.openConfigure = true;
       this.title = "配置流程";
@@ -404,19 +312,7 @@ export default {
         this.openConfigure=false;
       });
     },
-    /** 导出按钮操作 */
-    handleExport() {
-      const queryParams = this.queryParams;
-      this.$confirm('是否确认导出所有【请填写功能名称】数据项?', "警告", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        }).then(function() {
-          return exportProject(queryParams);
-        }).then(response => {
-          this.download(response.msg);
-        })
-    }
+
   }
 };
 </script>

@@ -28,6 +28,8 @@ public interface ProjectMapper
      */
     public List<Project> selectProjectList(Project project);
 
+    public List<Project> selectProjectListByPrincipal(Long userId);
+
     /**
      * 新增【请填写功能名称】
      * 

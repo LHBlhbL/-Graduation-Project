@@ -120,7 +120,6 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
     @Override
     public AjaxResult processListAllIn(Integer pageNum, Integer pageSize) {
         Page<FlowTask> page = new Page<>();
-        Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
         HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery()
                 .orderByProcessInstanceStartTime()
                 .desc();
@@ -142,7 +141,8 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             flowTask.setCreateTime(hisIns.getStartTime());
             flowTask.setFinishTime(hisIns.getEndTime());
             flowTask.setProcInsId(hisIns.getId());
-
+            SysUser user = sysUserService.selectUserById(Long.parseLong( hisIns.getStartUserId()));
+            flowTask.setUserName(user.getNickName());
             // 计算耗时
             long time = System.currentTimeMillis() - hisIns.getStartTime().getTime();
             flowTask.setDuration(getDate(time));
@@ -188,7 +188,7 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             flowTask.setProcInsId(hisIns.getId());
 
             SysUser user = sysUserService.selectUserById(Long.parseLong( hisIns.getStartUserId()));
-            flowTask.setUserName(user.getUserName());
+            flowTask.setUserName(user.getNickName());
 
             // 计算耗时
             long time = hisIns.getEndTime().getTime() - hisIns.getStartTime().getTime();
@@ -204,6 +204,8 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             // 设置taskId
             List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
             flowTask.setTaskId(historicTaskInstance.get(0).getId());
+            Map<String, Object> stringObjectMap = hisVar(flowTask.getTaskId());
+            flowTask.setMoney((String) stringObjectMap.get("money"));
             if (getName.containsKey(flowTask.getDeployId())) {
                 flowTask.setProjectName(getName.get(flowTask.getDeployId()));
             }
@@ -477,7 +479,17 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         message.setText(context);
         message.setSentDate(new Date());
         //执行发送
-        javaMailSender.send(message);
+        try {
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public Map<String,Object> hisVar(String taskId){
+        HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskId).singleResult();
+        return historicTaskInstance.getProcessVariables();
     }
 
     public AjaxResult processVariables(String taskId) {

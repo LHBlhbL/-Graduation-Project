@@ -12,6 +12,7 @@
         <result property="expensesTotal" column="expenses_total"/>
         <result property="expensesLeft" column="expenses_left"/>
         <result property="status" column="status"/>
+        <result property="note" column="note"/>
         <association property="dept" column="dept_id" javaType="ProjectDept" resultMap="deptResult"/>
         <association property="principal" column="user_id" javaType="ProjectPrincipal" resultMap="principalNameResult"/>
         <association property="flow" column="project_id" javaType="ProjectFlow" resultMap="ProjectFlowResult"/>
@@ -46,7 +47,7 @@
     </resultMap>
 
     <sql id="selectProjectVo">
-        select project_id, dept_id, project_name, principal_id, expenses_total, expenses_left, status
+        select project_id, dept_id, project_name, principal_id, expenses_total, expenses_left, status, note
         from project
     </sql>
 
@@ -82,6 +83,11 @@
         where project_id = #{projectId}
     </select>
 
+    <select id="selectProjectListByPrincipal" parameterType="Long" resultMap="ProjectResult">
+        <include refid="selectProjectVo"/>
+        where principal_id = #{userId}
+    </select>
+
     <insert id="insertProject" parameterType="Project">
         insert into project
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -92,6 +98,7 @@
             <if test="expensesTotal != null">expenses_total,</if>
             <if test="expensesLeft != null">expenses_left,</if>
             <if test="status !=null">status,</if>
+            <if test="note !=null">note,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="projectId != null">#{projectId},</if>
@@ -101,6 +108,7 @@
             <if test="expensesTotal != null">#{expensesTotal},</if>
             <if test="expensesLeft != null">#{expensesLeft},</if>
             <if test="status !=null">#{status},</if>
+            <if test="note !=null">#{note},</if>
         </trim>
     </insert>
 
@@ -113,6 +121,7 @@
             <if test="expensesTotal != null">expenses_total = #{expensesTotal},</if>
             <if test="expensesLeft != null">expenses_left = #{expensesLeft},</if>
             <if test="status !=null">status = #{status},</if>
+            <if test="note !=null">note = #{note},</if>
         </trim>
         where project_id = #{projectId}
     </update>

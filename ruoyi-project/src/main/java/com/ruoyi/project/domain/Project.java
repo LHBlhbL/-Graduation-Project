@@ -14,37 +14,37 @@ import com.ruoyi.common.core.domain.BaseEntity;
 public class Project extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * $column.columnComment
-     */
+
     private Long projectId;
 
-    /**
-     * $column.columnComment
-     */
+
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Long deptId;
 
-    /**
-     * $column.columnComment
-     */
+
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private String projectName;
 
-    /**
-     * $column.columnComment
-     */
+
     private Long principalId;
 
-    /**
-     * $column.columnComment
-     */
+
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Double expensesTotal;
 
     private int version;
 
     private String procName;
+
+    private String note;
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
 
     public int getVersion() {
         return version;

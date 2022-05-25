@@ -33,6 +33,8 @@ public interface IProjectService
      */
     public List<Project> selectProjectList(Project project);
 
+    public List<Project> selectProjectListPrincipal();
+
     /**
      * 新增【请填写功能名称】
      * 

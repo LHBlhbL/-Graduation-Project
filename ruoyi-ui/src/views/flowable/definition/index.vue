@@ -105,7 +105,7 @@
               更多操作<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item icon="el-icon-edit-outline" @click.native="handleLoadXml(scope.row)">
+              <el-dropdown-item icon="el-icon-edit-outline" @click.native="handleLoadXml(scope.row)" v-hasPermi="['system:deployment:edit']">
                 编辑
               </el-dropdown-item>
               <el-dropdown-item icon="el-icon-connection" @click.native="handleAddForm(scope.row)" v-if="scope.row.formId == null">

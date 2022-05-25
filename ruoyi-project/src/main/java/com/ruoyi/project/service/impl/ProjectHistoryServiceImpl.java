@@ -192,20 +192,22 @@ public class ProjectHistoryServiceImpl extends FlowServiceFactory implements IPr
             flowTask.setTaskDefKey(histTask.getTaskDefinitionKey());
             flowTask.setTaskName(histTask.getName());
             userList.setProcInsId(histTask.getProcessInstanceId());
-            ProjectUserList userList1 = projectUserMapper.selectProjectUserListByProcId(userList);
-            if(userList1!=null)
-            {
-                flowTask.setProjectId(userList1.getProjectId());
-                flowTask.setProjectName(userList1.getProjectName());
-            }
-            else
-            {
-                Project project = projectMapper.selectProjectByProcInsId(histTask.getProcessInstanceId());
-                if(project!=null) {
-                    flowTask.setProjectId(project.getProjectId());
-                    flowTask.setProjectName(project.getProjectName());
-                }
-            }
+            Map<String, Object> variables = processVariables(histTask.getId());
+            String name = projectMapper.selectProjectById(Long.valueOf(String.valueOf(variables.get("projectId")))).getProjectName();
+            flowTask.setProjectName(name);
+//            if(userList1!=null)
+//            {
+//                flowTask.setProjectId(userList1.getProjectId());
+//                flowTask.setProjectName(userList1.getProjectName());
+//            }
+//            else
+//            {
+//                Project project = projectMapper.selectProjectByProcInsId(histTask.getProcessInstanceId());
+//                if(project!=null) {
+//                    flowTask.setProjectId(project.getProjectId());
+//                    flowTask.setProjectName(project.getProjectName());
+//                }
+//            }
 
 
             // 流程定义信息
@@ -237,6 +239,17 @@ public class ProjectHistoryServiceImpl extends FlowServiceFactory implements IPr
         // 流程变量
             Map<String, Object> variables = taskService.getVariables(taskId);
             return AjaxResult.success(variables);
+    }
+
+    public Map<String, Object> processVariables(String taskId) {
+        // 流程变量
+        HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskId).singleResult();
+        if (Objects.nonNull(historicTaskInstance)) {
+            return historicTaskInstance.getProcessVariables();
+        } else {
+            Map<String, Object> variables = taskService.getVariables(taskId);
+            return variables;
+        }
     }
 
     private String getDate(long ms) {
