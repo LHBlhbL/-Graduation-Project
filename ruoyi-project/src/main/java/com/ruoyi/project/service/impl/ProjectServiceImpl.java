@@ -68,7 +68,6 @@ public class ProjectServiceImpl extends FlowServiceFactory implements IProjectSe
     public List<Project> selectProjectList(Project project) {
         List<Project> returnList = projectMapper.selectProjectList(project);
         ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery()
-//                .latestVersion()
                 .orderByProcessDefinitionKey().asc();
         List<ProcessDefinition> processDefinitionList = processDefinitionQuery.listPage(1 - 1, 10);
         Map<String, String> name = new HashMap<>();

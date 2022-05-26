@@ -31,25 +31,6 @@ public class ProjectUserList extends BaseEntity
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private String procInsId;
 
-    private Double money;
-
-    private byte[] image;
-
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
-
-    public Double getMoney() {
-        return money;
-    }
-
-    public void setMoney(Double money) {
-        this.money = money;
-    }
 
     public void setId(Long id)
     {

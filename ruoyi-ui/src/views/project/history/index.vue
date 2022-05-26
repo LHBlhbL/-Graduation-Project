@@ -23,27 +23,9 @@
     <el-table v-loading="loading" :data="historyList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="项目编号" align="center" prop="projectId" />
-      <el-table-column label="项目名称" align="center" prop="flowTask.projectName" />
+      <el-table-column label="申请人编号" align="center" prop="userId" />
       <el-table-column label="报销金额" align="center" prop="money" />
       <el-table-column label="申请人" align="center" prop="flowTask.userName" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-tickets"
-            @click="handleFlowRecord(scope.row)"
-            v-hasPermi="['project:history:detail']"
-          >详情</el-button>
-          <el-button
-            type="text"
-            icon="el-icon-delete"
-            size="mini"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['project:history:delete']"
-          >删除</el-button>
-        </template>
-      </el-table-column>
     </el-table>
 
     <pagination

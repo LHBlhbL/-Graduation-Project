@@ -1,9 +1,10 @@
 import request from "../../utils/request";
 
-export function remiList(){
+export function remiList(query){
   return request({
     url:'/reim/list',
     method:'get',
+    params:query
   })
 }
 

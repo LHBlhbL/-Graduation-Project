@@ -12,6 +12,7 @@ import com.ruoyi.project.mapper.ProjectFlowMapper;
 import com.ruoyi.project.mapper.ProjectMapper;
 import com.ruoyi.project.mapper.ProjectUserMapper;
 import com.ruoyi.project.service.IRemiService;
+import com.ruoyi.system.service.ISysUserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.bpmn.model.EndEvent;
@@ -23,6 +24,7 @@ import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +35,9 @@ public class RemiServiceImpl extends FlowServiceFactory implements IRemiService 
     @Autowired
     ProjectMapper mapper;
 
+    @Resource
+    private ISysUserService sysUserService;
+
     @Autowired
     private ProjectFlowMapper projectFlowMapper;
 
@@ -41,15 +46,11 @@ public class RemiServiceImpl extends FlowServiceFactory implements IRemiService 
 
     @Override
     public List<Project> listRemi() {
-        List<Project> projects = mapper.selectRemiList();
-        List<Project> returnList = new ArrayList<>();
-        for(Project project:projects)
+        List<Project> returnList = mapper.selectRemiProjectList();
+        for(Project project:returnList)
         {
-            ProjectFlow projectFlow = projectFlowMapper.selectProjectFlowByPId(project.getProjectId());
-            if(projectFlow!=null)
-            {
-                returnList.add(project);
-            }
+            String nickName = sysUserService.selectUserById(project.getPrincipalId()).getNickName();
+            project.setStartUserName(nickName);
         }
         return returnList;
     }

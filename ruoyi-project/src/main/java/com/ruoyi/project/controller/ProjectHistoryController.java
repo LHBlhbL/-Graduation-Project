@@ -32,11 +32,11 @@ public class ProjectHistoryController extends BaseController
      * 查询【请填写功能名称】列表
      */
     @GetMapping("/list")
-    public TableDataInfo list(ProjectHistory projectHistory)
+    public TableDataInfo list(@RequestParam Integer pageNum,@RequestParam Integer pageSize)
     {
         startPage();
-        List<ProjectHistory> list = projectHistoryService.selectProjectHistoryList(projectHistory);
-        return getDataTable(list);
+        List<ProjectHistory> histories = projectHistoryService.selectProjectHistoryList(pageNum, pageSize);
+        return getDataTable(histories);
     }
 
 
@@ -45,15 +45,7 @@ public class ProjectHistoryController extends BaseController
     /**
      * 导出【请填写功能名称】列表
      */
-    @PreAuthorize("@ss.hasPermi('project:history:export')")
-    @Log(title = "【请填写功能名称】", businessType = BusinessType.EXPORT)
-    @GetMapping("/export")
-    public AjaxResult export(ProjectHistory projectHistory)
-    {
-        List<ProjectHistory> list = projectHistoryService.selectProjectHistoryList(projectHistory);
-        ExcelUtil<ProjectHistory> util = new ExcelUtil<ProjectHistory>(ProjectHistory.class);
-        return util.exportExcel(list, "history");
-    }
+
 
     /**
      * 获取【请填写功能名称】详细信息

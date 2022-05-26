@@ -38,6 +38,16 @@ public class Project extends BaseEntity {
 
     private String note;
 
+    public String getStartUserName() {
+        return startUserName;
+    }
+
+    public void setStartUserName(String startUserName) {
+        this.startUserName = startUserName;
+    }
+
+    private String startUserName;
+
     public String getNote() {
         return note;
     }

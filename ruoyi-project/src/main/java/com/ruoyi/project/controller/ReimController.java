@@ -43,7 +43,7 @@ public class ReimController extends BaseController {
 
 
     @GetMapping("/list")
-    public TableDataInfo reimlist()
+    public TableDataInfo reimlist(Project project)
     {
         startPage();
         List<Project> list = remiService.listRemi();

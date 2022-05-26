@@ -34,6 +34,16 @@ public class ProjectHistory extends BaseEntity
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Long userId;
 
+    private String UsernameS;
+
+    public String getUsernameS() {
+        return UsernameS;
+    }
+
+    public void setUsernameS(String username) {
+        UsernameS = username;
+    }
+
     private FlowTask flowTask;
 
     public FlowTask getFlowTask() {

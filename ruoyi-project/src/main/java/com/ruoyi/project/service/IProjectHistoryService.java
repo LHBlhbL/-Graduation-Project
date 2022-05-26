@@ -3,6 +3,7 @@ package com.ruoyi.project.service;
 import java.util.List;
 
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.project.domain.Project;
 import com.ruoyi.project.domain.ProjectHistory;
 
 /**
@@ -27,7 +28,7 @@ public interface IProjectHistoryService
      * @param projectHistory 【请填写功能名称】
      * @return 【请填写功能名称】集合
      */
-    public List<ProjectHistory> selectProjectHistoryList(ProjectHistory projectHistory);
+    public List<ProjectHistory>selectProjectHistoryList(Integer pageNum, Integer pageSize);
 
     /**
      * 新增【请填写功能名称】

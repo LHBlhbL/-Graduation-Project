@@ -30,13 +30,13 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="projectList">
-      <div v-if="!status">
+    <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange" border>
+<!--     <div v-if="!status">-->
         <el-table-column type="selection" width="55" align="center"/>
-        <el-table-column label="项目编号" align="center" prop="projectId"/>
         <el-table-column label="项目名称" align="center" prop="projectName"/>
-        <el-table-column label="项目部门" align="center" prop="dept.deptName"/>
-        <el-table-column label="项目负责人" align="center" prop="principal.principalName"/>
+        <el-table-column label="项目负责人" align="center" prop="startUserName"/>
+        <el-table-column label="项目经费" align="center" prop="expensesTotal"/>
+        <el-table-column label="项目信息" align="center" prop="note"/>
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button
@@ -48,7 +48,7 @@
             </el-button>
           </template>
         </el-table-column>
-      </div>
+<!--      </div>-->
     </el-table>
 
     <pagination
@@ -108,11 +108,6 @@ export default {
         pageSize: 10,
         deptId: null,
         projectId:null,
-        projectName: null,
-        principalId: null,
-        expensesTotal: null,
-        expensesLeft: null,
-        status: null
       },
       // 表单参数
       form: {},
@@ -130,7 +125,7 @@ export default {
     /** 查询【请填写功能名称】列表 */
     getList() {
       this.loading = true;
-      remiList().then(response => {
+      remiList(this.queryParams).then(response => {
         this.projectList = response.rows;
         this.total = response.total;
         this.loading = false;

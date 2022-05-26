@@ -41,12 +41,9 @@ public class ProjectHistoryServiceImpl extends FlowServiceFactory implements IPr
     @Autowired
     private ProjectHistoryMapper projectHistoryMapper;
 
-
     @Autowired
     private ProjectMapper projectMapper;
 
-    @Autowired
-    private ProjectUserMapper projectUserMapper;
 
     @Autowired
     private SysUserMapper sysUserMapper;
@@ -73,39 +70,38 @@ public class ProjectHistoryServiceImpl extends FlowServiceFactory implements IPr
      * @return 【请填写功能名称】
      */
     @Override
-    public List<ProjectHistory> selectProjectHistoryList(ProjectHistory projectHistory)
+    public List<ProjectHistory>  selectProjectHistoryList(Integer pageNum, Integer pageSize)
     {
+        List<ProjectHistory> histories = new ArrayList<>();
 
-        List<ProjectHistory> projectHistories = projectHistoryMapper.selectProjectHistoryList(projectHistory);
-        Project project = new Project();
-        SysUser user = new SysUser();
-        for(ProjectHistory projectHistory1:projectHistories)
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery()
+                .orderByProcessInstanceStartTime()
+                .desc();
+        List<HistoricProcessInstance> historicProcessInstances = historicProcessInstanceQuery.finished().listPage(pageSize * (pageNum - 1), pageSize);
+        Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
+        for (HistoricProcessInstance hisIns : historicProcessInstances)
         {
-            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                    .orderByProcessInstanceStartTime()
-                    .processInstanceId(projectHistory1.getHisTaskId())
-                    .finished()
-                    .desc()
-                    .singleResult();
-            FlowTask flowTask = new FlowTask();
-            project = projectMapper.selectProjectById(projectHistory1.getProjectId());
-            user = sysUserMapper.selectUserById(projectHistory1.getUserId());
-            flowTask.setUserName(user.getUserName());
-            flowTask.setProjectName(project.getProjectName());
-            if(historicProcessInstance!=null)
+            ProjectHistory history = new ProjectHistory();
+            List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(hisIns.getId()).orderByHistoricTaskInstanceEndTime().desc().list();
+            String taskId = historicTaskInstance.get(0).getId();
+            Map<String, Object> stringObjectMap = hisVar(taskId);
+            Long projectId= Long.parseLong((String) stringObjectMap.get("projectId"));
+            Long principalId = projectMapper.selectProjectById(projectId).getPrincipalId();
+            if(userId==principalId)
             {
-                flowTask.setDeployId(historicProcessInstance.getDeploymentId());
+                history.setProjectId(projectId);
+                Long startUserId =Long.parseLong( hisIns.getStartUserId());
+                history.setUserId(startUserId);
+                history.setMoney(Double.parseDouble((String) stringObjectMap.get("money")));
+                histories.add(history);
             }
-            List<HistoricTaskInstance> historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(projectHistory1.getHisTaskId()).orderByHistoricTaskInstanceEndTime().desc().list();
-            if(historicTaskInstance.size()!=0)
-            {
-                flowTask.setTaskId(historicTaskInstance.get(0).getId());
-            }
-
-            projectHistory1.setFlowTask(flowTask);
         }
+        return histories;
+    }
 
-            return projectHistories;
+    public Map<String,Object> hisVar(String taskId){
+        HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().includeProcessVariables().finished().taskId(taskId).singleResult();
+        return historicTaskInstance.getProcessVariables();
     }
 
     /**

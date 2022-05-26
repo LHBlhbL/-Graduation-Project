@@ -147,6 +147,11 @@
         <where>p.status = '0'</where>
     </select>
 
+    <select id="selectRemiProjectList" resultMap="ProjectResult">
+        select p.project_id, p.project_name, p.principal_id, p.status, p.note, p.expenses_total  from project p
+        left join project_flow f on p.project_id = f.project_id
+        <where>p.status = '0' </where>
+    </select>
     <select id="selectRemiQueryList" parameterType="Project" resultMap="ProjectResult">
         select p.project_id, p.dept_id, p.project_name, p.principal_id, p.status, d.dept_name, u.nick_name from project
         p
