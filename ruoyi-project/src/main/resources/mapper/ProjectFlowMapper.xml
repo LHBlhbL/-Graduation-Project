@@ -21,6 +21,13 @@
         from project_flow
     </sql>
 
+    <select id="selectProjectFlowByDeploymentId" parameterType="string" resultMap="ProjectFlowResult">
+        <include refid="selectProjectFlowVo"/>
+        <where>
+            deploy_id = #{id}
+        </where>
+    </select>
+
     <select id="selectProjectFlowByPId" parameterType="long" resultMap="ProjectFlowResult">
         <include refid="selectProjectFlowVo"/>
         <where>
@@ -83,6 +90,12 @@
         delete
         from project_flow
         where id = #{id}
+    </delete>
+
+    <delete id="deleteProjectFlowByDeployId" parameterType="String">
+        delete
+        from project_flow
+        where deploy_id = #{id}
     </delete>
 
     <delete id="deleteProjectFlowByProjectId" parameterType="Long">

@@ -105,7 +105,7 @@ public class ProjectController extends BaseController {
         if(result==0)
             return AjaxResult.error("删除失败,存在未完成报销");
         else
-            return AjaxResult.success("删除成功");
+            return AjaxResult.error("1");
     }
 
     @GetMapping(value = "/userTreeselect/{deptId}")
@@ -124,10 +124,6 @@ public class ProjectController extends BaseController {
     @Log(title = "流程配置", businessType = BusinessType.INSERT)
     @PutMapping("/flow/add")
     public AjaxResult addFlow(@RequestBody ProjectFlow projectFlow) {
-        Project project = new Project();
-        project.setProjectId(projectFlow.getProjectId());
-        if(projectService.check(project)==0)
-            return AjaxResult.error("存在未完成报销");
         return AjaxResult.success(flowService.insertProjectFlow(projectFlow));
     }
 

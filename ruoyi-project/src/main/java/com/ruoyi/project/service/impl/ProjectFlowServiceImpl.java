@@ -1,11 +1,18 @@
 package com.ruoyi.project.service.impl;
 
 import java.util.List;
+
+import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.project.domain.ProjectUserList;
+import com.ruoyi.project.mapper.ProjectUserMapper;
+import com.ruoyi.system.service.ISysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.project.mapper.ProjectFlowMapper;
 import com.ruoyi.project.domain.ProjectFlow;
 import com.ruoyi.project.service.IProjectFlowService;
+
+import javax.annotation.Resource;
 
 /**
  * 【请填写功能名称】Service业务层处理
@@ -18,6 +25,12 @@ public class ProjectFlowServiceImpl implements IProjectFlowService
 {
     @Autowired
     private ProjectFlowMapper projectFlowMapper;
+
+    @Resource
+    private ISysUserService sysUserService;
+
+    @Autowired
+    private ProjectUserMapper userMapper;
 
     /**
      * 查询【请填写功能名称】
@@ -33,6 +46,15 @@ public class ProjectFlowServiceImpl implements IProjectFlowService
 
     @Override
     public ProjectFlow selectProjectFlowByPId(Long projectId) {
+        ProjectFlow flow = new ProjectFlow();
+
+        Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
+        ProjectUserList userList = new ProjectUserList();
+        userList.setProjectId(projectId);
+        userList.setUserId(userId);
+        List<ProjectUserList> projectUserLists = userMapper.selectProjectUserList(userList);
+        if(projectUserLists.size()>0)
+            return flow;
         return projectFlowMapper.selectProjectFlowByPId(projectId);
     }
 

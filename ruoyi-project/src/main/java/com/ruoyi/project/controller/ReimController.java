@@ -109,6 +109,12 @@ public class ReimController extends BaseController {
         return getDataTable(list);
     }
 
+    @PostMapping("deployment/delete")
+    public AjaxResult deploymentDelete(@RequestBody String id){
+        remiService.deleteDeployment(id);
+        return null;
+    }
+
     @GetMapping("/process/stop/{procInsId}")
     public AjaxResult stopProcess(@PathVariable("procInsId") String procInsId){
         return remiService.stopProcess(procInsId);

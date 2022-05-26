@@ -33,7 +33,7 @@ import java.util.Objects;
 public class RemiServiceImpl extends FlowServiceFactory implements IRemiService  {
 
     @Autowired
-    ProjectMapper mapper;
+    private ProjectMapper mapper;
 
     @Resource
     private ISysUserService sysUserService;
@@ -69,6 +69,11 @@ public class RemiServiceImpl extends FlowServiceFactory implements IRemiService 
             }
         }
         return returnList;
+    }
+
+    @Override
+    public void deleteDeployment(String id) {
+
     }
 
     @Override

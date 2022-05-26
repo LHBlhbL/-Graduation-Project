@@ -26,9 +26,8 @@ public class FlowableServiceImpl extends FlowServiceFactory implements IFlowable
     private FlowDeployMapper flowDeployMapper;
 
     @Override
-    public Page<FlowProcDefDto> listDefinition(String name, Integer pageNum, Integer pageSize) {
-        Page<FlowProcDefDto> page = new Page<>();
-        PageHelper.startPage(pageNum, pageSize);
+    public List<FlowProcDefDto> listDefinition(String name, Integer pageNum, Integer pageSize) {
+
         final List<FlowProcDefDto> dataList = flowDeployMapper.selectDeployList(name);
         List<FlowProcDefDto> returnList = new ArrayList<>();
         // 加载挂表单
@@ -40,8 +39,7 @@ public class FlowableServiceImpl extends FlowServiceFactory implements IFlowable
                 returnList.add(procDef);
             }
         }
-        page.setTotal(new PageInfo(returnList).getTotal());
-        page.setRecords(returnList);
-        return page;
+
+        return returnList;
     }
 }

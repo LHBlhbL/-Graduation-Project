@@ -166,16 +166,24 @@ export default {
     },
     startProcess(row) {
       getProcess(row.projectId).then(response => {
-        this.$router.push({
-          path: '/project/record/index',
-          query: {
-            deployId: response.data.deployId,
-            procDefId: response.data.procDefId,
-            projectId: row.projectId,
-            projectName:row.projectName,
-            finished: true
-          }
-        })
+        if(!response.data.deployId)
+        {
+          this.msgError("存在未完成报销");
+        }
+        else
+        {
+          this.$router.push({
+            path: '/project/record/index',
+            query: {
+              deployId: response.data.deployId,
+              procDefId: response.data.procDefId,
+              projectId: row.projectId,
+              projectName:row.projectName,
+              finished: true
+            }
+          })
+        }
+
       });
 
     },

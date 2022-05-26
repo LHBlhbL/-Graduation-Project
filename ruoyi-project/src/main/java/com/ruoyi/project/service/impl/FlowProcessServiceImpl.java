@@ -510,23 +510,6 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
         try {
             SysUser sysUser = SecurityUtils.getLoginUser().getUser();
             Project project = projectMapper.selectProjectById(projectId);
-            //  Object money = variables.get("money");
-//            if(money!=null)
-//            {
-//                Double expensesLeft = project.getExpensesLeft();
-//                Double now = Double.parseDouble((String) money);
-//                if(expensesLeft<now)
-//                {
-//                    return AjaxResult.error("项目经费不足");
-//                }
-//
-//            }
-            ProjectUserList projectUserList = new ProjectUserList();
-            projectUserList.setProjectId(projectId);
-            projectUserList.setUserId(sysUser.getUserId());
-            List<ProjectUserList> projectUserLists = projectUserMapper.selectProjectUserList(projectUserList);
-            if (projectUserLists.size() != 0)
-                throw new NullPointerException();
 
 
             ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(procDefId)
@@ -556,10 +539,7 @@ public class FlowProcessServiceImpl extends FlowServiceFactory implements IFlowP
             userList.setProjectName(project.getProjectName());
             projectUserMapper.insertProjectUser(userList);
             return AjaxResult.success("报销启动成功");
-        } catch (NullPointerException exception) {
-            exception.printStackTrace();
-            return AjaxResult.error("报销流程进行中");
-        } catch (Exception e) {
+        }  catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.error("流程启动错误");
         }

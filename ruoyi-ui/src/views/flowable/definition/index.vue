@@ -91,12 +91,12 @@
           <el-tag size="medium" >v{{ scope.row.version }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center">
-        <template slot-scope="scope">
-          <el-tag type="success" v-if="scope.row.suspensionState === 1">激活</el-tag>
-          <el-tag type="warning" v-if="scope.row.suspensionState === 2">挂起</el-tag>
-        </template>
-      </el-table-column>
+<!--      <el-table-column label="状态" align="center">-->
+<!--        <template slot-scope="scope">-->
+<!--          <el-tag type="success" v-if="scope.row.suspensionState === 1">激活</el-tag>-->
+<!--          <el-tag type="warning" v-if="scope.row.suspensionState === 2">挂起</el-tag>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
       <el-table-column label="部署时间" align="center" prop="deploymentTime" width="180"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -111,12 +111,12 @@
               <el-dropdown-item icon="el-icon-connection" @click.native="handleAddForm(scope.row)" v-if="scope.row.formId == null">
                 配置表单
               </el-dropdown-item>
-              <el-dropdown-item icon="el-icon-video-pause" @click.native="handleUpdateSuspensionState(scope.row)" v-if="scope.row.suspensionState === 1">
-                挂起
-              </el-dropdown-item>
-              <el-dropdown-item icon="el-icon-video-play" @click.native="handleUpdateSuspensionState(scope.row)" v-if="scope.row.suspensionState === 2">
-                激活
-              </el-dropdown-item>
+<!--              <el-dropdown-item icon="el-icon-video-pause" @click.native="handleUpdateSuspensionState(scope.row)" v-if="scope.row.suspensionState === 1">-->
+<!--                挂起-->
+<!--              </el-dropdown-item>-->
+<!--              <el-dropdown-item icon="el-icon-video-play" @click.native="handleUpdateSuspensionState(scope.row)" v-if="scope.row.suspensionState === 2">-->
+<!--                激活-->
+<!--              </el-dropdown-item>-->
               <el-dropdown-item icon="el-icon-delete" @click.native="handleDelete(scope.row)" v-hasPermi="['system:deployment:remove']">
                 删除
               </el-dropdown-item>
@@ -239,6 +239,7 @@
 </style>
 <script>
 import { listDefinition, updateState, delDeployment, addDeployment, updateDeployment, exportDeployment, definitionStart, readXml} from "@/api/flowable/definition";
+ import { delProjectDeployment } from "@/api/project/process"
 import { getToken } from "@/utils/auth";
 import { getForm, addDeployForm ,listForm } from "@/api/flowable/form";
 import Parser from '@/components/parser/Parser'
@@ -512,6 +513,7 @@ export default {
       }).then(function() {
         return delDeployment(params);
       }).then(() => {
+        delProjectDeployment(row.deploymentId)
         this.getList();
         this.msgSuccess("删除成功");
       })

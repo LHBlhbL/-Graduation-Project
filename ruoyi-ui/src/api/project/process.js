@@ -47,6 +47,14 @@ export function rejectProcess(data,projectId) {
     data: data
   })
 }
+export function delProjectDeployment(id)
+{
+  return request({
+    url: '/reim/deployment/delete',
+    method: 'post',
+    data: id
+  })
+}
 export function  stopProcess(procInsId){
   return request(
     {

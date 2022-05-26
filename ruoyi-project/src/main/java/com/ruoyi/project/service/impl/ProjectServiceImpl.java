@@ -146,7 +146,8 @@ public class ProjectServiceImpl extends FlowServiceFactory implements IProjectSe
             return 0;
         }
         projectFlowMapper.deleteProjectFlowByProjectId(projectId);
-        return projectMapper.deleteProjectById(projectId);
+        projectMapper.deleteProjectById(projectId);
+        return 1;
     }
 
     @Override

@@ -9,5 +9,7 @@ public interface IRemiService {
     public List<Project> listRemi();
     public List<Project> queryList(Project project);
 
+    public void deleteDeployment(String id);
+
     public AjaxResult stopProcess(String procInsId);
 }

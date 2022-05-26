@@ -130,7 +130,7 @@ export default {
     },
     // 上传成功回调
     handleUploadSuccess(res) {
-      this.dialogImageUrl=process.env.VUE_APP_BASE_API +res.fileName;
+      this.dialogImageUrl= process.env.VUE_APP_BASE_API + res.fileName;
       this.uploadList.push({ name: res.fileName, url: this.dialogImageUrl });
       this.imageUrl =  res.fileName;
       if (this.uploadList.length === this.number) {

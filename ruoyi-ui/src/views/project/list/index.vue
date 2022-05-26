@@ -117,16 +117,16 @@
     <!-- 添加或修改项目对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-        <el-form-item label="项目所属部门" prop="deptId">
-          <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" @input="updatePrincipals" placeholder="请选择所属部门" />
-        </el-form-item>
         <el-form-item label="项目名称" prop="projectName">
           <el-input v-model="form.projectName" placeholder="请输入项目名称" aria-required="true" />
+        </el-form-item>
+        <el-form-item label="项目所属部门" prop="deptId">
+          <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" @input="updatePrincipals" placeholder="请选择所属部门" />
         </el-form-item>
         <el-form-item label="负责人" prop="principalID">
           <treeselect v-model="form.principalId" :options="principalOptions"  :show-count="true" placeholder="请输入项目负责人"/>
         </el-form-item>
-        <el-form-item label="项目经费" prop="expensesTotal">
+        <el-form-item v-if="editShow" label="项目经费" prop="expensesTotal">
           <el-input v-model="form.expensesTotal" placeholder="请输入项目经费" />
         </el-form-item>
         <el-form-item label="备注信息" prop="note">
@@ -144,9 +144,6 @@
             </el-radio-group>
           </el-form-item>
         </el-col>
-<!--        <el-form-item label="${comment}" prop="expensesLeft">-->
-<!--          <el-input v-model="form.expensesLeft" placeholder="请输入${comment}" />-->
-<!--        </el-form-item>-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -157,6 +154,7 @@
     <el-dialog :title="title" :visible.sync="openConfigure" width="60%" append-to-body>
       <el-table v-loading="processLoading" fit :data="definitionList" border >
         <el-table-column label="流程名称" align="center" prop="name" />
+        <el-table-column label="表单名称" align="center" prop="formName" />
         <el-table-column label="流程版本" align="center">
           <template slot-scope="scope">
             <el-tag size="medium" >v{{ scope.row.version }}</el-tag>
@@ -173,13 +171,13 @@
           </template>
         </el-table-column>
       </el-table>
-      <pagination
-        v-show="processTotal>0"
-        :total="processTotal"
-        :page.sync="queryParams.pageNum"
-        :limit.sync="queryParams.pageSize"
-        @pagination="listDefinition"
-      />
+<!--      <pagination-->
+<!--        v-show="processTotal>0"-->
+<!--        :total="processTotal"-->
+<!--        :page.sync="queryParams.pageNum"-->
+<!--        :limit.sync="queryParams.pageSize"-->
+<!--        @pagination="listDefinition"-->
+<!--      />-->
     </el-dialog>
   </div>
 </template>
@@ -206,6 +204,7 @@ export default {
       ids: [],
       // 非单个禁用
       single: true,
+      editShow: true,
       // 非多个禁用
       multiple: true,
       // 显示搜索条件
@@ -244,7 +243,7 @@ export default {
       // 表单校验
       rules: {
         expensesTotal:[{
-          pattern: /^0{1}(\.\d*)|(^[1-9][0-9]*)+(\.\d*)?$/,
+          pattern: /^(([1-9]{1}\d*)|(0{1}))(\.\d{0,2})?$/,
           message: "请输入正确金额",
           trigger: "blur"
         }]
@@ -336,16 +335,18 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
+      this.editShow = true;
       this.title = "添加项目";
       this.getTreeselect();
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const projectId = row.projectId || this.ids
+      const projectId = row.projectId
       getProject(projectId).then(response => {
         this.form = response.data;
         this.open = true;
+        this.editShow = false;
         this.getTreeselect();
         this.getPrincipals();
         this.title = "修改"+row.projectName+"表";
@@ -358,6 +359,7 @@ export default {
           if (this.form.projectId != null) {
             updateProject(this.form).then(response => {
               this.msgSuccess("修改成功");
+              this.editShow = true;
               this.open = false;
               this.getList();
             });
@@ -382,7 +384,14 @@ export default {
           return delProject(projectIds);
         }).then((res) => {
           this.getList();
-          this.msg(res.msg);
+          if(res.msg=="1")
+          {
+            this.$message.success("删除成功");
+          }
+          else
+          {
+            this.msg(res.msg);
+          }
         })
     },
     handleConfigure(row){
@@ -393,7 +402,7 @@ export default {
     },
     listDefinition(){
       listDefinitionFlow(this.queryParamsCon).then(response => {
-        this.definitionList = response.data.records;
+        this.definitionList = response.data;
         this.processTotal = response.data.total;
         this.processLoading = false;
       });
@@ -402,6 +411,8 @@ export default {
       addProjectPro(this.projectIdPro,row.deploymentId,row.id).then(res => {
         this.msgSuccess(res.msg);
         this.openConfigure=false;
+        this.resetForm("queryForm");
+        this.handleQuery();
       });
     },
     /** 导出按钮操作 */
