@@ -239,7 +239,7 @@
 </style>
 <script>
 import { listDefinition, updateState, delDeployment, addDeployment, updateDeployment, exportDeployment, definitionStart, readXml} from "@/api/flowable/definition";
- import { delProjectDeployment } from "@/api/project/process"
+ import { checkProjectDeployment } from "@/api/project/list"
 import { getToken } from "@/utils/auth";
 import { getForm, addDeployForm ,listForm } from "@/api/flowable/form";
 import Parser from '@/components/parser/Parser'
@@ -511,11 +511,10 @@ export default {
         cancelButtonText: "取消",
         type: "warning"
       }).then(function() {
-        return delDeployment(params);
+        return checkProjectDeployment(params.deployId);
       }).then(() => {
-        delProjectDeployment(row.deploymentId)
         this.getList();
-        this.msgSuccess("删除成功");
+        this.msgSuccess("操作成功");
       })
     },
     /** 导出按钮操作 */

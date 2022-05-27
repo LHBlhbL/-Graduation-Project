@@ -45,8 +45,7 @@ public class ProjectHistoryServiceImpl extends FlowServiceFactory implements IPr
     private ProjectMapper projectMapper;
 
 
-    @Autowired
-    private SysUserMapper sysUserMapper;
+
 
     @Resource
     private ISysUserService sysUserService;
@@ -64,10 +63,8 @@ public class ProjectHistoryServiceImpl extends FlowServiceFactory implements IPr
     }
 
     /**
-     * 查询【请填写功能名称】列表
+     * 查询历史列表
      * 
-     * @param projectHistory 【请填写功能名称】
-     * @return 【请填写功能名称】
      */
     @Override
     public List<ProjectHistory>  selectProjectHistoryList(Integer pageNum, Integer pageSize)
@@ -92,6 +89,8 @@ public class ProjectHistoryServiceImpl extends FlowServiceFactory implements IPr
                 history.setProjectId(projectId);
                 Long startUserId =Long.parseLong( hisIns.getStartUserId());
                 history.setUserId(startUserId);
+                String nickName = sysUserService.selectUserById(startUserId).getNickName();
+                history.setUsernameS(nickName);
                 history.setMoney(Double.parseDouble((String) stringObjectMap.get("money")));
                 histories.add(history);
             }

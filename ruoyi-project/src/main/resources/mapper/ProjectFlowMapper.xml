@@ -28,6 +28,12 @@
         </where>
     </select>
 
+    <select id="selectProjectFlowByDeployId" parameterType="string" resultMap="ProjectFlowResult">
+        <include refid="selectProjectFlowVo"/>
+        <where>
+            deploy_id = #{id}
+        </where>
+    </select>
     <select id="selectProjectFlowByPId" parameterType="long" resultMap="ProjectFlowResult">
         <include refid="selectProjectFlowVo"/>
         <where>

@@ -105,7 +105,7 @@ public class ProjectController extends BaseController {
         if(result==0)
             return AjaxResult.error("删除失败,存在未完成报销");
         else
-            return AjaxResult.error("1");
+            return AjaxResult.success("删除成功");
     }
 
     @GetMapping(value = "/userTreeselect/{deptId}")
@@ -139,5 +139,17 @@ public class ProjectController extends BaseController {
         return AjaxResult.success(flowableService.listDefinition(name,pageNum, pageSize));
     }
 
+    @PutMapping("/flow/check")
+    public AjaxResult flowCheck(@RequestBody String id) {
+        int i = flowService.selectProjectFlowListByDeployId(id);
+        if(i==0)
+        {
+            return AjaxResult.error("流程已配置");
+        }
+        else
+        {
+            return AjaxResult.success("删除成功");
+        }
+    }
 
 }

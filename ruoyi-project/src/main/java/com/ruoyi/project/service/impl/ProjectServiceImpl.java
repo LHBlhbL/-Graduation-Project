@@ -90,6 +90,11 @@ public class ProjectServiceImpl extends FlowServiceFactory implements IProjectSe
     }
 
     @Override
+    public Project selectProjectInfoById(Long id) {
+        return projectMapper.selectProjectInfoById(id);
+    }
+
+    @Override
     public List<Project> selectProjectListPrincipal() {
         Long userId = SecurityUtils.getLoginUser().getUser().getUserId();
         List<Project> returnList = projectMapper.selectProjectListByPrincipal(userId);

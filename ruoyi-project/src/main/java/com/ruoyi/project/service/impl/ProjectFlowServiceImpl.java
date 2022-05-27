@@ -3,6 +3,7 @@ package com.ruoyi.project.service.impl;
 import java.util.List;
 
 import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.flowable.factory.FlowServiceFactory;
 import com.ruoyi.project.domain.ProjectUserList;
 import com.ruoyi.project.mapper.ProjectUserMapper;
 import com.ruoyi.system.service.ISysUserService;
@@ -21,7 +22,7 @@ import javax.annotation.Resource;
  * @date 2022-03-06
  */
 @Service
-public class ProjectFlowServiceImpl implements IProjectFlowService 
+public class ProjectFlowServiceImpl extends FlowServiceFactory implements IProjectFlowService
 {
     @Autowired
     private ProjectFlowMapper projectFlowMapper;
@@ -68,6 +69,20 @@ public class ProjectFlowServiceImpl implements IProjectFlowService
     public List<ProjectFlow> selectProjectFlowList(ProjectFlow projectFlow)
     {
         return projectFlowMapper.selectProjectFlowList(projectFlow);
+    }
+
+    @Override
+    public int selectProjectFlowListByDeployId(String id) {
+        List<ProjectFlow> flows = projectFlowMapper.selectProjectFlowByDeployId(id);
+        if(flows.size()>0)
+        {
+            return 0;
+        }
+        else
+        {
+            repositoryService.deleteDeployment(id, true);
+            return 1;
+        }
     }
 
     /**

@@ -1,5 +1,18 @@
 <template>
   <div class="app-container">
+    <el-card class="box-card" v-if="infoProject">
+      <div slot="header" class="clearfix">
+        <span class="el-icon-notebook-1">项目信息</span>
+      </div>
+      <el-table border :data="projectInfo" >
+        <el-table-column label="项目编号" align="center" prop="projectId" />
+        <el-table-column label="项目名称" align="center" prop="projectName" />
+        <el-table-column label="项目负责人" align="center" prop="principal.principalName" />
+        <el-table-column label="项目经费" align="center" prop="expensesTotal" />
+        <el-table-column label="剩余经费" align="center" prop="expensesLeft" />
+        <el-table-column label="项目信息" align="center" prop="note" />
+      </el-table>
+    </el-card>
     <el-card class="box-card" >
         <div slot="header" class="clearfix">
           <span class="el-icon-document" v-if="startName">{{startName}}填报</span>
@@ -164,6 +177,7 @@ import Treeselect from "@riophae/vue-treeselect";
 import {listUser} from "@/api/system/user";
 import {definitionStart,startProcess} from "@/api/project/reimbursement"
 import {complete,rejectProcess} from "@/api/project/process"
+import {informationOfProject} from "@/api/project/list"
 import {uploadImgToBase64} from "@/utils/uploadImg"
 import imgUpload from "./imgUpload";
 export default {
@@ -249,12 +263,14 @@ export default {
       returnTaskList: [],  // 回退列表数据
       finished: 'false',
       completeTitle: null,
+      infoProject:false,
       completeOpen: false,
       returnTitle: null,
       returnOpen: false,
       rejectOpen: false,
       rejectTitle: null,
       startName:"",
+      projectInfo:"",
       picDialogVisible:false,
       userData:[],
     };
@@ -280,6 +296,12 @@ export default {
     this.getFlowRecordList( this.taskForm.procInsId, this.taskForm.deployId);
     this.startName = this.$route.query.startName
     this.finished =  this.$route.query && this.$route.query.finished
+    this.infoProject =  this.$route.query && this.$route.query.infoProject
+    if(this.infoProject)
+    {
+      this.getProjectInfo(this.projectId)
+    }
+
   },
   mounted() {
     // // 表单数据回填，模拟异步请求场景
@@ -411,6 +433,15 @@ export default {
           this.variableOpen = true
         });
       }
+    },
+
+    getProjectInfo(id)
+    {
+      informationOfProject(id).then(
+        res =>{
+            this.projectInfo = res.rows;
+        }
+      );
     },
 
 

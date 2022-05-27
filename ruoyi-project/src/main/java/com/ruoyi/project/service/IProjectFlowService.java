@@ -29,6 +29,8 @@ public interface IProjectFlowService
      */
     public List<ProjectFlow> selectProjectFlowList(ProjectFlow projectFlow);
 
+    public int selectProjectFlowListByDeployId(String id);
+
     /**
      * 新增【请填写功能名称】
      * 

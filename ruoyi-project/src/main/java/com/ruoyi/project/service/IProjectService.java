@@ -33,6 +33,8 @@ public interface IProjectService
      */
     public List<Project> selectProjectList(Project project);
 
+    public Project selectProjectInfoById(Long id);
+
     public List<Project> selectProjectListPrincipal();
 
     /**

@@ -157,6 +157,7 @@ export default {
           projectId:row.projectId,
           startName:row.startUserName,
           projectName:row.projectName,
+          infoProject:true,
           finished: true
         }
       })

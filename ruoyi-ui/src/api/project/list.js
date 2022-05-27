@@ -103,12 +103,28 @@ export function getProcess(projectId)
   })
 }
 
+export function checkProjectDeployment(id)
+{
+  return request({
+    url:'/project/flow/check',
+    method:'put',
+    data:id
+  })
+}
+
 // 查询流程定义列表
 export function listDefinitionFlow(query) {
   return request({
     url: '/project/definition/list',
     method: 'get',
     params: query
+  })
+}
+
+export function informationOfProject(id){
+  return request({
+    url: '/Info/information/'+id,
+    method: 'get',
   })
 }
 

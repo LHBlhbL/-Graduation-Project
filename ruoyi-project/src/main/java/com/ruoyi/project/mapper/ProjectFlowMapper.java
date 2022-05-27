@@ -67,6 +67,8 @@ public interface ProjectFlowMapper
 
     public int deleteProjectFlowByDeployId(String id);
 
+    public List<ProjectFlow> selectProjectFlowByDeployId(String id);
+
     public ProjectFlow  selectProjectFlowByDeploymentId(String id);
 
     public ProjectFlow selectProjectFlowByPId(Long ProjectId);

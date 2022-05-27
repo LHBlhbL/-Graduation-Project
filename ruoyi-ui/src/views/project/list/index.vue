@@ -382,16 +382,9 @@ export default {
           type: "warning"
         }).then(function() {
           return delProject(projectIds);
-        }).then((res) => {
+        }).then(() => {
           this.getList();
-          if(res.msg=="1")
-          {
-            this.$message.success("删除成功");
-          }
-          else
-          {
-            this.msg(res.msg);
-          }
+         this.msg("操作成功");
         })
     },
     handleConfigure(row){
